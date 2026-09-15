@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
@@ -23,6 +24,18 @@ public class TratadorGlobalDeErrosTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Test
+	void deveRetornarConflitoQuandoEmailJaEstiverCadastrado() throws Exception {
+
+		mockMvc.perform(post("/test/email-duplicado")).andExpect(status().isConflict())
+				.andExpect(jsonPath("$.timestamp").exists()).andExpect(jsonPath("$.status").value(409))
+				.andExpect(jsonPath("$.erro").value("Conflito de dados"))
+				.andExpect(jsonPath("$.mensagens[0]").value("O e-mail informado já está cadastrado."))
+				.andExpect(jsonPath("$.path").value("/test/email-duplicado"))
+				.andExpect(jsonPath("$.codigo").value("EMAIL_JA_CADASTRADO"));
+
+	}
 
 	@Test
 	void deveRetornarErroPadronizadoQuandoNomeForInvalido() throws Exception {
@@ -52,6 +65,12 @@ public class TratadorGlobalDeErrosTest {
 		@PostMapping("/teste/validacao")
 		void validar(@Valid @RequestBody DadosValidosTeste dados) {
 
+		}
+
+		@PostMapping("/test/email-duplicado")
+		void simularEmailDuplicado() {
+
+			throw new EmailJaCadastradoException();
 		}
 
 	}
