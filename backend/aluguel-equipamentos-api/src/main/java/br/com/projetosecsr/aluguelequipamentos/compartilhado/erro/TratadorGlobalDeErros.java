@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisInvalidasException;
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -42,5 +44,33 @@ public class TratadorGlobalDeErros {
 
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
 	}
+
+	@ExceptionHandler(CredenciaisInvalidasException.class)
+	public ResponseEntity<ErroResponse> tratarCredenciaisInvalidas(CredenciaisInvalidasException excecao,HttpServletRequest requisicao){
+
+		ErroResponse resposta = new ErroResponse(
+
+				Instant.now(),HttpStatus.UNAUTHORIZED.value(),"Não autorizado",List.of(excecao.getMessage()),
+				requisicao.getRequestURI(),"CREDENCIAIS_INVALIDAS"
+				);
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(resposta);
+	}
+
+	@ExceptionHandler(UsuarioInativoException.class)
+	public ResponseEntity<ErroResponse> tratarUsuarioInativo(UsuarioInativoException excecao,HttpServletRequest requisicao){
+
+		ErroResponse resposta = new ErroResponse(
+		Instant.now(),HttpStatus.FORBIDDEN.value(),"Acesso negado",List.of(excecao.getMessage()),
+		requisicao.getRequestURI(),"USUARIO_INATIVO"
+		);
+
+return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
+
+
+
+	}
+
+
 
 }

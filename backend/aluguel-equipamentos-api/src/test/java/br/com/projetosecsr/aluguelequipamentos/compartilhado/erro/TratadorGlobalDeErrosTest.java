@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -18,7 +19,10 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastrado
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
-@WebMvcTest
+@AutoConfigureMockMvc(addFilters = false)
+@WebMvcTest(
+        controllers = TratadorGlobalDeErrosTest.ControllerValidacaoTeste.class
+)
 @Import({ TratadorGlobalDeErros.class, TratadorGlobalDeErrosTest.ControllerValidacaoTeste.class })
 public class TratadorGlobalDeErrosTest {
 
