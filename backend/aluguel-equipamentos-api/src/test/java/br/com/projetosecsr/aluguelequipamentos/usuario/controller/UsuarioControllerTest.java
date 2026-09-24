@@ -1,0 +1,185 @@
+package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.Instant;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.BadJwtException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
+import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
+import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
+import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
+
+@WebMvcTest(controllers = UsuarioController.class)
+@Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class })
+public class UsuarioControllerTest {
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@MockitoBean
+	private UsuarioService usuarioService;
+
+	@MockitoBean
+	private JwtDecoder jwtDecoder;
+
+	@Test
+	void deveRetornarNaoAutorizadoQuandoTokenNaoForInformado() throws Exception {
+		// PREPARAR
+		String corpoRequisicao = """
+				{
+				  "nome": "Funcionário Teste",
+				  "email": "funcionario@empresa.com",
+				  "senha": "senha-segura-com-15-caracteres",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc
+				.perform(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isUnauthorized()).andExpect(jsonPath("$.status").value(401))
+				.andExpect(jsonPath("$.erro").value("Não autorizado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Token de acesso não informado."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios"))
+				.andExpect(jsonPath("$.codigo").value("TOKEN_AUSENTE"));
+
+		verifyNoInteractions(usuarioService);
+
+	}
+
+	@Test
+	void deveRetornarNaoAutorizadoQuandoTokenForInvalido() throws Exception {
+
+		// PREPARAR
+		String corpoRequisicao = """
+				{
+				  "nome": "Funcionário Teste",
+				  "email": "funcionario@empresa.com",
+				  "senha": "senha-segura-com-15-caracteres",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		// MOCKS
+		when(jwtDecoder.decode("token-invalido")).thenThrow(new BadJwtException("Token inválido"));
+
+		// Executar
+
+		ResultActions resultado = mockMvc
+				.perform(post("/api/usuarios").header(HttpHeaders.AUTHORIZATION, "Bearer token-invalido")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isUnauthorized()).andExpect(jsonPath("$.status").value(401))
+				.andExpect(jsonPath("$.erro").value("Não autorizado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Token de acesso inválido ou expirado."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios"))
+				.andExpect(jsonPath("$.codigo").value("TOKEN_INVALIDO"));
+
+		verify(jwtDecoder).decode("token-invalido");
+		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoUsuarioForFuncionario() throws Exception {
+
+		// PREPARAR
+		String corpoRequisicao = """
+				{
+				  "nome": "Funcionário Teste",
+				  "email": "funcionario@empresa.com",
+				  "senha": "senha-segura-com-15-caracteres",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "JS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+
+		ResultActions resultado = mockMvc
+				.perform(post("/api/usuarios").header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden());
+
+		verify(jwtDecoder).decode("token-funcionario");
+		verifyNoInteractions(usuarioService);
+
+	}
+
+	@Test
+	void deveCadastrarUsuarioQuandoAutenticadoComoAdministrador() throws Exception {
+
+		// PREPARAR
+		String corpoRequisicao = """
+				{
+				  "nome": "Funcionário Teste",
+				  "email": "funcionario@empresa.com",
+				  "senha": "senha-segura-com-15-caracteres",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant data = Instant.parse("2026-09-18T15:00:00Z");
+
+		UsuarioResponse respostaDoService = new UsuarioResponse(10L, "Funcionário Teste", "funcionario@empresa.com",
+				PerfilUsuario.FUNCIONARIO, true, data, data);
+
+		// MOCKS
+
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.cadastrar(any(CadastrarUsuarioRequest.class))).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc
+				.perform(post("/api/usuarios").header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isCreated()).andExpect(jsonPath("$.id").value(10))
+				.andExpect(jsonPath("$.nome").value("Funcionário Teste"))
+				.andExpect(jsonPath("$.email").value("funcionario@empresa.com"))
+				.andExpect(jsonPath("$.perfil").value("FUNCIONARIO")).andExpect(jsonPath("$.ativo").value(true))
+				.andExpect(jsonPath("$.senha").doesNotExist());
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).cadastrar(any(CadastrarUsuarioRequest.class));
+
+	}
+
+}
