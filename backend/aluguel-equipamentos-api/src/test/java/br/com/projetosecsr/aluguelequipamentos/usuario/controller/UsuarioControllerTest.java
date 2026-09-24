@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
@@ -32,7 +33,8 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
 
 @WebMvcTest(controllers = UsuarioController.class)
-@Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class })
+@Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class,
+		TratadorAcessoNegado.class })
 public class UsuarioControllerTest {
 
 	@Autowired
@@ -117,7 +119,7 @@ public class UsuarioControllerTest {
 				}
 				""";
 
-		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "JS256").subject("2")
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
 				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
 
 		// MOCKS
@@ -130,7 +132,14 @@ public class UsuarioControllerTest {
 						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
 
 		// VERIFICAR
-		resultado.andExpect(status().isForbidden());
+		resultado
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.status").value(403))
+        .andExpect(jsonPath("$.erro").value("Acesso negado"))
+        .andExpect(jsonPath("$.mensagens[0]")
+                .value("Você não possui permissão para acessar este recurso."))
+        .andExpect(jsonPath("$.path").value("/api/usuarios"))
+        .andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
 
 		verify(jwtDecoder).decode("token-funcionario");
 		verifyNoInteractions(usuarioService);

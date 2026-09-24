@@ -26,10 +26,12 @@ import br.com.projetosecsr.aluguelequipamentos.autenticacao.response.UsuarioAute
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.service.AutenticacaoService;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 
-@Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class })
+@Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class,
+		TratadorAcessoNegado.class })
 @WebMvcTest(controllers = AutenticacaoController.class)
 public class AutenticacaoControllerTest {
 

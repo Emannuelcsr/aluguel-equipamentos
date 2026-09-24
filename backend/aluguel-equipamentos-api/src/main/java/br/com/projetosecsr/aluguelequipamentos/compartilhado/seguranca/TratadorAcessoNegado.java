@@ -5,64 +5,49 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.ErroResponse;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
-public class TratadorFalhaAutenticacao implements AuthenticationEntryPoint {
+public class TratadorAcessoNegado implements AccessDeniedHandler {
 
 	private final ObjectMapper objectMapper;
 
-	public TratadorFalhaAutenticacao(ObjectMapper objectMapper) {
-
+	public TratadorAcessoNegado(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
 	@Override
-	public void commence(HttpServletRequest requisicao, HttpServletResponse resposta, AuthenticationException excecao)
-			throws IOException {
-
-		String cabecalhoAutorizacao = requisicao.getHeader(HttpHeaders.AUTHORIZATION);
-
-		boolean tokenAusente = cabecalhoAutorizacao == null || cabecalhoAutorizacao.isBlank();
-
-		String mensagem;
-		String codigo;
-
-		if (tokenAusente) {
-
-			mensagem = "Token de acesso não informado.";
-			codigo = "TOKEN_AUSENTE";
-
-		} else {
-
-			mensagem = "Token de acesso inválido ou expirado.";
-
-			codigo = "TOKEN_INVALIDO";
-		}
+	public void handle(HttpServletRequest requisicao, HttpServletResponse resposta, AccessDeniedException excecao)
+			throws IOException, ServletException {
 
 		Instant momentoDoErro = Instant.now();
-		int status = HttpStatus.UNAUTHORIZED.value();
-		String descricaoDoErro = "Não autorizado";
-		List<String> mensagens = List.of(mensagem);
+		int status = HttpStatus.FORBIDDEN.value();
+		String descricaoDoErro = "Acesso negado";
+		List<String> mensagens = List.of("Você não possui permissão para acessar este recurso.");
 		String caminho = requisicao.getRequestURI();
+		String codigo = "ACESSO_NEGADO";
 
+		// -----------
 		ErroResponse erroResponse = new ErroResponse(momentoDoErro, status, descricaoDoErro, mensagens, caminho,
 				codigo);
+		// ------------
 
 		resposta.setStatus(status);
 		resposta.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		resposta.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
 		objectMapper.writeValue(resposta.getOutputStream(), erroResponse);
+
 	}
 
 }

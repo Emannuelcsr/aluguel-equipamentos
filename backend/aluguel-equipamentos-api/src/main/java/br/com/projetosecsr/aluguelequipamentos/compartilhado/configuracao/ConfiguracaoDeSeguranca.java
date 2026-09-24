@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 
 @Configuration
@@ -17,7 +18,7 @@ public class ConfiguracaoDeSeguranca {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter,
-			TratadorFalhaAutenticacao tratadorFalhaAutenticacao) throws Exception {
+			TratadorFalhaAutenticacao tratadorFalhaAutenticacao, TratadorAcessoNegado tratadorAcessoNegado) throws Exception {
 
 		http.csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
 				.httpBasic(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)
@@ -27,7 +28,9 @@ public class ConfiguracaoDeSeguranca {
 								.permitAll().requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
 								.anyRequest().denyAll())
 
-				.exceptionHandling(excecoes -> excecoes.authenticationEntryPoint(tratadorFalhaAutenticacao))
+				.exceptionHandling(excecoes -> excecoes
+				        .authenticationEntryPoint(tratadorFalhaAutenticacao)
+				        .accessDeniedHandler(tratadorAcessoNegado))
 
 				.oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(tratadorFalhaAutenticacao)
 						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
