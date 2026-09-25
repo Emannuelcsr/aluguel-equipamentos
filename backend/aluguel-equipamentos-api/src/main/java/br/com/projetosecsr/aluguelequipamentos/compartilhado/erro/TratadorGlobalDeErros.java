@@ -1,6 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.compartilhado.erro;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisInvalidasException;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +79,17 @@ public class TratadorGlobalDeErros {
 				List.of(excecao.getMessage()), requisicao.getRequestURI(), "USUARIO_NAO_ENCONTRADO");
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+	@ExceptionHandler(PaginaInvalidaException.class)
+	public ResponseEntity<ErroResponse> tratarPaginaInvalida(PaginaInvalidaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Parâmetros de paginação inválidos", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"PAGINA_NAO_ENCONTRADA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
 	}
 
 }

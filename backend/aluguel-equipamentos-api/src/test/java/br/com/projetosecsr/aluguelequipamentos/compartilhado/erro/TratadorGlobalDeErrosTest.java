@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.validation.Valid;
@@ -84,6 +85,12 @@ public class TratadorGlobalDeErrosTest {
 			throw new UsuarioNaoEncontradoException();
 		}
 
+		@GetMapping("/teste/pagina-invalida")
+		void lancarPaginaInvalida() {
+
+			throw new PaginaInvalidaException("A página informada não existe");
+		}
+
 	}
 
 	@Test
@@ -97,4 +104,17 @@ public class TratadorGlobalDeErrosTest {
 				.andExpect(jsonPath("$.path").value("/teste/usuario-nao-encontrado"))
 				.andExpect(jsonPath("$.codigo").value("USUARIO_NAO_ENCONTRADO"));
 	}
+
+	@Test
+	void deveRetornarBadRequestQuandoPaginaForInvalida() throws Exception {
+
+		// EXECUTAR E VERIFICAR
+		mockMvc.perform(get("/teste/pagina-invalida")).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.timestamp").exists()).andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.erro").value("Parâmetros de paginação inválidos"))
+				.andExpect(jsonPath("$.mensagens[0]").value("A página informada não existe"))
+				.andExpect(jsonPath("$.path").value("/teste/pagina-invalida"))
+				.andExpect(jsonPath("$.codigo").value("PAGINA_NAO_ENCONTRADA"));
+	}
+
 }

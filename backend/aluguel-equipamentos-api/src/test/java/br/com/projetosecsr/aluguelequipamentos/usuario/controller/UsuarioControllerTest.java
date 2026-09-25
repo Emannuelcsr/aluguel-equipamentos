@@ -1,7 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -11,11 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.BadJwtException;
@@ -27,9 +30,11 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
@@ -256,7 +261,7 @@ public class UsuarioControllerTest {
 
 		verify(usuarioService).buscarPorId(usuarioId);
 
-		verifyNoInteractions(usuarioService);
+		verify(usuarioService).buscarPorId(usuarioId);
 
 	}
 
@@ -286,6 +291,63 @@ public class UsuarioControllerTest {
 		verify(jwtDecoder).decode("token-funcionario");
 
 		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveListarUsuariosComPaginacaoQuandoAutenticadoComoAdministrador() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 1L;
+		Long usuarioId2 = 2L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant data = Instant.parse("2026-09-24T15:00:00Z");
+
+		UsuarioResponse usuarioAdministradorResponse = new UsuarioResponse(usuarioId, "Administrador Teste",
+				"administrador@empresa.com", PerfilUsuario.ADMINISTRADOR, true, data, data);
+
+		UsuarioResponse usuarioFuncionarioResponse = new UsuarioResponse(usuarioId2, "Funcionario Teste",
+				"funcionario@empresa.com", PerfilUsuario.FUNCIONARIO, true, data, data);
+
+		PaginaResponse<UsuarioResponse> respostaDoService = new PaginaResponse<>(
+				List.of(usuarioAdministradorResponse, usuarioFuncionarioResponse), 1, 2, 2, 5L, 3, true, false);
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.listarPaginado(any(Pageable.class))).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(get("/api/usuarios").param("page", "1").param("size", "2")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.conteudo.length()").value(2))
+				.andExpect(jsonPath("$.conteudo[0].id").value(1))
+				.andExpect(jsonPath("$.conteudo[0].nome").value("Administrador Teste"))
+				.andExpect(jsonPath("$.conteudo[0].perfil").value("ADMINISTRADOR"))
+				.andExpect(jsonPath("$.conteudo[0].senha").doesNotExist())
+				.andExpect(jsonPath("$.conteudo[1].id").value(2))
+				.andExpect(jsonPath("$.conteudo[1].nome").value("Funcionario Teste"))
+				.andExpect(jsonPath("$.conteudo[1].perfil").value("FUNCIONARIO"))
+				.andExpect(jsonPath("$.conteudo[1].senha").doesNotExist()).andExpect(jsonPath("$.paginaAtual").value(1))
+				.andExpect(jsonPath("$.tamanho").value(2)).andExpect(jsonPath("$.quantidadeElementos").value(2))
+				.andExpect(jsonPath("$.totalElementos").value(5)).andExpect(jsonPath("$.totalPaginas").value(3))
+				.andExpect(jsonPath("$.primeiraPagina").value(true)).andExpect(jsonPath("$.ultimaPagina").value(false));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		ArgumentCaptor<Pageable> paginacaoCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+		verify(usuarioService).listarPaginado(paginacaoCaptor.capture());
+
+		Pageable paginacaoRecebida = paginacaoCaptor.getValue();
+
+		assertEquals(0, paginacaoRecebida.getPageNumber());
+		assertEquals(2, paginacaoRecebida.getPageSize());
+
 	}
 
 }

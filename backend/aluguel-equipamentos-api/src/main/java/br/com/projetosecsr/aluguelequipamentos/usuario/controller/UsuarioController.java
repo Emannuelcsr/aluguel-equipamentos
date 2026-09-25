@@ -13,6 +13,9 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioR
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -39,6 +42,14 @@ public class UsuarioController {
 		UsuarioResponse response = usuarioService.buscarPorId(id);
 
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping
+	ResponseEntity<PaginaResponse<UsuarioResponse>> listarPaginado(Pageable paginacao) {
+
+		PaginaResponse<UsuarioResponse> resposta = usuarioService.listarPaginado(paginacao);
+
+		return ResponseEntity.ok(resposta);
 	}
 
 }
