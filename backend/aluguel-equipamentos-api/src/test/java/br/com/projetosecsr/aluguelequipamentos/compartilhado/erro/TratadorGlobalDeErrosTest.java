@@ -1,5 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.compartilhado.erro;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,18 +12,18 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 @AutoConfigureMockMvc(addFilters = false)
-@WebMvcTest(
-        controllers = TratadorGlobalDeErrosTest.ControllerValidacaoTeste.class
-)
+@WebMvcTest(controllers = TratadorGlobalDeErrosTest.ControllerValidacaoTeste.class)
 @Import({ TratadorGlobalDeErros.class, TratadorGlobalDeErrosTest.ControllerValidacaoTeste.class })
 public class TratadorGlobalDeErrosTest {
 
@@ -77,5 +78,23 @@ public class TratadorGlobalDeErrosTest {
 			throw new EmailJaCadastradoException();
 		}
 
+		@GetMapping("/teste/usuario-nao-encontrado")
+		void simularUsuarioNaoEncontrado() {
+
+			throw new UsuarioNaoEncontradoException();
+		}
+
+	}
+
+	@Test
+	void deveRetornarNaoEncontradoQuandoUsuarioNaoExistir() throws Exception {
+
+		// EXECUTAR E VERIFICAR
+		mockMvc.perform(get("/teste/usuario-nao-encontrado")).andExpect(status().isNotFound())
+				.andExpect(jsonPath("$.timestamp").exists()).andExpect(jsonPath("$.status").value(404))
+				.andExpect(jsonPath("$.erro").value("Recurso não encontrado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Usuário não encontrado."))
+				.andExpect(jsonPath("$.path").value("/teste/usuario-nao-encontrado"))
+				.andExpect(jsonPath("$.codigo").value("USUARIO_NAO_ENCONTRADO"));
 	}
 }

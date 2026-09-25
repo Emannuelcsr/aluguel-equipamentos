@@ -2,6 +2,8 @@ package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,14 @@ public class UsuarioController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
+	}
+
+	@GetMapping("/{id}")
+	ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id) {
+
+		UsuarioResponse response = usuarioService.buscarPorId(id);
+
+		return ResponseEntity.ok(response);
 	}
 
 }

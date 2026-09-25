@@ -1,9 +1,11 @@
 package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -132,14 +134,11 @@ public class UsuarioControllerTest {
 						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
 
 		// VERIFICAR
-		resultado
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.status").value(403))
-        .andExpect(jsonPath("$.erro").value("Acesso negado"))
-        .andExpect(jsonPath("$.mensagens[0]")
-                .value("Você não possui permissão para acessar este recurso."))
-        .andExpect(jsonPath("$.path").value("/api/usuarios"))
-        .andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
+		resultado.andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.erro").value("Acesso negado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Você não possui permissão para acessar este recurso."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios"))
+				.andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
 
 		verify(jwtDecoder).decode("token-funcionario");
 		verifyNoInteractions(usuarioService);
@@ -189,6 +188,104 @@ public class UsuarioControllerTest {
 
 		verify(usuarioService).cadastrar(any(CadastrarUsuarioRequest.class));
 
+	}
+
+	@Test
+	void deveBuscarUsuarioPorIdQuandoAutenticadoComoAdministrador() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant data = Instant.parse("2026-09-24T15:00:00Z");
+
+		UsuarioResponse respostaDoService = new UsuarioResponse(usuarioId, "Maria Souza", "maria@empresa.com",
+				PerfilUsuario.FUNCIONARIO, true, data, data);
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.buscarPorId(usuarioId)).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				get("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(10))
+				.andExpect(jsonPath("$.nome").value("Maria Souza"))
+				.andExpect(jsonPath("$.email").value("maria@empresa.com"))
+				.andExpect(jsonPath("$.perfil").value("FUNCIONARIO")).andExpect(jsonPath("$.ativo").value(true))
+				.andExpect(jsonPath("$.senha").doesNotExist());
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).buscarPorId(usuarioId);
+	}
+
+	@Test
+	void deveRetornarNaoEncontradoQuandoUsuarioNaoExistir() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 999L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.buscarPorId(usuarioId)).thenThrow(new UsuarioNaoEncontradoException());
+
+		// EXECUTAR
+
+		ResultActions resultado = mockMvc.perform(
+				get("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404))
+				.andExpect(jsonPath("$.erro").value("Recurso não encontrado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Usuário não encontrado."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/999"))
+				.andExpect(jsonPath("$.codigo").value("USUARIO_NAO_ENCONTRADO"));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).buscarPorId(usuarioId);
+
+		verifyNoInteractions(usuarioService);
+
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoFuncionarioBuscarUsuarioPorId() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				get("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.erro").value("Acesso negado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Você não possui permissão para acessar este recurso."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10"))
+				.andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+
+		verifyNoInteractions(usuarioService);
 	}
 
 }

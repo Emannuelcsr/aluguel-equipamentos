@@ -18,7 +18,8 @@ public class ConfiguracaoDeSeguranca {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter,
-			TratadorFalhaAutenticacao tratadorFalhaAutenticacao, TratadorAcessoNegado tratadorAcessoNegado) throws Exception {
+			TratadorFalhaAutenticacao tratadorFalhaAutenticacao, TratadorAcessoNegado tratadorAcessoNegado)
+			throws Exception {
 
 		http.csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
 				.httpBasic(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)
@@ -26,11 +27,11 @@ public class ConfiguracaoDeSeguranca {
 				.authorizeHttpRequests(
 						autorizacao -> autorizacao.requestMatchers(HttpMethod.POST, "/api/autenticacao/login")
 								.permitAll().requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
+								.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
 								.anyRequest().denyAll())
 
-				.exceptionHandling(excecoes -> excecoes
-				        .authenticationEntryPoint(tratadorFalhaAutenticacao)
-				        .accessDeniedHandler(tratadorAcessoNegado))
+				.exceptionHandling(excecoes -> excecoes.authenticationEntryPoint(tratadorFalhaAutenticacao)
+						.accessDeniedHandler(tratadorAcessoNegado))
 
 				.oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(tratadorFalhaAutenticacao)
 						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));

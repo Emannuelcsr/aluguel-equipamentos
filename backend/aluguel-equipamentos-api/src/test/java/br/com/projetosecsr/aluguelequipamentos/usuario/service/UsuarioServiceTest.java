@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,10 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -96,6 +100,54 @@ public class UsuarioServiceTest {
 		verifyNoInteractions(passwordEncoder);
 
 		verify(usuarioRepository, never()).save(any(Usuario.class));
+
+	}
+
+	@Test
+	void deveBuscarUsuarioPorIdQuandoUsuarioExistir() {
+
+		// PREPARAR
+		Long usuarioId = 10l;
+		Usuario usuario = new Usuario("Maria Souza", "maria@empresa.com", "hash-da-senha", PerfilUsuario.FUNCIONARIO);
+		ReflectionTestUtils.setField(usuario, "id", usuarioId);
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		UsuarioResponse resposta = usuarioService.buscarPorId(usuarioId);
+
+		// VERIFICAR
+		verify(usuarioRepository).findById(usuarioId);
+
+		verifyNoInteractions(passwordEncoder);
+
+		assertEquals(usuarioId, resposta.id());
+		assertEquals("Maria Souza", resposta.nome());
+		assertEquals("maria@empresa.com", resposta.email());
+		assertEquals(PerfilUsuario.FUNCIONARIO, resposta.perfil());
+		assertTrue(resposta.ativo());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoUsuarioNaoForEncontradoPorId() {
+
+		// PREPARAR
+		Long usuarioId = 999L;
+
+		// MOKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.empty());
+
+		// EXECUTAR
+		UsuarioNaoEncontradoException excecao = assertThrows(UsuarioNaoEncontradoException.class,
+				() -> usuarioService.buscarPorId(usuarioId));
+
+		// VERIFICAR
+		assertEquals("Usuário não encontrado.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(usuarioId);
+
+		verifyNoInteractions(passwordEncoder);
 
 	}
 
