@@ -78,6 +78,14 @@ public class Usuario {
 
 	}
 
+	public void ativar() {
+		this.ativo = true;
+	}
+
+	public void desativar() {
+		this.ativo = false;
+	}
+
 	public Long getId() {
 		return id;
 	}

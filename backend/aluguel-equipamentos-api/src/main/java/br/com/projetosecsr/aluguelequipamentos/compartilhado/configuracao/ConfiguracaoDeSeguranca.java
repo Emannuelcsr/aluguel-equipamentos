@@ -24,12 +24,13 @@ public class ConfiguracaoDeSeguranca {
 		http.csrf(AbstractHttpConfigurer::disable).formLogin(AbstractHttpConfigurer::disable)
 				.httpBasic(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(
-						autorizacao -> autorizacao.requestMatchers(HttpMethod.POST, "/api/autenticacao/login")
-								.permitAll().requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
-								.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
-								.requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
-								.anyRequest().denyAll())
+				.authorizeHttpRequests(autorizacao -> autorizacao
+						.requestMatchers(HttpMethod.POST, "/api/autenticacao/login").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
+						.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+						.requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/*/ativar", "/api/usuarios/*/desativar")
+						.hasRole("ADMINISTRADOR").anyRequest().denyAll())
 
 				.exceptionHandling(excecoes -> excecoes.authenticationEntryPoint(tratadorFalhaAutenticacao)
 						.accessDeniedHandler(tratadorAcessoNegado))

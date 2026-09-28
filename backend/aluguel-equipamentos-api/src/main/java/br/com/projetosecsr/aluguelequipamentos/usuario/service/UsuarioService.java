@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
@@ -134,5 +137,42 @@ public class UsuarioService {
 
 		return UsuarioResponse.de(usuario);
 	}
+
+	@Transactional
+	public UsuarioResponse ativar(Long id) {
+
+		Usuario usuario = buscarUsuarioPorId(id);
+
+		if (usuario.isAtivo()) {
+
+			throw new UsuarioJaAtivoException();
+		}
+
+		usuario.ativar();
+
+		return UsuarioResponse.de(usuario);
+	}
+
+	@Transactional
+	public UsuarioResponse desativar(Long id, Long usuarioAutenticadoId) {
+
+		Usuario usuario = buscarUsuarioPorId(id);
+
+		if (usuario.getId().equals(usuarioAutenticadoId)) {
+
+			throw new AutodesativacaoNaoPermitidaException();
+		}
+
+		if (!usuario.isAtivo()) {
+
+			throw new UsuarioJaInativoException();
+		}
+
+		usuario.desativar();
+
+		return UsuarioResponse.de(usuario);
+	}
+
+
 
 }

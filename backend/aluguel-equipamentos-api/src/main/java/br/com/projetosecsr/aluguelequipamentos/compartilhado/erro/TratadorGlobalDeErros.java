@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisInvalidasException;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -90,6 +93,27 @@ public class TratadorGlobalDeErros {
 				"PAGINA_NAO_ENCONTRADA");
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler({ UsuarioJaAtivoException.class, UsuarioJaInativoException.class })
+	public ResponseEntity<ErroResponse> tratarSituacaoUsuarioInvalida(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de situação do usuário", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"SITUACAO_USUARIO_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler({ AutodesativacaoNaoPermitidaException.class })
+	public ResponseEntity<ErroResponse> tratarAutodesativacaoNaoPermitida(AutodesativacaoNaoPermitidaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.FORBIDDEN.value(), "Acesso negado",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "AUTODESATIVACAO_NAO_PERMITIDA");
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
 	}
 
 }

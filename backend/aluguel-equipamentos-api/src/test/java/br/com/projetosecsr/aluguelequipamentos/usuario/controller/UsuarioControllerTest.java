@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -15,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.List;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -38,7 +37,10 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
@@ -553,6 +555,177 @@ public class UsuarioControllerTest {
 
 		verify(jwtDecoder).decode("token-administrador");
 
+		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveAtivarUsuarioQuandoAutenticadoComoAdministrador() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant data = Instant.parse("2026-09-28T15:00:00Z");
+
+		UsuarioResponse respostaDoService = new UsuarioResponse(usuarioId, "Maria Souza", "maria@empresa.com",
+				PerfilUsuario.FUNCIONARIO, true, // Ativo
+				data, data);
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.ativar(usuarioId)).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/ativar", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(10))
+				.andExpect(jsonPath("$.nome").value("Maria Souza")).andExpect(jsonPath("$.ativo").value(true))
+				.andExpect(jsonPath("$.senha").doesNotExist());
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).ativar(usuarioId);
+	}
+
+	@Test
+	void deveRetornarErroQuandoTentarAtivarUsuarioJaAtivo() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(usuarioService.ativar(usuarioId)).thenThrow(new UsuarioJaAtivoException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/ativar", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isConflict()).andExpect(jsonPath("$.status").value(409))
+				.andExpect(jsonPath("$.erro").value("Conflito de situação do usuário"))
+				.andExpect(jsonPath("$.mensagens[0]").value("O usuário já está ativo."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10/ativar"))
+				.andExpect(jsonPath("$.codigo").value("SITUACAO_USUARIO_INVALIDA"));
+
+		verify(jwtDecoder).decode("token-administrador");
+		verify(usuarioService).ativar(usuarioId);
+	}
+
+	@Test
+	void deveDesativarUsuarioComSucesso() throws Exception {
+
+		// PREPARAR
+		Long usuarioIdParaDesativar = 10L;
+		Long adminAutenticadoId = 1L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256")
+				.subject(adminAutenticadoId.toString()).claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant data = Instant.parse("2026-09-28T15:00:00Z");
+
+		UsuarioResponse respostaDoService = new UsuarioResponse(usuarioIdParaDesativar, "Maria Souza",
+				"maria@empresa.com", PerfilUsuario.FUNCIONARIO, false, data, data);
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(usuarioService.desativar(usuarioIdParaDesativar, adminAutenticadoId)).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/desativar", usuarioIdParaDesativar)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(10))
+				.andExpect(jsonPath("$.ativo").value(false)).andExpect(jsonPath("$.senha").doesNotExist());
+
+		verify(jwtDecoder).decode("token-administrador");
+		verify(usuarioService).desativar(usuarioIdParaDesativar, adminAutenticadoId);
+	}
+
+	@Test
+	void deveRetornarErroQuandoUsuarioTentarDesativarASiMesmo() throws Exception {
+		// PREPARAR
+		Long adminAutenticadoId = 1L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256")
+				.subject(adminAutenticadoId.toString()).claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(usuarioService.desativar(adminAutenticadoId, adminAutenticadoId))
+				.thenThrow(new AutodesativacaoNaoPermitidaException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/desativar", adminAutenticadoId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.erro").value("Acesso negado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Não é permitido desativar a própria conta."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/1/desativar"))
+				.andExpect(jsonPath("$.codigo").value("AUTODESATIVACAO_NAO_PERMITIDA"));
+
+		verify(jwtDecoder).decode("token-administrador");
+		verify(usuarioService).desativar(adminAutenticadoId, adminAutenticadoId);
+	}
+
+	@Test
+	void deveRetornarErroQuandoTentarDesativarUsuarioJaInativo() throws Exception {
+		// PREPARAR
+		Long usuarioId = 10L;
+		Long adminAutenticadoId = 1L;
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256")
+				.subject(adminAutenticadoId.toString()).claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(usuarioService.desativar(usuarioId, adminAutenticadoId)).thenThrow(new UsuarioJaInativoException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/desativar", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isConflict()).andExpect(jsonPath("$.status").value(409))
+				.andExpect(jsonPath("$.erro").value("Conflito de situação do usuário"))
+				.andExpect(jsonPath("$.mensagens[0]").value("O usuário já está inativo."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10/desativar"))
+				.andExpect(jsonPath("$.codigo").value("SITUACAO_USUARIO_INVALIDA"));
+
+		verify(jwtDecoder).decode("token-administrador");
+		verify(usuarioService).desativar(usuarioId, adminAutenticadoId);
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoPerfilNaoForAutorizado() throws Exception {
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/desativar", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden());
+
+		verify(jwtDecoder).decode("token-funcionario");
 		verifyNoInteractions(usuarioService);
 	}
 

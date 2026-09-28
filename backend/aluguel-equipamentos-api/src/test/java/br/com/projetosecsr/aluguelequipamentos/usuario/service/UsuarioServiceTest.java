@@ -32,7 +32,10 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
@@ -305,6 +308,127 @@ public class UsuarioServiceTest {
 
 		verify(usuarioRepository).findById(idUser);
 		verify(usuarioRepository).existsByEmailAndIdNot("existente@email.com", idUser);
+	}
+
+	@Test
+	void deveAtivarUsuarioQuandoEstiverInativo() {
+		// PREPARAR
+		Long idUser = 1L;
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+		usuario.desativar();
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		UsuarioResponse resposta = usuarioService.ativar(idUser);
+
+		// VERIFICAR
+		verify(usuarioRepository).findById(idUser);
+
+		assertTrue(usuario.isAtivo());
+		assertTrue(resposta.ativo());
+		assertEquals(idUser, resposta.id());
+
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoUsuarioJaEstiverAtivo() {
+		// PREPARAR
+		Long idUser = 1L;
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		UsuarioJaAtivoException excecao = assertThrows(UsuarioJaAtivoException.class,
+				() -> usuarioService.ativar(idUser));
+
+		// VERIFICAR
+		assertEquals("O usuário já está ativo.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(idUser);
+
+		assertTrue(usuario.isAtivo());
+
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoUsuarioJaEstiverDesativo() {
+		// PREPARAR
+		Long idUser = 1L;
+		Long idAdmin = 2L;
+
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+		usuario.desativar();
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		UsuarioJaInativoException excecao = assertThrows(UsuarioJaInativoException.class,
+				() -> usuarioService.desativar(idUser, idAdmin));
+
+		// VERIFICAR
+		assertEquals("O usuário já está inativo.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(idUser);
+
+		assertFalse(usuario.isAtivo());
+
+	}
+
+	@Test
+	void deveDesativarUsuarioComSucesso() {
+		// PREPARAR
+		Long idUser = 1L;
+		Long idAdminLogado = 2L;
+
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		UsuarioResponse resposta = usuarioService.desativar(idUser, idAdminLogado);
+
+		// VERIFICAR
+		assertNotNull(resposta);
+		assertEquals(idUser, resposta.id());
+		assertFalse(resposta.ativo());
+		assertFalse(usuario.isAtivo());
+
+		verify(usuarioRepository).findById(idUser);
+		verifyNoMoreInteractions(usuarioRepository);
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoUsuarioTentarDesativarASiMesmo() {
+		// PREPARAR
+		Long idUser = 1L;
+		Long idAdminLogado = 1L; // Mesmo ID!
+
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		// EXECUTAR
+		AutodesativacaoNaoPermitidaException excecao = assertThrows(AutodesativacaoNaoPermitidaException.class,
+				() -> usuarioService.desativar(idUser, idAdminLogado));
+
+		// VERIFICAR
+		assertEquals("Não é permitido desativar a própria conta.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(idUser);
+		assertTrue(usuario.isAtivo()); // Permanece ativo
+		verifyNoMoreInteractions(usuarioRepository);
 	}
 
 }

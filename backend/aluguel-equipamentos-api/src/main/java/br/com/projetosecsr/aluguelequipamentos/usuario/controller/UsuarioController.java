@@ -2,7 +2,10 @@ package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -62,6 +65,25 @@ public class UsuarioController {
 
 		return ResponseEntity.ok(response);
 
+	}
+
+	@PatchMapping("/{id}/ativar")
+	ResponseEntity<UsuarioResponse> ativar(@PathVariable Long id) {
+
+		UsuarioResponse response = usuarioService.ativar(id);
+
+		return ResponseEntity.ok(response);
+
+	}
+
+	@PatchMapping("/{id}/desativar")
+	ResponseEntity<UsuarioResponse> desativar(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+
+		Long usuarioAutenticadoId = Long.valueOf(jwt.getSubject());
+
+		UsuarioResponse response = usuarioService.desativar(id, usuarioAutenticadoId);
+
+		return ResponseEntity.ok(response);
 	}
 
 }
