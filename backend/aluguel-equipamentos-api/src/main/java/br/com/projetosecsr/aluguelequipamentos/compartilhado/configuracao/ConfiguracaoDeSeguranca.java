@@ -28,6 +28,7 @@ public class ConfiguracaoDeSeguranca {
 						autorizacao -> autorizacao.requestMatchers(HttpMethod.POST, "/api/autenticacao/login")
 								.permitAll().requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
 								.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
+								.requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
 								.anyRequest().denyAll())
 
 				.exceptionHandling(excecoes -> excecoes.authenticationEntryPoint(tratadorFalhaAutenticacao)

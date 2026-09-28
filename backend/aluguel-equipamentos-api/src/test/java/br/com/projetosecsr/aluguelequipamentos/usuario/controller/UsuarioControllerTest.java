@@ -2,17 +2,20 @@ package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,10 +38,13 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
+import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = UsuarioController.class)
 @Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class,
@@ -52,6 +59,9 @@ public class UsuarioControllerTest {
 
 	@MockitoBean
 	private JwtDecoder jwtDecoder;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Test
 	void deveRetornarNaoAutorizadoQuandoTokenNaoForInformado() throws Exception {
@@ -348,6 +358,202 @@ public class UsuarioControllerTest {
 		assertEquals(0, paginacaoRecebida.getPageNumber());
 		assertEquals(2, paginacaoRecebida.getPageSize());
 
+	}
+
+	@Test
+	void deveAtualizarUsuarioQuandoAutenticadoComoAdministradorEDadosForemValidos() throws Exception {
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		String corpoRequisicao = """
+				{
+				  "nome": "Maria Atualizada",
+				  "email": "maria.nova@empresa.com",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		Instant dataAtualizacao = Instant.parse("2026-09-28T15:00:00Z");
+
+		UsuarioResponse respostaDoService = new UsuarioResponse(usuarioId, "Maria Atualizada", "maria.nova@empresa.com",
+				PerfilUsuario.FUNCIONARIO, true, dataAtualizacao, dataAtualizacao);
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(usuarioService.atualizar(eq(usuarioId), any(AtualizarUsuarioRequest.class))).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				put("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(10))
+				.andExpect(jsonPath("$.nome").value("Maria Atualizada"))
+				.andExpect(jsonPath("$.email").value("maria.nova@empresa.com"))
+				.andExpect(jsonPath("$.perfil").value("FUNCIONARIO")).andExpect(jsonPath("$.ativo").value(true))
+				.andExpect(jsonPath("$.senha").doesNotExist());
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).atualizar(eq(usuarioId), any(AtualizarUsuarioRequest.class));
+	}
+
+	@Test
+	void deveRetornarNaoEncontradoQuandoTentarAtualizarUsuarioInexistente() throws Exception {
+
+		// PREPARAR
+		Long usuarioIdInexistente = 999L;
+
+		String corpoRequisicao = """
+				{
+				  "nome": "Maria Atualizada",
+				  "email": "maria.nova@empresa.com",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.atualizar(eq(usuarioIdInexistente), any(AtualizarUsuarioRequest.class)))
+				.thenThrow(new UsuarioNaoEncontradoException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(put("/api/usuarios/{id}", usuarioIdInexistente)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador").contentType(MediaType.APPLICATION_JSON)
+				.content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404))
+				.andExpect(jsonPath("$.erro").value("Recurso não encontrado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Usuário não encontrado."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/999"))
+				.andExpect(jsonPath("$.codigo").value("USUARIO_NAO_ENCONTRADO"));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).atualizar(eq(usuarioIdInexistente), any(AtualizarUsuarioRequest.class));
+	}
+
+	@Test
+	void deveRetornarErroQuandoEmailJaEstiverCadastradoParaOutroUsuario() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		String corpoRequisicao = """
+				{
+				  "nome": "Maria Souza",
+				  "email": "email.existente@empresa.com",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		when(usuarioService.atualizar(eq(usuarioId), any(AtualizarUsuarioRequest.class)))
+				.thenThrow(new EmailJaCadastradoException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				put("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isConflict()).andExpect(jsonPath("$.status").value(409))
+				.andExpect(jsonPath("$.erro").value("Conflito de dados"))
+				.andExpect(jsonPath("$.mensagens[0]").value("O e-mail informado já está cadastrado."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10"))
+				.andExpect(jsonPath("$.codigo").value("EMAIL_JA_CADASTRADO"));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).atualizar(eq(usuarioId), any(AtualizarUsuarioRequest.class));
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoFuncionarioTentarAtualizarUsuario() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		String corpoRequisicao = """
+				{
+				  "nome": "Maria Atualizada",
+				  "email": "maria.nova@empresa.com",
+				  "perfil": "FUNCIONARIO"
+				}
+				""";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				put("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.erro").value("Acesso negado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Você não possui permissão para acessar este recurso."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10"))
+				.andExpect(jsonPath("$.codigo").value("ACESSO_NEGADO"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+
+		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveRetornarBadRequestQuandoDadosDaRequisicaoForemInvalidos() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 10L;
+
+		// JSON com nome em branco e e-mail sem formato válido
+		String corpoRequisicaoInvalido = """
+				{
+				  "nome": "   ",
+				  "email": "email-invalido-sem-arroba",
+				  "perfil": null
+				}
+				""";
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256").subject("1")
+				.claim("perfil", PerfilUsuario.ADMINISTRADOR.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				put("/api/usuarios/{id}", usuarioId).header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicaoInvalido));
+
+		// VERIFICAR
+		resultado.andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.erro").value("Dados inválidos")).andExpect(jsonPath("$.mensagens").isArray())
+				.andExpect(jsonPath("$.path").value("/api/usuarios/10"))
+				.andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verifyNoInteractions(usuarioService);
 	}
 
 }

@@ -70,6 +70,14 @@ public class Usuario {
 		this.dataAtualizacao = Instant.now();
 	}
 
+	public void atualizarDados(String nome, String email, PerfilUsuario perfil) {
+
+		this.nome = nome;
+		this.email = email;
+		this.perfil = perfil;
+
+	}
+
 	public Long getId() {
 		return id;
 	}

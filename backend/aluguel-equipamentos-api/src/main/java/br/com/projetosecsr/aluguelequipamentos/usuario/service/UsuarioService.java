@@ -15,6 +15,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
@@ -41,12 +42,41 @@ public class UsuarioService {
 				pagina.isLast());
 	}
 
+	private Usuario buscarUsuarioPorId(Long id) {
+
+		Optional<Usuario> usuarioEncontrado = usuarioRepository.findById(id);
+
+		if (usuarioEncontrado.isEmpty()) {
+
+			throw new UsuarioNaoEncontradoException();
+		}
+
+		Usuario usuario = usuarioEncontrado.get();
+
+		return usuario;
+	}
+
+	private String normalizarNome(String nome) {
+
+		String nomeNormalizado = nome.strip();
+
+		return nomeNormalizado;
+
+	}
+
+	private String normalizarEmail(String email) {
+
+		String emailNormalizado = email.strip().toLowerCase(Locale.ROOT);
+
+		return emailNormalizado;
+	}
+
 	@Transactional
 	public UsuarioResponse cadastrar(CadastrarUsuarioRequest request) {
 
-		String nomeNormalizado = request.nome().strip();
+		String nomeNormalizado = normalizarNome(request.nome());
 
-		String emailNormalizado = request.email().strip().toLowerCase(Locale.ROOT);
+		String emailNormalizado = normalizarEmail(request.email());
 
 		if (usuarioRepository.existsByEmail(emailNormalizado)) {
 
@@ -66,14 +96,7 @@ public class UsuarioService {
 	@Transactional(readOnly = true)
 	public UsuarioResponse buscarPorId(Long id) {
 
-		Optional<Usuario> usuarioEncontrado = usuarioRepository.findById(id);
-
-		if (usuarioEncontrado.isEmpty()) {
-
-			throw new UsuarioNaoEncontradoException();
-		}
-
-		Usuario usuario = usuarioEncontrado.get();
+		Usuario usuario = buscarUsuarioPorId(id);
 
 		UsuarioResponse resposta = UsuarioResponse.de(usuario);
 
@@ -90,6 +113,26 @@ public class UsuarioService {
 
 		return converterPagina(paginaDeRespostas);
 
+	}
+
+	@Transactional
+	public UsuarioResponse atualizar(Long id, AtualizarUsuarioRequest request) {
+
+		Usuario usuario = buscarUsuarioPorId(id);
+
+		String nomeNormalizado = normalizarNome(request.nome());
+
+		String emailNormalizado = normalizarEmail(request.email());
+
+		if (usuarioRepository.existsByEmailAndIdNot(emailNormalizado, usuario.getId())) {
+
+			throw new EmailJaCadastradoException();
+
+		}
+
+		usuario.atualizarDados(nomeNormalizado, emailNormalizado, request.perfil());
+
+		return UsuarioResponse.de(usuario);
 	}
 
 }

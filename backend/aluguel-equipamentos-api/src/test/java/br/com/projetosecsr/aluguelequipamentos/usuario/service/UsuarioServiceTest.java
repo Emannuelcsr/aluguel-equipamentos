@@ -2,12 +2,14 @@ package br.com.projetosecsr.aluguelequipamentos.usuario.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -33,6 +35,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
@@ -233,6 +236,75 @@ public class UsuarioServiceTest {
 
 		verifyNoInteractions(passwordEncoder);
 
+	}
+
+	@Test
+	void deveAtualizarUsuarioQuandoDadosForemValidos() {
+
+		// PREPARAR
+		Long idUser1 = 1L;
+
+		Usuario usuario = new Usuario("Maria Souza", "maria@empresa.com", "hash-original", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser1);
+
+		AtualizarUsuarioRequest usuarioAtualizado = new AtualizarUsuarioRequest(" Maria Atualizada ",
+				" MARIA.NOVA@Empresa.com ", PerfilUsuario.FUNCIONARIO);
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser1)).thenReturn(Optional.of(usuario));
+		when(usuarioRepository.existsByEmailAndIdNot("maria.nova@empresa.com", idUser1)).thenReturn(false);
+
+		// EXECUTAR
+		UsuarioResponse resposta = usuarioService.atualizar(idUser1, usuarioAtualizado);
+
+		// VERIFICAR
+		verify(usuarioRepository).findById(idUser1);
+		verify(usuarioRepository).existsByEmailAndIdNot("maria.nova@empresa.com", idUser1);
+
+		assertNotNull(resposta);
+		assertEquals(idUser1, resposta.id());
+		assertEquals("Maria Atualizada", resposta.nome());
+		assertEquals("maria.nova@empresa.com", resposta.email());
+		assertEquals(PerfilUsuario.FUNCIONARIO, resposta.perfil());
+
+		verifyNoMoreInteractions(usuarioRepository);
+
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoUsuarioNaoExistir() {
+		// PREPARAR
+		Long idInexistente = 99L;
+		AtualizarUsuarioRequest request = new AtualizarUsuarioRequest("Maria", "maria@email.com",
+				PerfilUsuario.FUNCIONARIO);
+
+		when(usuarioRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+		// EXECUTAR & VERIFICAR
+		assertThrows(UsuarioNaoEncontradoException.class, () -> usuarioService.atualizar(idInexistente, request));
+
+		verify(usuarioRepository).findById(idInexistente);
+		verifyNoMoreInteractions(usuarioRepository);
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoEmailPertencerAOutroUsuario() {
+		// PREPARAR
+		Long idUser = 1L;
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		AtualizarUsuarioRequest request = new AtualizarUsuarioRequest("Maria", "existente@email.com",
+				PerfilUsuario.ADMINISTRADOR);
+		// CORREÇÃO AQUI: Definir o ID na entidade usuario
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+		when(usuarioRepository.existsByEmailAndIdNot("existente@email.com", idUser)).thenReturn(true);
+
+		// EXECUTAR & VERIFICAR
+		assertThrows(EmailJaCadastradoException.class, () -> usuarioService.atualizar(idUser, request));
+
+		verify(usuarioRepository).findById(idUser);
+		verify(usuarioRepository).existsByEmailAndIdNot("existente@email.com", idUser);
 	}
 
 }
