@@ -40,6 +40,7 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorF
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.RedefinicaoPropriaSenhaNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
@@ -47,6 +48,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontr
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.RedefinirSenhaUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
 import tools.jackson.databind.ObjectMapper;
@@ -844,6 +846,120 @@ public class UsuarioControllerTest {
 		verify(jwtDecoder).decode("token-funcionario");
 
 		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveRedefinirSenhaDeOutroUsuarioQuandoAutenticadoComoAdministrador() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+		Long administradorAutenticadoId = 1L;
+
+		String corpoRequisicao = """
+				{
+				  "novaSenha": "nova-senha-segura",
+				  "confirmacaoNovaSenha": "nova-senha-segura"
+				}
+				""";
+
+		RedefinirSenhaUsuarioRequest requestEsperado = new RedefinirSenhaUsuarioRequest("nova-senha-segura",
+				"nova-senha-segura");
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256")
+				.subject(administradorAutenticadoId.toString()).claim("perfil", PerfilUsuario.ADMINISTRADOR.name())
+				.build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/senha", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador").contentType(MediaType.APPLICATION_JSON)
+				.content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isNoContent());
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).redefinirSenha(usuarioId, administradorAutenticadoId, requestEsperado);
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoFuncionarioTentarRedefinirSenha() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 3L;
+		Long funcionarioAutenticadoId = 2L;
+
+		String corpoRequisicao = """
+				{
+				  "novaSenha": "nova-senha-segura",
+				  "confirmacaoNovaSenha": "nova-senha-segura"
+				}
+				""";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256")
+				.subject(funcionarioAutenticadoId.toString()).claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/senha", usuarioId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario").contentType(MediaType.APPLICATION_JSON)
+				.content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden());
+
+		verify(jwtDecoder).decode("token-funcionario");
+
+		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveRetornarAcessoNegadoQuandoAdministradorTentarRedefinirPropriaSenha() throws Exception {
+
+		// PREPARAR
+		Long administradorAutenticadoId = 1L;
+
+		String corpoRequisicao = """
+				{
+				  "novaSenha": "nova-senha-segura",
+				  "confirmacaoNovaSenha": "nova-senha-segura"
+				}
+				""";
+
+		RedefinirSenhaUsuarioRequest requestEsperado = new RedefinirSenhaUsuarioRequest("nova-senha-segura",
+				"nova-senha-segura");
+
+		Jwt jwtAdministrador = Jwt.withTokenValue("token-administrador").header("alg", "HS256")
+				.subject(administradorAutenticadoId.toString()).claim("perfil", PerfilUsuario.ADMINISTRADOR.name())
+				.build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+
+		doThrow(new RedefinicaoPropriaSenhaNaoPermitidaException()).when(usuarioService)
+				.redefinirSenha(administradorAutenticadoId, administradorAutenticadoId, requestEsperado);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(patch("/api/usuarios/{id}/senha", administradorAutenticadoId)
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-administrador").contentType(MediaType.APPLICATION_JSON)
+				.content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+				.andExpect(jsonPath("$.erro").value("Acesso negado"))
+				.andExpect(jsonPath("$.mensagens[0]")
+						.value("Não é permitido redefinir a própria senha por esta operação."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/1/senha"))
+				.andExpect(jsonPath("$.codigo").value("REDEFINICAO_PROPRIA_SENHA_NAO_PERMITIDA"));
+
+		verify(jwtDecoder).decode("token-administrador");
+
+		verify(usuarioService).redefinirSenha(administradorAutenticadoId, administradorAutenticadoId, requestEsperado);
 	}
 
 }

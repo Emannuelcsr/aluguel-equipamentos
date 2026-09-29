@@ -18,6 +18,7 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.RedefinirSenhaUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -93,6 +94,17 @@ public class UsuarioController {
 		Long usuarioAutenticadoId = Long.valueOf(jwt.getSubject());
 
 		usuarioService.alterarPropriaSenha(usuarioAutenticadoId, request);
+
+		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping("/{id}/senha")
+	ResponseEntity<Void> redefinirSenha(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt,
+			@Valid @RequestBody RedefinirSenhaUsuarioRequest request) {
+
+		Long usuarioAutenticadoId = Long.valueOf(jwt.getSubject());
+
+		usuarioService.redefinirSenha(id, usuarioAutenticadoId, request);
 
 		return ResponseEntity.noContent().build();
 	}

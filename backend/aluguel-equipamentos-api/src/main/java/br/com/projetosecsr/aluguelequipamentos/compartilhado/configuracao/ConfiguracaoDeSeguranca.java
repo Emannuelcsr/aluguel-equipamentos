@@ -31,6 +31,7 @@ public class ConfiguracaoDeSeguranca {
 						.requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/me/senha")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
+						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/*/senha").hasRole("ADMINISTRADOR")
 
 						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/*/ativar", "/api/usuarios/*/desativar")
 						.hasRole("ADMINISTRADOR").anyRequest().denyAll())

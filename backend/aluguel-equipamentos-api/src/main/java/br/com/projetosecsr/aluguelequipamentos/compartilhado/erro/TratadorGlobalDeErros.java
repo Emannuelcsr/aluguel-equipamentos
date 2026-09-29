@@ -16,6 +16,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNa
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.RedefinicaoPropriaSenhaNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
@@ -128,6 +129,17 @@ public class TratadorGlobalDeErros {
 				"ALTERACAO_SENHA_INVALIDA");
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler({ RedefinicaoPropriaSenhaNaoPermitidaException.class })
+	public ResponseEntity<ErroResponse> tratarRedefinicaoPropriaSenhaNaoPermitida(
+			RedefinicaoPropriaSenhaNaoPermitidaException excecao, HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.FORBIDDEN.value(),
+				"Acesso negado", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"REDEFINICAO_PROPRIA_SENHA_NAO_PERMITIDA");
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
 	}
 
 }

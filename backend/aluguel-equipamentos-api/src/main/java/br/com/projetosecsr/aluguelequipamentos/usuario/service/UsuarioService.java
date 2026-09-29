@@ -16,6 +16,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNa
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.RedefinicaoPropriaSenhaNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
@@ -24,6 +25,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioReposit
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.RedefinirSenhaUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @Service
@@ -202,6 +204,28 @@ public class UsuarioService {
 		}
 
 		String novaSenhaHash = passwordEncoder.encode(request.senhaNova());
+
+		usuario.alterarSenha(novaSenhaHash);
+
+	}
+
+	@Transactional
+	public void redefinirSenha(Long id, Long usuarioAutenticadoId, RedefinirSenhaUsuarioRequest request) {
+
+		Usuario usuario = buscarUsuarioPorId(id);
+
+		if (usuario.getId().equals(usuarioAutenticadoId)) {
+
+			throw new RedefinicaoPropriaSenhaNaoPermitidaException();
+
+		}
+
+		if (!request.novaSenha().equals(request.confirmacaoNovaSenha())) {
+
+			throw new ConfirmacaoSenhaInvalidaException();
+		}
+
+		String novaSenhaHash = passwordEncoder.encode(request.novaSenha());
 
 		usuario.alterarSenha(novaSenhaHash);
 

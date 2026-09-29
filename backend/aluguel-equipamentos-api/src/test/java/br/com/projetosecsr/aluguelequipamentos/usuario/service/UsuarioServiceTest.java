@@ -38,6 +38,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNa
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.RedefinicaoPropriaSenhaNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
@@ -46,6 +47,7 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioReposit
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.RedefinirSenhaUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -570,6 +572,109 @@ public class UsuarioServiceTest {
 		verify(passwordEncoder, never()).encode(anyString());
 		assertEquals("hash-atual", usuarioEncontradoNoBanco.getSenhaHash());
 
+	}
+
+	@Test
+	void deveRedefinirSenhaDeOutroUsuarioQuandoDadosForemValidos() {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+		Long administradorAutenticadoId = 1L;
+
+		Usuario usuarioEncontradoNoBanco = new Usuario("Maria", "maria@email.com", "hash-atual",
+				PerfilUsuario.FUNCIONARIO);
+
+		ReflectionTestUtils.setField(usuarioEncontradoNoBanco, "id", usuarioId);
+
+		String novaSenha = "nova-senha-segura";
+
+		RedefinirSenhaUsuarioRequest request = new RedefinirSenhaUsuarioRequest(novaSenha, novaSenha);
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioEncontradoNoBanco));
+
+		when(passwordEncoder.encode(novaSenha)).thenReturn("novo-hash");
+
+		// EXECUTAR
+		usuarioService.redefinirSenha(usuarioId, administradorAutenticadoId, request);
+
+		// VERIFICAR
+		verify(usuarioRepository).findById(usuarioId);
+
+		verify(passwordEncoder).encode(novaSenha);
+
+		verify(passwordEncoder, never()).matches(anyString(), anyString());
+
+		assertEquals("novo-hash", usuarioEncontradoNoBanco.getSenhaHash());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoAdministradorTentarRedefinirPropriaSenha() {
+
+		// PREPARAR
+		Long administradorAutenticadoId = 1L;
+
+		Usuario administradorEncontradoNoBanco = new Usuario("Administrador", "administrador@email.com", "hash-atual",
+				PerfilUsuario.ADMINISTRADOR);
+
+		ReflectionTestUtils.setField(administradorEncontradoNoBanco, "id", administradorAutenticadoId);
+
+		RedefinirSenhaUsuarioRequest request = new RedefinirSenhaUsuarioRequest("nova-senha-segura",
+				"nova-senha-segura");
+
+		// MOCKS
+		when(usuarioRepository.findById(administradorAutenticadoId))
+				.thenReturn(Optional.of(administradorEncontradoNoBanco));
+
+		// EXECUTAR
+		RedefinicaoPropriaSenhaNaoPermitidaException excecao = assertThrows(
+				RedefinicaoPropriaSenhaNaoPermitidaException.class,
+				() -> usuarioService.redefinirSenha(administradorAutenticadoId, administradorAutenticadoId, request));
+
+		// VERIFICAR
+		assertEquals("Não é permitido redefinir a própria senha por esta operação.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(administradorAutenticadoId);
+
+		verify(passwordEncoder, never()).encode(anyString());
+
+		verify(passwordEncoder, never()).matches(anyString(), anyString());
+
+		assertEquals("hash-atual", administradorEncontradoNoBanco.getSenhaHash());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoConfirmacaoDaRedefinicaoForDiferente() {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+		Long administradorAutenticadoId = 1L;
+
+		Usuario usuarioEncontradoNoBanco = new Usuario("Maria", "maria@email.com", "hash-atual",
+				PerfilUsuario.FUNCIONARIO);
+
+		ReflectionTestUtils.setField(usuarioEncontradoNoBanco, "id", usuarioId);
+
+		RedefinirSenhaUsuarioRequest request = new RedefinirSenhaUsuarioRequest("nova-senha-segura",
+				"outra-senha-diferente");
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioEncontradoNoBanco));
+
+		// EXECUTAR
+		ConfirmacaoSenhaInvalidaException excecao = assertThrows(ConfirmacaoSenhaInvalidaException.class,
+				() -> usuarioService.redefinirSenha(usuarioId, administradorAutenticadoId, request));
+
+		// VERIFICAR
+		assertEquals("A confirmação da nova senha não corresponde à nova senha.", excecao.getMessage());
+
+		verify(usuarioRepository).findById(usuarioId);
+
+		verify(passwordEncoder, never()).encode(anyString());
+
+		verify(passwordEncoder, never()).matches(anyString(), anyString());
+
+		assertEquals("hash-atual", usuarioEncontradoNoBanco.getSenhaHash());
 	}
 
 }
