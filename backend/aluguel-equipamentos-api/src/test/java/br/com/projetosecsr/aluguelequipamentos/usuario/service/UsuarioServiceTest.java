@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -33,11 +35,15 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.P
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -357,7 +363,7 @@ public class UsuarioServiceTest {
 	}
 
 	@Test
-	void deveLancarExcecaoQuandoUsuarioJaEstiverDesativo() {
+	void deveLancarExcecaoQuandoUsuarioJaEstiverInativo() {
 		// PREPARAR
 		Long idUser = 1L;
 		Long idAdmin = 2L;
@@ -429,6 +435,141 @@ public class UsuarioServiceTest {
 		verify(usuarioRepository).findById(idUser);
 		assertTrue(usuario.isAtivo()); // Permanece ativo
 		verifyNoMoreInteractions(usuarioRepository);
+	}
+
+	@Test
+	void deveAlterarPropriaSenhaQuandoDadosForemValidos() {
+		// PREPARAR
+		Long idUser = 1L;
+		Usuario usuario = new Usuario("Maria", "maria@email.com", "hash", PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuario, "id", idUser);
+		String senhaAtual = "senha-atual-correta";
+		String novaSenha = "nova-senha-segura";
+		String confirmaNovaSenha = "nova-senha-segura";
+
+		AlterarPropriaSenhaRequest novaSenhaAtualizada = new AlterarPropriaSenhaRequest(senhaAtual, novaSenha,
+				confirmaNovaSenha);
+
+		// MOCKS
+		when(usuarioRepository.findById(idUser)).thenReturn(Optional.of(usuario));
+
+		when(passwordEncoder.matches(senhaAtual, "hash")).thenReturn(true);
+
+		when(passwordEncoder.matches(novaSenha, "hash")).thenReturn(false);
+
+		when(passwordEncoder.encode(novaSenha)).thenReturn("novo-hash");
+
+		// EXECUTAR
+		usuarioService.alterarPropriaSenha(idUser, novaSenhaAtualizada);
+
+		// VERIFICAR
+		verify(usuarioRepository).findById(idUser);
+
+		verify(passwordEncoder).matches(senhaAtual, "hash");
+
+		verify(passwordEncoder).matches(novaSenha, "hash");
+
+		verify(passwordEncoder).encode(novaSenha);
+
+		assertEquals("novo-hash", usuario.getSenhaHash());
+
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoSenhaAtualEstiverIncorreta() {
+
+		// PREPARAR
+		Long usuarioId = 1L;
+		Usuario usuarioEncontradoNoBanco = new Usuario("Maria", "maria@email.com", "hash-atual",
+				PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuarioEncontradoNoBanco, "id", usuarioId);
+
+		String senhaAtualIncorreta = "senha-atual-errada";
+		String novaSenha = "nova-senha-segura";
+		String confirmacaoNovaSenha = "nova-senha-segura";
+
+		AlterarPropriaSenhaRequest novaSenhaAtualizada = new AlterarPropriaSenhaRequest(senhaAtualIncorreta, novaSenha,
+				confirmacaoNovaSenha);
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioEncontradoNoBanco));
+
+		when(passwordEncoder.matches(senhaAtualIncorreta, "hash-atual")).thenReturn(false);
+
+		SenhaAtualIncorretaException excecao = assertThrows(SenhaAtualIncorretaException.class,
+				() -> usuarioService.alterarPropriaSenha(usuarioId, novaSenhaAtualizada));
+
+		// VERIFICA
+		assertEquals("A senha atual está incorreta.", excecao.getMessage());
+		verify(usuarioRepository).findById(usuarioId);
+		verify(passwordEncoder).matches(senhaAtualIncorreta, "hash-atual");
+		verify(passwordEncoder, never()).encode(anyString());
+		assertEquals("hash-atual", usuarioEncontradoNoBanco.getSenhaHash());
+
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoConfirmacaoNovaSenhaForDiferente() {
+
+		// PREPARAR
+		Long usuarioId = 1L;
+		Usuario usuarioEncontradoNoBanco = new Usuario("Maria", "maria@email.com", "hash-atual",
+				PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuarioEncontradoNoBanco, "id", usuarioId);
+
+		String senhaAtual = "senha-atual-correta";
+		String novaSenha = "nova-senha-segura";
+		String confirmacaoNovaSenha = "outra-senha-diferente";
+
+		AlterarPropriaSenhaRequest novaSenhaAtualizada = new AlterarPropriaSenhaRequest(senhaAtual, novaSenha,
+				confirmacaoNovaSenha);
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioEncontradoNoBanco));
+		when(passwordEncoder.matches(senhaAtual, "hash-atual")).thenReturn(true);
+
+		ConfirmacaoSenhaInvalidaException excecao = assertThrows(ConfirmacaoSenhaInvalidaException.class,
+				() -> usuarioService.alterarPropriaSenha(usuarioId, novaSenhaAtualizada));
+
+		// VERIFICAR
+		assertEquals("A confirmação da nova senha não corresponde à nova senha.", excecao.getMessage());
+		verify(usuarioRepository).findById(usuarioId);
+		verify(passwordEncoder).matches(senhaAtual, "hash-atual");
+		verify(passwordEncoder, never()).encode(anyString());
+		assertEquals("hash-atual", usuarioEncontradoNoBanco.getSenhaHash());
+	}
+
+	@Test
+	void deveLancarExcecaoQuandoNovaSenhaForIgualAtual() {
+
+		// PREPARAR
+		Long usuarioId = 1L;
+		Usuario usuarioEncontradoNoBanco = new Usuario("Maria", "maria@email.com", "hash-atual",
+				PerfilUsuario.ADMINISTRADOR);
+		ReflectionTestUtils.setField(usuarioEncontradoNoBanco, "id", usuarioId);
+
+		String senhaAtual = "senha-atual-correta";
+		String novaSenha = "senha-atual-correta";
+		String confirmacaoNovaSenha = "senha-atual-correta";
+
+		AlterarPropriaSenhaRequest novaSenhaAtualizada = new AlterarPropriaSenhaRequest(senhaAtual, novaSenha,
+				confirmacaoNovaSenha);
+
+		// MOCKS
+		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuarioEncontradoNoBanco));
+		when(passwordEncoder.matches(senhaAtual, "hash-atual")).thenReturn(true);
+
+		// EXECUTAR
+		NovaSenhaIgualAtualException excecao = assertThrows(NovaSenhaIgualAtualException.class,
+				() -> usuarioService.alterarPropriaSenha(usuarioId, novaSenhaAtualizada));
+
+		// VERIFICAR
+		assertEquals("A nova senha deve ser diferente da senha atual.", excecao.getMessage());
+		verify(usuarioRepository).findById(usuarioId);
+		verify(passwordEncoder, times(2)).matches(senhaAtual, "hash-atual");
+		verify(passwordEncoder, never()).encode(anyString());
+		assertEquals("hash-atual", usuarioEncontradoNoBanco.getSenhaHash());
+
 	}
 
 }

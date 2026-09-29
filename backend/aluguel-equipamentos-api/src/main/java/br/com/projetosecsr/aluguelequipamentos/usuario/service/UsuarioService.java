@@ -13,11 +13,15 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -173,6 +177,34 @@ public class UsuarioService {
 		return UsuarioResponse.de(usuario);
 	}
 
+	@Transactional
+	public void alterarPropriaSenha(Long id, AlterarPropriaSenhaRequest request) {
 
+		Usuario usuario = buscarUsuarioPorId(id);
+
+		boolean senhaAtualCorreta = passwordEncoder.matches(request.senhaAtual(), usuario.getSenhaHash());
+
+		if (!senhaAtualCorreta) {
+			throw new SenhaAtualIncorretaException();
+		}
+
+		if (!request.senhaNova().equals(request.confirmacaoNovaSenha())) {
+
+			throw new ConfirmacaoSenhaInvalidaException();
+		}
+
+		boolean novaSenhaIgualAtual = passwordEncoder.matches(request.senhaNova(), usuario.getSenhaHash());
+
+		if (novaSenhaIgualAtual) {
+
+			throw new NovaSenhaIgualAtualException();
+
+		}
+
+		String novaSenhaHash = passwordEncoder.encode(request.senhaNova());
+
+		usuario.alterarSenha(novaSenhaHash);
+
+	}
 
 }

@@ -78,6 +78,12 @@ public class Usuario {
 
 	}
 
+	public void alterarSenha(String novaSenhaHash) {
+
+		this.senhaHash = novaSenhaHash;
+
+	}
+
 	public void ativar() {
 		this.ativo = true;
 	}

@@ -1,7 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.compartilhado.erro;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,10 @@ import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisI
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.NovaSenhaIgualAtualException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
@@ -114,6 +116,18 @@ public class TratadorGlobalDeErros {
 				List.of(excecao.getMessage()), requisicao.getRequestURI(), "AUTODESATIVACAO_NAO_PERMITIDA");
 
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
+	}
+
+	@ExceptionHandler({ SenhaAtualIncorretaException.class, ConfirmacaoSenhaInvalidaException.class,
+			NovaSenhaIgualAtualException.class })
+	public ResponseEntity<ErroResponse> tratarAlteracaoDeSenhaInvalida(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Alteração de senha inválida", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"ALTERACAO_SENHA_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
 	}
 
 }

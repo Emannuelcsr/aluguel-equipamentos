@@ -3,6 +3,7 @@ package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -39,9 +40,11 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorF
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorretaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -593,7 +596,7 @@ public class UsuarioControllerTest {
 	}
 
 	@Test
-	void deveRetornarErroQuandoTentarAtivarUsuarioJaAtivo() throws Exception {
+	void deveRetornarConflitoQuandoTentarAtivarUsuarioJaAtivo() throws Exception {
 
 		// PREPARAR
 		Long usuarioId = 10L;
@@ -621,7 +624,7 @@ public class UsuarioControllerTest {
 	}
 
 	@Test
-	void deveDesativarUsuarioComSucesso() throws Exception {
+	void deveDesativarUsuarioQuandoAutenticadoComoAdministrador() throws Exception {
 
 		// PREPARAR
 		Long usuarioIdParaDesativar = 10L;
@@ -708,7 +711,7 @@ public class UsuarioControllerTest {
 	}
 
 	@Test
-	void deveRetornarAcessoNegadoQuandoPerfilNaoForAutorizado() throws Exception {
+	void deveRetornarAcessoNegadoQuandoFuncionarioTentarDesativarUsuario() throws Exception {
 		// PREPARAR
 		Long usuarioId = 10L;
 
@@ -726,6 +729,120 @@ public class UsuarioControllerTest {
 		resultado.andExpect(status().isForbidden());
 
 		verify(jwtDecoder).decode("token-funcionario");
+		verifyNoInteractions(usuarioService);
+	}
+
+	@Test
+	void deveAlterarPropriaSenhaQuandoAutenticadoComoFuncionario() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+
+		// Dados válidos para alteração da senha
+		String corpoRequisicao = """
+				{
+				  "senhaAtual": "senha-atual-correta",
+				  "senhaNova": "nova-senha-segura",
+				  "confirmacaoNovaSenha": "nova-senha-segura"
+				}
+				""";
+
+		AlterarPropriaSenhaRequest requestEsperado = new AlterarPropriaSenhaRequest("senha-atual-correta",
+				"nova-senha-segura", "nova-senha-segura");
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256")
+				.subject(usuarioId.toString()).claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc
+				.perform(patch("/api/usuarios/me/senha").header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isNoContent());
+		verify(jwtDecoder).decode("token-funcionario");
+		verify(usuarioService).alterarPropriaSenha(usuarioId, requestEsperado);
+
+	}
+
+	@Test
+	void deveRetornarBadRequestQuandoSenhaAtualForIncorreta() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+
+		// Dados válidos para alteração da senha
+		String corpoRequisicao = """
+				{
+				  "senhaAtual": "senha-atual-correta",
+				  "senhaNova": "nova-senha-segura",
+				  "confirmacaoNovaSenha": "nova-senha-segura"
+				}
+				""";
+
+		AlterarPropriaSenhaRequest requestEsperado = new AlterarPropriaSenhaRequest("senha-atual-correta",
+				"nova-senha-segura", "nova-senha-segura");
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256")
+				.subject(usuarioId.toString()).claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		doThrow(new SenhaAtualIncorretaException()).when(usuarioService).alterarPropriaSenha(usuarioId,
+				requestEsperado);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc
+				.perform(patch("/api/usuarios/me/senha").header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400))
+				.andExpect(jsonPath("$.erro").value("Alteração de senha inválida"))
+				.andExpect(jsonPath("$.mensagens[0]").value("A senha atual está incorreta."))
+				.andExpect(jsonPath("$.path").value("/api/usuarios/me/senha"))
+				.andExpect(jsonPath("$.codigo").value("ALTERACAO_SENHA_INVALIDA"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+
+		verify(usuarioService).alterarPropriaSenha(usuarioId, requestEsperado);
+
+	}
+
+	@Test
+	void deveRetornarBadRequestQuandoNovaSenhaForMuitoCurta() throws Exception {
+
+		// PREPARAR
+		Long usuarioId = 2L;
+
+		String corpoRequisicao = """
+				{
+				  "senhaAtual": "senha-atual-correta",
+				  "senhaNova": "curta",
+				  "confirmacaoNovaSenha": "curta"
+				}
+				""";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256")
+				.subject(usuarioId.toString()).claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc
+				.perform(patch("/api/usuarios/me/senha").header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario")
+						.contentType(MediaType.APPLICATION_JSON).content(corpoRequisicao));
+
+		// VERIFICAR
+		resultado.andExpect(status().isBadRequest());
+
+		verify(jwtDecoder).decode("token-funcionario");
+
 		verifyNoInteractions(usuarioService);
 	}
 

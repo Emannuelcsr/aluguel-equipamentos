@@ -1,5 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.usuario.controller;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,14 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
+import br.com.projetosecsr.aluguelequipamentos.usuario.request.AlterarPropriaSenhaRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.CadastrarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.service.UsuarioService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Pageable;
-
-import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -84,6 +84,17 @@ public class UsuarioController {
 		UsuarioResponse response = usuarioService.desativar(id, usuarioAutenticadoId);
 
 		return ResponseEntity.ok(response);
+	}
+
+	@PatchMapping("/me/senha")
+	ResponseEntity<Void> alterarPropriaSenha(@AuthenticationPrincipal Jwt jwt,
+			@Valid @RequestBody AlterarPropriaSenhaRequest request) {
+
+		Long usuarioAutenticadoId = Long.valueOf(jwt.getSubject());
+
+		usuarioService.alterarPropriaSenha(usuarioAutenticadoId, request);
+
+		return ResponseEntity.noContent().build();
 	}
 
 }
