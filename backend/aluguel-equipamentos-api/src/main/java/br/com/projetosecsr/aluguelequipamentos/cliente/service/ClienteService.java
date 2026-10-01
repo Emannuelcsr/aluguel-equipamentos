@@ -9,16 +9,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.projetosecsr.aluguelequipamentos.cliente.entidade.Cliente;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.DocumentoJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EmailClienteJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.repository.ClienteRepository;
+import br.com.projetosecsr.aluguelequipamentos.cliente.request.AtualizarClienteRequest;
 import br.com.projetosecsr.aluguelequipamentos.cliente.request.CadastrarClienteRequest;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResumoResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.validacao.ValidadorCliente;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
+import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @Service
 public class ClienteService {
@@ -168,6 +176,64 @@ public class ClienteService {
 
 		return converterPagina(paginaDeRespostas);
 
+	}
+
+	@Transactional
+	public ClienteResponse atualizar(AtualizarClienteRequest request, Long id) {
+
+		Cliente cliente = buscarClientePorId(id);
+
+		String nomeRazaoSocial = normalizarNomeRazaoSocial(request.nomeRazaoSocial());
+
+		String nomeFantasia = normalizarNomeFantasia(request.nomeFantasia());
+
+		String email = normalizarEmail(request.email());
+
+		String estado = normalizarEstado(request.estado());
+
+		String complemento = normalizarComplemento(request.complemento());
+
+		validadorCliente.validarNomeFantasia(cliente.getTipo(), nomeFantasia);
+
+		validadorCliente.validarEstado(estado);
+
+		if (clienteRepository.existsByEmailAndIdNot(email, id)) {
+			throw new EmailClienteJaCadastradoException();
+		}
+
+		cliente.atualizarDados(nomeRazaoSocial, nomeFantasia, email, request.telefone(), request.cep(),
+				request.logradouro(), request.numero(), complemento, request.bairro(), request.cidade(), estado);
+
+		return ClienteResponse.de(cliente);
+	}
+
+	@Transactional
+	public ClienteResponse ativar(Long id) {
+
+		Cliente cliente = buscarClientePorId(id);
+
+		if (cliente.isAtivo()) {
+
+			throw new ClienteJaAtivoException();
+		}
+
+		cliente.ativar();
+
+		return ClienteResponse.de(cliente);
+	}
+
+	@Transactional
+	public ClienteResponse desativar(Long id) {
+
+		Cliente cliente = buscarClientePorId(id);
+
+		if (!cliente.isAtivo()) {
+			throw new ClienteJaInativoException();
+		}
+
+		cliente.desativar();
+
+		return ClienteResponse.de(cliente);
 	}
 
 }
