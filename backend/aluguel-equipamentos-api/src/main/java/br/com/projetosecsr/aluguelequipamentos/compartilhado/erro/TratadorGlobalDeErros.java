@@ -11,6 +11,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisInvalidasException;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.CepNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaInativoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ConsultaCepIndisponivelException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.DocumentoIncompativelComTipoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.DocumentoInvalidoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.DocumentoJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EmailClienteJaCadastradoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EstadoInvalidoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.NomeFantasiaNaoPermitidoException;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
@@ -135,11 +146,74 @@ public class TratadorGlobalDeErros {
 	public ResponseEntity<ErroResponse> tratarRedefinicaoPropriaSenhaNaoPermitida(
 			RedefinicaoPropriaSenhaNaoPermitidaException excecao, HttpServletRequest requisicao) {
 
-		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.FORBIDDEN.value(),
-				"Acesso negado", List.of(excecao.getMessage()), requisicao.getRequestURI(),
-				"REDEFINICAO_PROPRIA_SENHA_NAO_PERMITIDA");
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.FORBIDDEN.value(), "Acesso negado",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "REDEFINICAO_PROPRIA_SENHA_NAO_PERMITIDA");
 
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
 	}
 
+	@ExceptionHandler({ ClienteNaoEncontradoException.class })
+	public ResponseEntity<ErroResponse> tratarClienteNaoEncontrado(ClienteNaoEncontradoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "Cliente não encontrado",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CLIENTE_NAO_ENCONTRADO");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+	@ExceptionHandler({ DocumentoJaCadastradoException.class, EmailClienteJaCadastradoException.class })
+	public ResponseEntity<ErroResponse> tratarDadosClienteJaCadastrados(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de dados do cliente", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"DADOS_CLIENTE_JA_CADASTRADOS");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler({ ClienteJaAtivoException.class, ClienteJaInativoException.class })
+	public ResponseEntity<ErroResponse> tratarSituacaoClienteInvalida(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de situação do cliente", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"SITUACAO_CLIENTE_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler({ DocumentoInvalidoException.class, DocumentoIncompativelComTipoException.class,
+			NomeFantasiaNaoPermitidoException.class, EstadoInvalidoException.class })
+	public ResponseEntity<ErroResponse> tratarDadosClienteInvalidos(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Dados do cliente inválidos", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"DADOS_CLIENTE_INVALIDOS");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(CepNaoEncontradoException.class)
+	public ResponseEntity<ErroResponse> tratarCepNaoEncontrado(CepNaoEncontradoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "CEP não encontrado",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CEP_NAO_ENCONTRADO");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+	@ExceptionHandler(ConsultaCepIndisponivelException.class)
+	public ResponseEntity<ErroResponse> tratarConsultaCepIndisponivel(ConsultaCepIndisponivelException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.SERVICE_UNAVAILABLE.value(),
+				"Serviço de consulta de CEP indisponível", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"CONSULTA_CEP_INDISPONIVEL");
+
+		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(resposta);
+	}
 }
