@@ -18,7 +18,10 @@ import br.com.projetosecsr.aluguelequipamentos.cliente.request.AtualizarClienteR
 import br.com.projetosecsr.aluguelequipamentos.cliente.request.CadastrarClienteRequest;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResumoResponse;
+import br.com.projetosecsr.aluguelequipamentos.cliente.response.EnderecoCepResponse;
+import br.com.projetosecsr.aluguelequipamentos.cliente.response.ViaCepResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.service.ClienteService;
+import br.com.projetosecsr.aluguelequipamentos.cliente.service.ConsultaCepService;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.request.AtualizarUsuarioRequest;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -30,8 +33,12 @@ public class ClienteController {
 
 	private final ClienteService clienteService;
 
-	public ClienteController(ClienteService clienteService) {
+	private final ConsultaCepService consultaCepService;
+
+	public ClienteController(ClienteService clienteService, ConsultaCepService consultaCepService) {
 		this.clienteService = clienteService;
+		this.consultaCepService = consultaCepService;
+
 	}
 
 	@PostMapping
@@ -84,6 +91,14 @@ public class ClienteController {
 		ClienteResponse response = clienteService.desativar(id);
 
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/cep/{cep}")
+	public ResponseEntity<EnderecoCepResponse> consultaCep(@PathVariable String cep) {
+
+		EnderecoCepResponse resposta = consultaCepService.consultar(cep);
+
+		return ResponseEntity.ok(resposta);
 	}
 
 }

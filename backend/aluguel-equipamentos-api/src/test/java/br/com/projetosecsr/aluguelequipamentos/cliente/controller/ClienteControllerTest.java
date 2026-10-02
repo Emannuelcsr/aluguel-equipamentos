@@ -32,16 +32,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import br.com.projetosecsr.aluguelequipamentos.cliente.entidade.TipoCliente;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.CepNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ConsultaCepIndisponivelException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.DocumentoJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EmailClienteJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.request.AtualizarClienteRequest;
 import br.com.projetosecsr.aluguelequipamentos.cliente.request.CadastrarClienteRequest;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.response.ClienteResumoResponse;
+import br.com.projetosecsr.aluguelequipamentos.cliente.response.EnderecoCepResponse;
 import br.com.projetosecsr.aluguelequipamentos.cliente.service.ClienteService;
+import br.com.projetosecsr.aluguelequipamentos.cliente.service.ConsultaCepService;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
@@ -64,6 +68,9 @@ public class ClienteControllerTest {
 
 	@MockitoBean
 	private JwtDecoder jwtDecoder;
+
+	@MockitoBean
+	private ConsultaCepService consultaCepService;
 
 	@Test
 	void deveBuscarClienteQuandoAutenticadoComoFuncionario() throws Exception {
@@ -788,7 +795,8 @@ public class ClienteControllerTest {
 		// MOCKS
 		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
 
-		when(clienteService.listarPaginado(any(Pageable.class))).thenThrow(new PaginaInvalidaException("A página informada não existe"));
+		when(clienteService.listarPaginado(any(Pageable.class)))
+				.thenThrow(new PaginaInvalidaException("A página informada não existe"));
 
 		// EXECUTAR
 		ResultActions resultado = mockMvc.perform(get("/api/clientes").param("page", "4").param("size", "2")
@@ -804,5 +812,96 @@ public class ClienteControllerTest {
 		verify(jwtDecoder).decode("token-funcionario");
 
 		verify(clienteService).listarPaginado(any(Pageable.class));
+	}
+
+	@Test
+	void deveConsultarCepQuandoAutenticadoComoFuncionario() throws Exception {
+
+		// PREPARAR
+		String cep = "88330000";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		EnderecoCepResponse respostaDoService = new EnderecoCepResponse("88330-000", "Rua das Flores", "", "Centro",
+				"Balneário Camboriú", "SC");
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		when(consultaCepService.consultar(cep)).thenReturn(respostaDoService);
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				get("/api/clientes/cep/{cep}", cep).header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isOk()).andExpect(jsonPath("$.cep").value("88330-000"))
+				.andExpect(jsonPath("$.logradouro").value("Rua das Flores"))
+				.andExpect(jsonPath("$.complemento").value("")).andExpect(jsonPath("$.bairro").value("Centro"))
+				.andExpect(jsonPath("$.cidade").value("Balneário Camboriú"))
+				.andExpect(jsonPath("$.estado").value("SC"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+
+		verify(consultaCepService).consultar(cep);
+	}
+
+	@Test
+	void deveRetornarNaoEncontradoQuandoCepNaoExistir() throws Exception {
+
+		// PREPARAR
+		String cep = "00000000";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		when(consultaCepService.consultar(cep)).thenThrow(new CepNaoEncontradoException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				get("/api/clientes/cep/{cep}", cep).header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404))
+				.andExpect(jsonPath("$.erro").value("CEP não encontrado"))
+				.andExpect(jsonPath("$.mensagens[0]").value("CEP não encontrado."))
+				.andExpect(jsonPath("$.path").value("/api/clientes/cep/00000000"))
+				.andExpect(jsonPath("$.codigo").value("CEP_NAO_ENCONTRADO"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+		verify(consultaCepService).consultar(cep);
+	}
+
+	@Test
+	void deveRetornarServicoIndisponivelQuandoConsultaCepFalhar() throws Exception {
+
+		// PREPARAR
+		String cep = "88330000";
+
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("2")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// MOCKS
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		when(consultaCepService.consultar(cep)).thenThrow(new ConsultaCepIndisponivelException());
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(
+				get("/api/clientes/cep/{cep}", cep).header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.status").value(503))
+				.andExpect(jsonPath("$.erro").value("Serviço de consulta de CEP indisponível"))
+				.andExpect(jsonPath("$.mensagens[0]").value("Serviço de consulta de CEP indisponível."))
+				.andExpect(jsonPath("$.path").value("/api/clientes/cep/88330000"))
+				.andExpect(jsonPath("$.codigo").value("CONSULTA_CEP_INDISPONIVEL"));
+
+		verify(jwtDecoder).decode("token-funcionario");
+		verify(consultaCepService).consultar(cep);
 	}
 }
