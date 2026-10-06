@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.CredenciaisInvalidasException;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInativoException;
+import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaJaAtivaException;
+import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaJaCadastradaException;
+import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaJaInativaException;
+import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.CepNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.ClienteJaInativoException;
@@ -216,4 +220,37 @@ public class TratadorGlobalDeErros {
 
 		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(resposta);
 	}
+
+	@ExceptionHandler({ CategoriaNaoEncontradoException.class })
+	public ResponseEntity<ErroResponse> tratarCategoriaNaoEncontrado(CategoriaNaoEncontradoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(),
+				"Categoria não encontrada", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"CATEGORIA_NAO_ENCONTRADO");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+	@ExceptionHandler({ CategoriaJaCadastradaException.class })
+	public ResponseEntity<ErroResponse> tratarDadosCategoriaJaCadastrados(CategoriaJaCadastradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(), "Categoria ja cadastrada",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CATEGORIA_JA_CADASTRADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler({ CategoriaJaAtivaException.class, CategoriaJaInativaException.class })
+	public ResponseEntity<ErroResponse> tratarSituacaoCategoriaInvalida(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de situação da categoria", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"SITUACAO_CATEGORIA_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
 }
