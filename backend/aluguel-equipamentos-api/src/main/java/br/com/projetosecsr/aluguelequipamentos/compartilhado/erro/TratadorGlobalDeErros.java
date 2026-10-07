@@ -27,6 +27,9 @@ import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EmailClienteJaCad
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EstadoInvalidoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.NomeFantasiaNaoPermitidoException;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaAtivoException;
+import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
+import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
@@ -253,4 +256,25 @@ public class TratadorGlobalDeErros {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
 	}
 
+	@ExceptionHandler({ EquipamentoJaAtivoException.class, EquipamentoJaInativoException.class })
+	public ResponseEntity<ErroResponse> tratarSituacaoEquipamentoInvalida(RuntimeException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de situação do equipamento", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"SITUACAO_EQUIPAMENTO_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(EquipamentoNaoEncontradoException.class)
+	public ResponseEntity<ErroResponse> tratarEquipamentoNaoEncontrado(EquipamentoNaoEncontradoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(),
+				"Equipamento não encontrado", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"EQUIPAMENTO_NAO_ENCONTRADO");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
 }
