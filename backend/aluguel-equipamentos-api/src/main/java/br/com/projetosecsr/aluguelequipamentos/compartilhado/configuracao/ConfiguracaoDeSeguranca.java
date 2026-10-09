@@ -41,13 +41,20 @@ public class ConfiguracaoDeSeguranca {
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
 						.requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.PATCH, "/api/categorias/**").hasRole("ADMINISTRADOR")
-
 						.requestMatchers(HttpMethod.POST, "/api/equipamentos/**").hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.GET, "/api/equipamentos/**")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
 						.requestMatchers(HttpMethod.PUT, "/api/equipamentos/**").hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.PATCH, "/api/equipamentos/**").hasRole("ADMINISTRADOR")
-
+						.requestMatchers(HttpMethod.POST, "/api/unidades-equipamento/**").hasRole("ADMINISTRADOR")
+						.requestMatchers(HttpMethod.GET, "/api/unidades-equipamento/**")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
+						.requestMatchers(HttpMethod.PATCH, "/api/unidades-equipamento/*/ativar",
+								"/api/unidades-equipamento/*/desativar")
+						.hasRole("ADMINISTRADOR")
+						.requestMatchers(HttpMethod.PATCH, "/api/unidades-equipamento/*/manutencao",
+								"/api/unidades-equipamento/*/liberar-manutencao")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
 						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/*/ativar", "/api/usuarios/*/desativar")
 						.hasRole("ADMINISTRADOR").anyRequest().denyAll())
 

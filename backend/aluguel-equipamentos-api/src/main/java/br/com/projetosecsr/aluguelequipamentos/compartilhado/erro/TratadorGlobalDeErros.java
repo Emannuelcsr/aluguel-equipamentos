@@ -30,6 +30,10 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.P
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.OperacaoInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaAtivaException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaInativaException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
@@ -276,5 +280,39 @@ public class TratadorGlobalDeErros {
 				"EQUIPAMENTO_NAO_ENCONTRADO");
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+
+	@ExceptionHandler(UnidadeEquipamentoNaoEncontradoException.class)
+	public ResponseEntity<ErroResponse> tratarUnidadeEquipamentoNaoEncontrado(
+			UnidadeEquipamentoNaoEncontradoException excecao, HttpServletRequest request) {
+
+		ErroResponse erro = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(),
+				"Unidade de equipamento não encontrada", List.of(excecao.getMessage()), request.getRequestURI(),
+				"UNIDADE_EQUIPAMENTO_NAO_ENCONTRADA");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+
+	@ExceptionHandler({ UnidadeEquipamentoJaAtivaException.class, UnidadeEquipamentoJaInativaException.class })
+	public ResponseEntity<ErroResponse> tratarSituacaoUnidadeEquipamentoInvalida(RuntimeException excecao,
+			HttpServletRequest request) {
+
+		ErroResponse erro = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Conflito de situação da unidade de equipamento", List.of(excecao.getMessage()),
+				request.getRequestURI(), "SITUACAO_UNIDADE_EQUIPAMENTO_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
+	@ExceptionHandler(OperacaoInvalidaException.class)
+	public ResponseEntity<ErroResponse> tratarOperacaoInvalidaUnidadeEquipamento(OperacaoInvalidaException excecao,
+			HttpServletRequest request) {
+
+		ErroResponse erro = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Operação inválida para a unidade de equipamento", List.of(excecao.getMessage()),
+				request.getRequestURI(), "OPERACAO_UNIDADE_EQUIPAMENTO_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
 	}
 }
