@@ -30,6 +30,10 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.P
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ClienteInativoParaReservaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.DataFinalInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.DataInicialInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ReservaNaoEncontradaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.OperacaoInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaAtivaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaInativaException;
@@ -44,6 +48,10 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoExc
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ConflitoDeReservaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.OperacaoReservaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.UnidadeDuplicadaNaReservaException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeIndisponivelParaReservaException;
 
 @RestControllerAdvice
 public class TratadorGlobalDeErros {
@@ -282,7 +290,6 @@ public class TratadorGlobalDeErros {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
 	}
 
-
 	@ExceptionHandler(UnidadeEquipamentoNaoEncontradoException.class)
 	public ResponseEntity<ErroResponse> tratarUnidadeEquipamentoNaoEncontrado(
 			UnidadeEquipamentoNaoEncontradoException excecao, HttpServletRequest request) {
@@ -314,5 +321,91 @@ public class TratadorGlobalDeErros {
 				request.getRequestURI(), "OPERACAO_UNIDADE_EQUIPAMENTO_INVALIDA");
 
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+
+	@ExceptionHandler(ReservaNaoEncontradaException.class)
+	public ResponseEntity<ErroResponse> tratarReservaNaoEncontrado(ReservaNaoEncontradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "Reserva não encontrada",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "RESERVA_NAO_ENCONTRADA");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
+	@ExceptionHandler(ClienteInativoParaReservaException.class)
+	public ResponseEntity<ErroResponse> tratarClienteInativoParaReserva(ClienteInativoParaReservaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.FORBIDDEN.value(), "Acesso negado",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CLIENTE_INATIVO");
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(resposta);
+
+	}
+
+	@ExceptionHandler(DataInicialInvalidaException.class)
+	public ResponseEntity<ErroResponse> tratarDataInicialParaReserva(DataInicialInvalidaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(), "Data inicial inválida",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "DATA_INICIAL_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+
+	}
+
+	@ExceptionHandler(DataFinalInvalidaException.class)
+	public ResponseEntity<ErroResponse> tratarDataFinalParaReserva(DataFinalInvalidaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(), "Data final inválida",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "DATA_FINAL_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+
+	}
+
+	@ExceptionHandler(UnidadeDuplicadaNaReservaException.class)
+	public ResponseEntity<ErroResponse> tratarUnidadeDuplicadaNaReserva(UnidadeDuplicadaNaReservaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Unidade duplicada na reserva", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"UNIDADE_DUPLICADA_NA_RESERVA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(ConflitoDeReservaException.class)
+	public ResponseEntity<ErroResponse> tratarConflitoDeReserva(ConflitoDeReservaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(), "Conflito de reserva",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CONFLITO_DE_RESERVA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(UnidadeIndisponivelParaReservaException.class)
+	public ResponseEntity<ErroResponse> tratarUnidadeIndisponivelParaReserva(
+			UnidadeIndisponivelParaReservaException excecao, HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Unidade indisponível para reserva", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"UNIDADE_INDISPONIVEL_PARA_RESERVA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(OperacaoReservaInvalidaException.class)
+	public ResponseEntity<ErroResponse> tratarOperacaoReservaInvalida(OperacaoReservaInvalidaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Operação inválida para reserva", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"OPERACAO_RESERVA_INVALIDA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
 	}
 }
