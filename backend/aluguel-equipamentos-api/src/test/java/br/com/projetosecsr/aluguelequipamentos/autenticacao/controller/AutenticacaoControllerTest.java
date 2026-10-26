@@ -9,12 +9,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +27,7 @@ import br.com.projetosecsr.aluguelequipamentos.autenticacao.excecao.UsuarioInati
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.request.LoginRequest;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.response.LoginResponse;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.response.UsuarioAutenticadoResponse;
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.service.AutenticacaoService;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
@@ -43,6 +48,28 @@ public class AutenticacaoControllerTest {
 
 	@MockitoBean
 	private AutenticacaoService autenticacaoService;
+	
+	@MockitoBean
+	private ConversorAutenticacaoJwt conversorAutenticacaoJwt;
+	
+	@BeforeEach
+	void prepararConversor() {
+
+	    JwtGrantedAuthoritiesConverter conversorDeAutoridades =
+	            new JwtGrantedAuthoritiesConverter();
+
+	    conversorDeAutoridades.setAuthoritiesClaimName("perfil");
+	    conversorDeAutoridades.setAuthorityPrefix("ROLE_");
+
+	    JwtAuthenticationConverter conversorPadrao =
+	            new JwtAuthenticationConverter();
+
+	    conversorPadrao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
+
+	    when(conversorAutenticacaoJwt.convert(any(Jwt.class)))
+	            .thenAnswer(invocacao ->
+	                    conversorPadrao.convert(invocacao.getArgument(0)));
+	}
 
 	@Test
 	void deveRealizarLoginQuandoDadosForemValidos() throws Exception {

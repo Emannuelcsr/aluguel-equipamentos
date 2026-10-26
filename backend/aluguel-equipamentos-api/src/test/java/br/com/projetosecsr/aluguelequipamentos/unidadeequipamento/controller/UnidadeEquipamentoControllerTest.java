@@ -4,47 +4,46 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
+import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
-import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
-import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
-import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.request.CadastrarUnidadeEquipamentoRequest;
-import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.response.UnidadeEquipamentoResponse;
-import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.service.UnidadeEquipamentoService;
-import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
-
-import static org.mockito.Mockito.never;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
-
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.OperacaoInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaAtivaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaInativaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.request.CadastrarUnidadeEquipamentoRequest;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.response.UnidadeEquipamentoResponse;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.service.UnidadeEquipamentoService;
+import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.PerfilUsuario;
 
 @WebMvcTest(controllers = UnidadeEquipamentoController.class)
 @Import({ ConfiguracaoDeSeguranca.class, TratadorGlobalDeErros.class, TratadorFalhaAutenticacao.class,
@@ -59,6 +58,28 @@ public class UnidadeEquipamentoControllerTest {
 
 	@MockitoBean
 	private JwtDecoder jwtDecoder;
+	
+	@MockitoBean
+	private ConversorAutenticacaoJwt conversorAutenticacaoJwt;
+	
+	@BeforeEach
+	void prepararConversor() {
+
+	    JwtGrantedAuthoritiesConverter conversorDeAutoridades =
+	            new JwtGrantedAuthoritiesConverter();
+
+	    conversorDeAutoridades.setAuthoritiesClaimName("perfil");
+	    conversorDeAutoridades.setAuthorityPrefix("ROLE_");
+
+	    JwtAuthenticationConverter conversorPadrao =
+	            new JwtAuthenticationConverter();
+
+	    conversorPadrao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
+
+	    when(conversorAutenticacaoJwt.convert(any(Jwt.class)))
+	            .thenAnswer(invocacao ->
+	                    conversorPadrao.convert(invocacao.getArgument(0)));
+	}
 
 	@Test
 	void deveCadastrarUnidadeEquipamentoQuandoAutenticadoComoAdministrador() throws Exception {

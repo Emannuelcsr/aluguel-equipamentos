@@ -1,22 +1,30 @@
 package br.com.projetosecsr.aluguelequipamentos.compartilhado.erro;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
@@ -30,6 +38,27 @@ public class TratadorGlobalDeErrosTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+	@MockitoBean
+	private ConversorAutenticacaoJwt conversorAutenticacaoJwt;
+	
+	@BeforeEach
+	void prepararConversor() {
+
+	    JwtGrantedAuthoritiesConverter conversorDeAutoridades =
+	            new JwtGrantedAuthoritiesConverter();
+
+	    conversorDeAutoridades.setAuthoritiesClaimName("perfil");
+	    conversorDeAutoridades.setAuthorityPrefix("ROLE_");
+
+	    JwtAuthenticationConverter conversorPadrao =
+	            new JwtAuthenticationConverter();
+
+	    conversorPadrao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
+
+	    when(conversorAutenticacaoJwt.convert(any(Jwt.class)))
+	            .thenAnswer(invocacao ->
+	                    conversorPadrao.convert(invocacao.getArgument(0)));
+	}
 
 	@Test
 	void deveRetornarConflitoQuandoEmailJaEstiverCadastrado() throws Exception {

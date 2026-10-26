@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaJaAtivaException;
 import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaJaInativaException;
 import br.com.projetosecsr.aluguelequipamentos.categoria.excecao.CategoriaNaoEncontradoException;
@@ -59,6 +63,28 @@ public class CategoriaControllerTest {
 	@MockitoBean
 	private JwtDecoder jwtDecoder;
 
+	@MockitoBean
+	private ConversorAutenticacaoJwt conversorAutenticacaoJwt;
+	
+	@BeforeEach
+	void prepararConversor() {
+
+	    JwtGrantedAuthoritiesConverter conversorDeAutoridades =
+	            new JwtGrantedAuthoritiesConverter();
+
+	    conversorDeAutoridades.setAuthoritiesClaimName("perfil");
+	    conversorDeAutoridades.setAuthorityPrefix("ROLE_");
+
+	    JwtAuthenticationConverter conversorPadrao =
+	            new JwtAuthenticationConverter();
+
+	    conversorPadrao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
+
+	    when(conversorAutenticacaoJwt.convert(any(Jwt.class)))
+	            .thenAnswer(invocacao ->
+	                    conversorPadrao.convert(invocacao.getArgument(0)));
+	}
+	
 	@Test
 	void deveCadastrarCategoriaQuandoAutenticadoComoAdministrador() throws Exception {
 

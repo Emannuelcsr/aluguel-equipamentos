@@ -6,10 +6,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 
@@ -17,7 +16,7 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorF
 public class ConfiguracaoDeSeguranca {
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter,
+	SecurityFilterChain securityFilterChain(HttpSecurity http, ConversorAutenticacaoJwt conversorAutenticacaoJwt,
 			TratadorFalhaAutenticacao tratadorFalhaAutenticacao, TratadorAcessoNegado tratadorAcessoNegado)
 			throws Exception {
 
@@ -66,25 +65,9 @@ public class ConfiguracaoDeSeguranca {
 						.accessDeniedHandler(tratadorAcessoNegado))
 
 				.oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(tratadorFalhaAutenticacao)
-						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+						.jwt(jwt -> jwt.jwtAuthenticationConverter(conversorAutenticacaoJwt)));
 
 		return http.build();
-	}
-
-	@Bean
-	JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-		JwtGrantedAuthoritiesConverter conversorDeAutoridades = new JwtGrantedAuthoritiesConverter();
-
-		conversorDeAutoridades.setAuthoritiesClaimName("perfil");
-		conversorDeAutoridades.setAuthorityPrefix("ROLE_");
-
-		JwtAuthenticationConverter conversorDeAutenticacao = new JwtAuthenticationConverter();
-
-		conversorDeAutenticacao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
-
-		return conversorDeAutenticacao;
-
 	}
 
 }

@@ -137,4 +137,17 @@ public class UnidadeEquipamento {
 		this.status = StatusUnidadeEquipamento.DISPONIVEL;
 	}
 
+	public void alugar() {
+
+		if (!this.ativo) {
+			throw new OperacaoInvalidaException("A unidade não pode ser alugada porque está inativa.");
+		}
+
+		if (this.status != StatusUnidadeEquipamento.DISPONIVEL) {
+			throw new OperacaoInvalidaException("A unidade só pode ser alugada quando estiver disponível.");
+		}
+
+		this.status = StatusUnidadeEquipamento.ALUGADO;
+	}
+
 }

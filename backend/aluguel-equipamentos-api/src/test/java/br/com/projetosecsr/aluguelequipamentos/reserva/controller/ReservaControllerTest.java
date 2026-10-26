@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -22,12 +23,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
@@ -46,12 +52,35 @@ public class ReservaControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-
+	
+	@MockitoBean
+	private ConversorAutenticacaoJwt conversorAutenticacaoJwt;
+	
+	
 	@MockitoBean
 	private ReservaService reservaService;
 
 	@MockitoBean
 	private JwtDecoder jwtDecoder;
+	
+	@BeforeEach
+	void prepararConversor() {
+
+	    JwtGrantedAuthoritiesConverter conversorDeAutoridades =
+	            new JwtGrantedAuthoritiesConverter();
+
+	    conversorDeAutoridades.setAuthoritiesClaimName("perfil");
+	    conversorDeAutoridades.setAuthorityPrefix("ROLE_");
+
+	    JwtAuthenticationConverter conversorPadrao =
+	            new JwtAuthenticationConverter();
+
+	    conversorPadrao.setJwtGrantedAuthoritiesConverter(conversorDeAutoridades);
+
+	    when(conversorAutenticacaoJwt.convert(any(Jwt.class)))
+	            .thenAnswer(invocacao ->
+	                    conversorPadrao.convert(invocacao.getArgument(0)));
+	}
 
 	@Test
 	void deveCadastrarReservar() throws Exception {
@@ -77,6 +106,12 @@ public class ReservaControllerTest {
 
 		// MOCKS
 		when(jwtDecoder.decode("token-administrador")).thenReturn(jwtAdministrador);
+		when(conversorAutenticacaoJwt.convert(jwtAdministrador))
+        .thenReturn(new JwtAuthenticationToken(
+                jwtAdministrador,
+                List.of(new SimpleGrantedAuthority("ROLE_ADMINISTRADOR"))
+        ));
+
 
 		when(reservaService.cadastrar(any(CadastrarReservaRequest.class))).thenReturn(respostaDoService);
 
