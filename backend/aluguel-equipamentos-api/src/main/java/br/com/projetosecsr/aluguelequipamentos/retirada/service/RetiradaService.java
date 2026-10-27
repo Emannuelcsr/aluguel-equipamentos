@@ -35,6 +35,7 @@ import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ObservacaoObriga
 import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ReservaNaoAprovadaException;
 import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaForaDoPeriodoException;
 import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaJaRealizadaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaNaoEncontradaException;
 import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.UnidadeInativaParaRetiradaException;
 import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.UnidadeIndisponivelParaRetiradaException;
 import br.com.projetosecsr.aluguelequipamentos.retirada.repository.RetiradaRepository;
@@ -45,6 +46,7 @@ import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.Statu
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
+import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @Service
 public class RetiradaService {
@@ -77,6 +79,20 @@ public class RetiradaService {
 		return new PaginaResponse<>(pagina.getContent(), pagina.getNumber() + 1, pagina.getSize(),
 				pagina.getNumberOfElements(), pagina.getTotalElements(), pagina.getTotalPages(), pagina.isFirst(),
 				pagina.isLast());
+	}
+
+	private Retirada buscarRetiradaPorId(Long id) {
+
+		Optional<Retirada> retiradaEncontrada = retiradaRepository.findById(id);
+
+		if (retiradaEncontrada.isEmpty()) {
+
+			throw new RetiradaNaoEncontradaException();
+		}
+
+		Retirada retirada = retiradaEncontrada.get();
+
+		return retirada;
 	}
 
 	private Reserva validarReserva(Long reservaId) {
@@ -275,6 +291,17 @@ public class RetiradaService {
 		}
 
 		return RetiradaResponse.de(retirada);
+
+	}
+
+	@Transactional(readOnly = true)
+	public RetiradaResponse buscarPorId(Long id) {
+
+		Retirada retirada = buscarRetiradaPorId(id);
+
+		RetiradaResponse resposta = RetiradaResponse.de(retirada);
+
+		return resposta;
 
 	}
 

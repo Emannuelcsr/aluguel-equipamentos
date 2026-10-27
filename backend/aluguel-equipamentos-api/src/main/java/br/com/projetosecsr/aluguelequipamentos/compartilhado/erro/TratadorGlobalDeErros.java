@@ -31,13 +31,29 @@ import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJa
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ClienteInativoParaReservaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ConflitoDeReservaException;
 import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.DataFinalInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.DataInicialInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.OperacaoReservaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ReservaNaoEncontradaException;
+import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.UnidadeDuplicadaNaReservaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ClienteInativoParaRetiradaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ConfirmacaoRetiradaObrigatoriaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.DescricaoMetodoVerificacaoObrigatoriaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ItemRetiradaDuplicadoException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ItensRetiradaDivergentesException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ObservacaoObrigatoriaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.ReservaNaoAprovadaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaForaDoPeriodoException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaJaRealizadaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaNaoEncontradaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.UnidadeInativaParaRetiradaException;
+import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.UnidadeIndisponivelParaRetiradaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.OperacaoInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaAtivaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaInativaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeIndisponivelParaReservaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.AutodesativacaoNaoPermitidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.ConfirmacaoSenhaInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.EmailJaCadastradoException;
@@ -48,10 +64,6 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoExc
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
-import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ConflitoDeReservaException;
-import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.OperacaoReservaInvalidaException;
-import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.UnidadeDuplicadaNaReservaException;
-import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeIndisponivelParaReservaException;
 
 @RestControllerAdvice
 public class TratadorGlobalDeErros {
@@ -408,4 +420,135 @@ public class TratadorGlobalDeErros {
 
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
 	}
+
+	@ExceptionHandler(ReservaNaoAprovadaException.class)
+	public ResponseEntity<ErroResponse> tratarReservaNaoAprovada(ReservaNaoAprovadaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Operação de retirada inválida", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"RESERVA_NAO_APROVADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(RetiradaForaDoPeriodoException.class)
+	public ResponseEntity<ErroResponse> tratarRetiradaForaDoPeriodo(RetiradaForaDoPeriodoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Retirada fora do período permitido", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"RETIRADA_FORA_DO_PERIODO");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(ClienteInativoParaRetiradaException.class)
+	public ResponseEntity<ErroResponse> tratarClienteInativoParaRetirada(ClienteInativoParaRetiradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Cliente inativo para retirada", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"CLIENTE_INATIVO_PARA_RETIRADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(RetiradaJaRealizadaException.class)
+	public ResponseEntity<ErroResponse> tratarRetiradaJaRealizada(RetiradaJaRealizadaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(), "Retirada já realizada",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "RETIRADA_JA_REALIZADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(UnidadeInativaParaRetiradaException.class)
+	public ResponseEntity<ErroResponse> tratarUnidadeInativaParaRetirada(UnidadeInativaParaRetiradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Unidade inativa para retirada", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"UNIDADE_INATIVA_PARA_RETIRADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(UnidadeIndisponivelParaRetiradaException.class)
+	public ResponseEntity<ErroResponse> tratarUnidadeIndisponivelParaRetirada(
+			UnidadeIndisponivelParaRetiradaException excecao, HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.CONFLICT.value(),
+				"Unidade indisponível para retirada", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"UNIDADE_INDISPONIVEL_PARA_RETIRADA");
+
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+
+	@ExceptionHandler(ItemRetiradaDuplicadoException.class)
+	public ResponseEntity<ErroResponse> tratarItemRetiradaDuplicado(ItemRetiradaDuplicadoException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Item duplicado na retirada", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"ITEM_RETIRADA_DUPLICADO");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(ItensRetiradaDivergentesException.class)
+	public ResponseEntity<ErroResponse> tratarItensRetiradaDivergentes(ItensRetiradaDivergentesException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Itens da retirada divergentes", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"ITENS_RETIRADA_DIVERGENTES");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(ObservacaoObrigatoriaException.class)
+	public ResponseEntity<ErroResponse> tratarObservacaoObrigatoria(ObservacaoObrigatoriaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Observação obrigatória", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"OBSERVACAO_OBRIGATORIA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(DescricaoMetodoVerificacaoObrigatoriaException.class)
+	public ResponseEntity<ErroResponse> tratarDescricaoMetodoVerificacaoObrigatoria(
+			DescricaoMetodoVerificacaoObrigatoriaException excecao, HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Descrição do método de verificação obrigatória", List.of(excecao.getMessage()),
+				requisicao.getRequestURI(), "DESCRICAO_METODO_VERIFICACAO_OBRIGATORIA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(ConfirmacaoRetiradaObrigatoriaException.class)
+	public ResponseEntity<ErroResponse> tratarConfirmacaoRetiradaObrigatoria(
+			ConfirmacaoRetiradaObrigatoriaException excecao, HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+				"Confirmação da retirada obrigatória", List.of(excecao.getMessage()), requisicao.getRequestURI(),
+				"CONFIRMACAO_RETIRADA_OBRIGATORIA");
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+
+	@ExceptionHandler(RetiradaNaoEncontradaException.class)
+	public ResponseEntity<ErroResponse> tratarRetiradaNaoEncontrada(RetiradaNaoEncontradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "Retirada não encontrada",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "RETIRADA_NAO_ENCONTRADA");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+
 }

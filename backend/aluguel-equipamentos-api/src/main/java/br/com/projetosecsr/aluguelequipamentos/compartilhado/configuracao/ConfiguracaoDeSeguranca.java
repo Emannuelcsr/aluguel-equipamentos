@@ -53,6 +53,8 @@ public class ConfiguracaoDeSeguranca {
 						.hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.PATCH, "/api/unidades-equipamento/*/manutencao",
 								"/api/unidades-equipamento/*/liberar-manutencao")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.POST, "/api/retiradas")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.GET, "/api/retiradas/*")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.POST, "/api/reservas")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
 						.requestMatchers(HttpMethod.GET, "/api/reservas", "/api/reservas/*")

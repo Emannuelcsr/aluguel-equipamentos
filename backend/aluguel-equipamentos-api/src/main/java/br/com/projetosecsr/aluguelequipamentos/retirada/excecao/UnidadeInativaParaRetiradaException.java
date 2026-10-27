@@ -6,6 +6,6 @@ public class UnidadeInativaParaRetiradaException extends RuntimeException {
 
 	public UnidadeInativaParaRetiradaException() {
 
-		super("A unidade deve estar ativa.");
+		super("A unidade de equipamento está inativa e não pode ser retirada.");
 	}
 }
