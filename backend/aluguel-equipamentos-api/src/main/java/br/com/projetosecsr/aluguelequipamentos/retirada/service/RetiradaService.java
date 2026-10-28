@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,6 @@ import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.Statu
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
-import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @Service
 public class RetiradaService {
@@ -302,6 +302,17 @@ public class RetiradaService {
 		RetiradaResponse resposta = RetiradaResponse.de(retirada);
 
 		return resposta;
+
+	}
+
+	@Transactional(readOnly = true)
+	public PaginaResponse<RetiradaResponse> listarPaginado(Pageable paginacao) {
+
+		Page<Retirada> paginaDeRetiradas = retiradaRepository.findAll(paginacao);
+
+		Page<RetiradaResponse> paginaDeRespostas = paginaDeRetiradas.map(retirada -> RetiradaResponse.de(retirada));
+
+		return converterPagina(paginaDeRespostas);
 
 	}
 

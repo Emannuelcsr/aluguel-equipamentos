@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,6 +34,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import br.com.projetosecsr.aluguelequipamentos.autenticacao.seguranca.ConversorAutenticacaoJwt;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.configuracao.ConfiguracaoDeSeguranca;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.erro.TratadorGlobalDeErros;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorAcessoNegado;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.seguranca.TratadorFalhaAutenticacao;
 import br.com.projetosecsr.aluguelequipamentos.retirada.entidade.CondicaoFisicaRetirada;
@@ -1869,4 +1872,177 @@ public class RetiradaControllerTest {
 
 		verifyNoInteractions(retiradaService);
 	}
+
+	@Test
+	void deveListarRetiradasComPaginacao() throws Exception {
+
+		// ==================== PREPARAR ====================
+
+		// 1. JWT do funcionário
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("5")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// 2. Data e hora das retiradas
+		OffsetDateTime dataHoraRetirada = OffsetDateTime.parse("2026-10-27T14:00:00-03:00");
+
+		// 3. Itens das retiradas
+		ItemRetiradaResponse itemResposta1 = new ItemRetiradaResponse(40L, 10L, 20L, "UNI-000020", "Marreta",
+				CondicaoFisicaRetirada.SEM_DANOS_APARENTES, null);
+
+		ItemRetiradaResponse itemResposta2 = new ItemRetiradaResponse(41L, 11L, 21L, "UNI-000021", "Marreta",
+				CondicaoFisicaRetirada.SEM_DANOS_APARENTES, null);
+
+		// 4. Primeira retirada
+		RetiradaResponse primeiraRetirada = new RetiradaResponse(30L, 2L, dataHoraRetirada, "João da Silva",
+				"52998224725", MetodoVerificacaoAutorizacao.PRESENCIAL, null, 5L, "Funcionário Carlos",
+				List.of(itemResposta1));
+
+		// 5. Segunda retirada
+		RetiradaResponse segundaRetirada = new RetiradaResponse(40L, 3L, dataHoraRetirada, "João da Silva",
+				"52998224725", MetodoVerificacaoAutorizacao.PRESENCIAL, null, 5L, "Funcionário Carlos",
+				List.of(itemResposta2));
+
+		// 6. Resposta paginada simulada
+		PaginaResponse<RetiradaResponse> paginaDeResposta = new PaginaResponse<>(
+				List.of(primeiraRetirada, segundaRetirada), 1, 2, 2, 5L, 3, true, false);
+
+		// 7. Configuração de paginação
+		Pageable paginacao = PageRequest.of(0, 2);
+
+		// ===================== MOCKS ======================
+
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		when(conversorAutenticacaoJwt.convert(jwtFuncionario)).thenReturn(
+				new JwtAuthenticationToken(jwtFuncionario, List.of(new SimpleGrantedAuthority("ROLE_FUNCIONARIO"))));
+
+		when(retiradaService.listarPaginado(paginacao)).thenReturn(paginaDeResposta);
+
+		// ==================== EXECUTAR ====================
+
+		ResultActions resultado = mockMvc.perform(get("/api/retiradas").param("page", "0").param("size", "2")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// ==================== VERIFICAR ===================
+
+		// 1. Status HTTP
+		resultado.andExpect(status().isOk())
+
+				// 2. Informações da paginação
+				.andExpect(jsonPath("$.paginaAtual").value(1)).andExpect(jsonPath("$.tamanho").value(2))
+				.andExpect(jsonPath("$.quantidadeElementos").value(2)).andExpect(jsonPath("$.totalElementos").value(5))
+				.andExpect(jsonPath("$.totalPaginas").value(3)).andExpect(jsonPath("$.primeiraPagina").value(true))
+				.andExpect(jsonPath("$.ultimaPagina").value(false)).andExpect(jsonPath("$.conteudo.length()").value(2))
+
+				// 3. Primeira retirada
+				.andExpect(jsonPath("$.conteudo[0].id").value(30))
+				.andExpect(jsonPath("$.conteudo[0].reservaId").value(2))
+				.andExpect(jsonPath("$.conteudo[0].nomeRecebedor").value("João da Silva"))
+				.andExpect(jsonPath("$.conteudo[0].usuarioResponsavelId").value(5))
+				.andExpect(jsonPath("$.conteudo[0].itens.length()").value(1))
+				.andExpect(jsonPath("$.conteudo[0].itens[0].codigoUnidade").value("UNI-000020"))
+
+				// 4. Segunda retirada
+				.andExpect(jsonPath("$.conteudo[1].id").value(40))
+				.andExpect(jsonPath("$.conteudo[1].reservaId").value(3))
+				.andExpect(jsonPath("$.conteudo[1].nomeRecebedor").value("João da Silva"))
+				.andExpect(jsonPath("$.conteudo[1].itens.length()").value(1))
+				.andExpect(jsonPath("$.conteudo[1].itens[0].codigoUnidade").value("UNI-000021"));
+
+		// 5. Verificar chamada ao service
+		verify(retiradaService).listarPaginado(paginacao);
+	}
+
+	@Test
+	void deveListarRetiradasComPaginaVazia() throws Exception {
+
+		// ==================== PREPARAR ====================
+
+		// 1. JWT do funcionário
+		Jwt jwtFuncionario = Jwt.withTokenValue("token-funcionario").header("alg", "HS256").subject("5")
+				.claim("perfil", PerfilUsuario.FUNCIONARIO.name()).build();
+
+		// 2. Configuração da paginação
+		Pageable paginacao = PageRequest.of(0, 10);
+
+		// 3. Resposta paginada vazia
+		PaginaResponse<RetiradaResponse> paginaVazia = new PaginaResponse<>(List.of(), 1, 10, 0, 0L, 0, true, true);
+
+		// ===================== MOCKS ======================
+
+		when(jwtDecoder.decode("token-funcionario")).thenReturn(jwtFuncionario);
+
+		when(conversorAutenticacaoJwt.convert(jwtFuncionario)).thenReturn(
+				new JwtAuthenticationToken(jwtFuncionario, List.of(new SimpleGrantedAuthority("ROLE_FUNCIONARIO"))));
+
+		when(retiradaService.listarPaginado(paginacao)).thenReturn(paginaVazia);
+
+		// ==================== EXECUTAR ====================
+
+		ResultActions resultado = mockMvc.perform(get("/api/retiradas").param("page", "0").param("size", "10")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-funcionario"));
+
+		// ==================== VERIFICAR ===================
+
+		// 1. Status HTTP
+		resultado.andExpect(status().isOk())
+
+				// 2. Informações da paginação
+				.andExpect(jsonPath("$.paginaAtual").value(1)).andExpect(jsonPath("$.tamanho").value(10))
+				.andExpect(jsonPath("$.quantidadeElementos").value(0)).andExpect(jsonPath("$.totalElementos").value(0))
+				.andExpect(jsonPath("$.totalPaginas").value(0)).andExpect(jsonPath("$.primeiraPagina").value(true))
+				.andExpect(jsonPath("$.ultimaPagina").value(true))
+
+				// 3. Conteúdo vazio
+				.andExpect(jsonPath("$.conteudo").isArray()).andExpect(jsonPath("$.conteudo").isEmpty());
+
+		// 4. Verificar chamada ao service
+		verify(retiradaService).listarPaginado(paginacao);
+	}
+
+	@Test
+	void deveNegarListagemRetiradasSemAutenticacao() throws Exception {
+
+		// PREPARAR
+		Pageable paginacao = PageRequest.of(0, 10);
+
+		// MOCKS
+		// Nenhum mock necessário.
+
+		// EXECUTAR
+		ResultActions resultado = mockMvc.perform(get("/api/retiradas").param("page", "0").param("size", "10"));
+
+		// VERIFICAR
+		resultado.andExpect(status().isUnauthorized());
+
+		verifyNoInteractions(retiradaService);
+	}
+
+	@Test
+	void deveNegarListagemRetiradasSemPermissao() throws Exception {
+
+		// ==================== PREPARAR ====================
+
+		Jwt jwtSemPermissao = Jwt.withTokenValue("token-sem-permissao").header("alg", "HS256").subject("5")
+				.claim("perfil", "SEM_PERMISSAO").build();
+
+		// ===================== MOCKS ======================
+
+		when(jwtDecoder.decode("token-sem-permissao")).thenReturn(jwtSemPermissao);
+
+		when(conversorAutenticacaoJwt.convert(jwtSemPermissao)).thenReturn(
+				new JwtAuthenticationToken(jwtSemPermissao, List.of(new SimpleGrantedAuthority("ROLE_SEM_PERMISSAO"))));
+
+		// ==================== EXECUTAR ====================
+
+		ResultActions resultado = mockMvc.perform(get("/api/retiradas").param("page", "0").param("size", "10")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer token-sem-permissao"));
+
+		// ==================== VERIFICAR ===================
+
+		resultado.andExpect(status().isForbidden());
+
+		verifyNoInteractions(retiradaService);
+	}
+
 }

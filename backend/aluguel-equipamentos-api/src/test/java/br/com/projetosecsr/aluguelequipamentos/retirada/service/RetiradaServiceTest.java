@@ -1,8 +1,10 @@
 package br.com.projetosecsr.aluguelequipamentos.retirada.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -19,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import br.com.projetosecsr.aluguelequipamentos.categoria.entidade.Categoria;
 import br.com.projetosecsr.aluguelequipamentos.cliente.entidade.Cliente;
 import br.com.projetosecsr.aluguelequipamentos.cliente.entidade.TipoCliente;
+import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.entidade.Equipamento;
 import br.com.projetosecsr.aluguelequipamentos.reserva.entidade.ItemReserva;
 import br.com.projetosecsr.aluguelequipamentos.reserva.entidade.Reserva;
@@ -34,6 +41,7 @@ import br.com.projetosecsr.aluguelequipamentos.reserva.entidade.StatusReserva;
 import br.com.projetosecsr.aluguelequipamentos.reserva.excecao.ReservaNaoEncontradaException;
 import br.com.projetosecsr.aluguelequipamentos.reserva.repository.ItemReservaRepository;
 import br.com.projetosecsr.aluguelequipamentos.reserva.repository.ReservaRepository;
+import br.com.projetosecsr.aluguelequipamentos.reserva.response.ReservaResponse;
 import br.com.projetosecsr.aluguelequipamentos.retirada.entidade.CondicaoFisicaRetirada;
 import br.com.projetosecsr.aluguelequipamentos.retirada.entidade.ItemRetirada;
 import br.com.projetosecsr.aluguelequipamentos.retirada.entidade.MetodoVerificacaoAutorizacao;
@@ -877,6 +885,161 @@ public class RetiradaServiceTest {
 		verify(retiradaRepository).findById(retiradaId);
 
 		verify(retiradaRepository, never()).save(any(Retirada.class));
+	}
+
+	@Test
+	void deveListarRetiradasComPaginacao() {
+
+		// ==================== PREPARAR ====================
+
+		// 1. IDs utilizados no teste
+		Long retiradaId = 30L;
+		Long retiradaId2 = 40L;
+		Long reservaId = 2L;
+		Long reservaId2 = 3L;
+		Long usuarioId = 5L;
+
+		// 2. Cliente
+		Cliente cliente = new Cliente(TipoCliente.PF, "João da Silva", null, "52998224725", "joao@email.com",
+				"47999999999", "88330000", "Rua das Flores", "123", "Apto 202", "Centro", "Balneário Camboriú", "SC");
+
+		// 3. Reservas
+		LocalDate dataInicial = LocalDate.now();
+		LocalDate dataFinal = dataInicial.plusDays(3);
+
+		Reserva reserva = new Reserva(cliente, dataInicial, dataFinal);
+		reserva.aprovar();
+		ReflectionTestUtils.setField(reserva, "id", reservaId);
+
+		Reserva reserva2 = new Reserva(cliente, dataInicial, dataFinal);
+		reserva2.aprovar();
+		ReflectionTestUtils.setField(reserva2, "id", reservaId2);
+
+		// 4. Categoria e equipamento
+		Categoria categoria = new Categoria("FERRAMENTAS", "Ferramentas gerais");
+
+		Equipamento equipamento = new Equipamento("Marreta", "Marreta com cabo de madeira", new BigDecimal("90.00"),
+				categoria);
+
+		// 5. Unidades de equipamento
+		UnidadeEquipamento unidade = new UnidadeEquipamento(equipamento);
+		ReflectionTestUtils.setField(unidade, "id", 20L);
+		ReflectionTestUtils.setField(unidade, "codigo", "UNI-000020");
+
+		UnidadeEquipamento unidade2 = new UnidadeEquipamento(equipamento);
+		ReflectionTestUtils.setField(unidade2, "id", 21L);
+		ReflectionTestUtils.setField(unidade2, "codigo", "UNI-000021");
+
+		// 6. Itens das reservas
+		ItemReserva itemReserva = new ItemReserva(unidade, new BigDecimal("90.00"), 4L);
+		ReflectionTestUtils.setField(itemReserva, "id", 10L);
+		reserva.adicionarItem(itemReserva);
+
+		ItemReserva itemReserva2 = new ItemReserva(unidade2, new BigDecimal("90.00"), 4L);
+		ReflectionTestUtils.setField(itemReserva2, "id", 11L);
+		reserva2.adicionarItem(itemReserva2);
+
+		// 7. Funcionário responsável
+		Usuario usuario = new Usuario("Funcionário Carlos", "carlos@email.com", "senhaHash", PerfilUsuario.FUNCIONARIO);
+		ReflectionTestUtils.setField(usuario, "id", usuarioId);
+
+		// 8. Retiradas
+		OffsetDateTime dataHoraRetirada = OffsetDateTime.now();
+
+		Retirada retirada = new Retirada(dataHoraRetirada, "João da Silva", "52998224725",
+				MetodoVerificacaoAutorizacao.PRESENCIAL, null, reserva, usuario);
+		ReflectionTestUtils.setField(retirada, "id", retiradaId);
+
+		Retirada retirada2 = new Retirada(dataHoraRetirada, "João da Silva", "52998224725",
+				MetodoVerificacaoAutorizacao.PRESENCIAL, null, reserva2, usuario);
+		ReflectionTestUtils.setField(retirada2, "id", retiradaId2);
+
+		// 9. Itens das retiradas
+		ItemRetirada itemRetirada = new ItemRetirada(itemReserva, CondicaoFisicaRetirada.SEM_DANOS_APARENTES, null);
+		ReflectionTestUtils.setField(itemRetirada, "id", 40L);
+		retirada.adicionarItem(itemRetirada);
+
+		ItemRetirada itemRetirada2 = new ItemRetirada(itemReserva2, CondicaoFisicaRetirada.SEM_DANOS_APARENTES, null);
+		ReflectionTestUtils.setField(itemRetirada2, "id", 41L);
+		retirada2.adicionarItem(itemRetirada2);
+
+		// 10. Paginação
+		Pageable paginacao = PageRequest.of(0, 2);
+
+		Page<Retirada> paginaDeRetiradas = new PageImpl<>(List.of(retirada, retirada2), paginacao, 5);
+
+		// ===================== MOCKS ======================
+
+		when(retiradaRepository.findAll(paginacao)).thenReturn(paginaDeRetiradas);
+
+		// ==================== EXECUTAR ====================
+
+		PaginaResponse<RetiradaResponse> resposta = retiradaService.listarPaginado(paginacao);
+
+		// ==================== VERIFICAR ===================
+
+		// 1. Informações da paginação
+		assertEquals(1, resposta.paginaAtual());
+		assertEquals(2, resposta.tamanho());
+		assertEquals(2, resposta.quantidadeElementos());
+		assertEquals(5L, resposta.totalElementos());
+		assertEquals(3, resposta.totalPaginas());
+
+		assertTrue(resposta.primeiraPagina());
+		assertFalse(resposta.ultimaPagina());
+
+		// 2. Quantidade de retiradas retornadas
+		assertEquals(2, resposta.conteudo().size());
+
+		// 3. Primeira retirada
+		RetiradaResponse primeiraRetirada = resposta.conteudo().get(0);
+
+		assertEquals(retiradaId, primeiraRetirada.id());
+
+		// 4. Segunda retirada
+		RetiradaResponse segundaRetirada = resposta.conteudo().get(1);
+
+		assertEquals(retiradaId2, segundaRetirada.id());
+
+		assertEquals(reservaId, primeiraRetirada.reservaId());
+		assertEquals("João da Silva", primeiraRetirada.nomeRecebedor());
+		assertEquals("52998224725", primeiraRetirada.documentoRecebedor());
+		assertEquals(usuarioId, primeiraRetirada.usuarioResponsavelId());
+		assertEquals("Funcionário Carlos", primeiraRetirada.usuarioResponsavelNome());
+		assertEquals(1, primeiraRetirada.itens().size());
+
+		// 5. Interação com o repository
+		verify(retiradaRepository).findAll(paginacao);
+	}
+
+	@Test
+	void deveRetornarPaginaVaziaQuandoNaoExistiremRetiradas() {
+
+		// PREPARAR
+		Pageable paginacao = PageRequest.of(0, 10);
+
+		Page<Retirada> paginaVazia = new PageImpl<>(List.of(), paginacao, 0);
+
+		// MOCKS
+		when(retiradaRepository.findAll(paginacao)).thenReturn(paginaVazia);
+
+		// EXECUTAR
+
+		PaginaResponse<RetiradaResponse> resposta = retiradaService.listarPaginado(paginacao);
+
+		// VERIFICAR
+
+		assertEquals(1, resposta.paginaAtual());
+		assertEquals(10, resposta.tamanho());
+		assertEquals(0, resposta.quantidadeElementos());
+		assertEquals(0L, resposta.totalElementos());
+		assertEquals(0, resposta.totalPaginas());
+
+		assertTrue(resposta.primeiraPagina());
+		assertTrue(resposta.ultimaPagina());
+		assertTrue(resposta.conteudo().isEmpty());
+
+		verify(retiradaRepository).findAll(paginacao);
 	}
 
 }
