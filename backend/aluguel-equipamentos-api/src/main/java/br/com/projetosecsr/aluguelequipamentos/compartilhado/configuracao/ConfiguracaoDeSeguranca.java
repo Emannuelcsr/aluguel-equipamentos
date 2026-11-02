@@ -24,6 +24,7 @@ public class ConfiguracaoDeSeguranca {
 				.httpBasic(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(autorizacao -> autorizacao
+						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/autenticacao/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
 						.requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
@@ -56,6 +57,9 @@ public class ConfiguracaoDeSeguranca {
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.POST, "/api/retiradas")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.GET, "/api/retiradas/*")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.GET, "/api/retiradas")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.POST, "/api/devolucoes")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.GET, "/api/devolucoes/*")
+						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.GET, "/api/devolucoes")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO").requestMatchers(HttpMethod.POST, "/api/reservas")
 						.hasAnyRole("ADMINISTRADOR", "FUNCIONARIO")
 						.requestMatchers(HttpMethod.GET, "/api/reservas", "/api/reservas/*")

@@ -150,4 +150,22 @@ public class UnidadeEquipamento {
 		this.status = StatusUnidadeEquipamento.ALUGADO;
 	}
 
+	public void devolverSemDanos() {
+
+		if (this.status != StatusUnidadeEquipamento.ALUGADO) {
+			throw new OperacaoInvalidaException("A unidade precisa estar ALUGADA para registrar a devolução.");
+		}
+
+		this.status = StatusUnidadeEquipamento.DISPONIVEL;
+	}
+
+	public void devolverParaManutencao() {
+
+		if (this.status != StatusUnidadeEquipamento.ALUGADO) {
+			throw new OperacaoInvalidaException("A unidade precisa estar ALUGADA para registrar a devolução.");
+		}
+
+		this.status = StatusUnidadeEquipamento.EM_MANUTENCAO;
+	}
+
 }
