@@ -1,0 +1,42 @@
+@if (mensagemErro) {
+  <p>{{ mensagemErro }}</p>
+}
+@if (carregando) {
+  <p>Carregando clientes...</p>
+}
+
+@if (mensagemSucesso) {
+  <p>{{ mensagemSucesso }}</p>
+}
+
+<table>
+
+  <thead>
+<tr>
+  <th>ID</th>
+  <th>TIPO</th>
+  <th>DOCUMENTO</th>
+  <th>NOME/RAZAO SOCIAL</th>
+</tr>
+</thead>
+<tbody>
+  
+@for (cliente of clientes; track cliente.id) {
+  <tr>
+  <td>{{ cliente.id }}</td>
+   <td>{{ cliente.tipo }}</td>
+   <td>{{ cliente.documento }}</td>
+   <td>{{ cliente.nomeRazaoSocial }}</td>
+   </tr>
+} @empty {
+  <tr>
+  <td colspan="4">Nenhum cliente encontrado.</td>
+  </tr>
+}
+
+</tbody>
+</table>
+
+<button (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">Voltar</button>
+<span>Pagina {{paginaAtual}} de {{totalPaginas}}</span>
+<button (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">Próxima</button>
