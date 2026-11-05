@@ -1,4 +1,3 @@
-
 <h1>Aluguel de Equipamentos</h1>
 
 <h2>Entrar no sistema</h2>
@@ -7,26 +6,20 @@
 
   <div>
     <label for="email">E-mail</label>
-    <input
-      id="email"
-      type="email"
-      formControlName="email"
-      placeholder="Digite seu e-mail"
-    >
+    <input id="email" type="email" formControlName="email" placeholder="Digite seu e-mail">
   </div>
 
   <div>
     <label for="senha">Senha</label>
-    <input
-      id="senha"
-      type="password"
-      formControlName="senha"
-      placeholder="Digite sua senha"
-    >
+    <input id="senha" type="password" formControlName="senha" placeholder="Digite sua senha">
   </div>
 
-  <button type="submit">
-    Entrar
+  @if (mensagemErro) {
+  <p role="alert">{{ mensagemErro }}</p>
+  }
+
+  <button type="submit" [disabled]="autenticando">
+    {{ autenticando ? 'Entrando...' : 'Entrar' }}
   </button>
 
 </form>

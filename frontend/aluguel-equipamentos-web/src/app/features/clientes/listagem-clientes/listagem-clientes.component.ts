@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ClienteService } from '../service/cliente.service';
 import { ClienteResponse } from '../../../core/models/cliente-response';
+import { AutenticacaoService } from '../../../core/services/autenticacao.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-listagem-clientes',
@@ -65,4 +67,6 @@ export class ListagemClientesComponent implements OnInit {
       this.listar(this.paginaAtual - 1);
     }
   }
+
+
 }

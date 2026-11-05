@@ -1,0 +1,136 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cabecalho {
+  height: 70px;
+  background-color: #1e293b;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.corpo {
+  display: flex;
+  flex: 1;
+}
+
+.menu-lateral {
+  width: 240px;
+  background-color: #f1f5f9;
+  padding: 20px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  nav {
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.submenu {
+      padding-left: 16px;
+    }
+
+    li {
+      margin-bottom: 8px;
+      white-space: nowrap;
+      font-size: 15px;
+      color: #334155;
+
+      padding: 12px;
+      border-radius: 8px;
+
+      &:has(a) {
+        padding: 0;
+      }
+    }
+
+    a {
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+      color: #334155;
+      text-decoration: none;
+
+      &:hover {
+        background-color: #e2e8f0;
+      }
+
+      &.ativo {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+.grupo-clientes {
+  padding: 0;
+}
+
+.titulo-grupo {
+  display: block;
+  padding: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.submenu {
+   margin-top: 4px;
+
+  a {
+    font-size: 14px;
+  }  
+}
+.botao-sair {
+  background-color: transparent;
+  color: white;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 8px 16px;
+
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #334155;
+  }
+}
+
+.area-usuario {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.informacoes-usuario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  span {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+  }
+
+  small {
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+}

@@ -1,22 +1,68 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LoginResponse } from '../models/login-response';
+import { jwtDecode } from 'jwt-decode';
+import { UsuarioAutenticadoResponse } from '../models/usuario-autenticado-response';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AutenticacaoService {
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
+  login(email: string, senha: string) {
+    const dadosLogin = {
+      email: email,
+      senha: senha,
+    };
 
-login(email:string, senha:string){
+    return this.http.post<LoginResponse>(
+      'http://localhost:8080/api/autenticacao/login',
+      dadosLogin,
+    );
+  }
 
-  const dadosLogin = {
-    email: email,
-    senha: senha
-  };
+  estaAutenticado(): boolean {
+    const token = sessionStorage.getItem('token');
 
-  return this.http.post<LoginResponse>('http://localhost:8080/api/autenticacao/login',dadosLogin);
-}
+    if (!token) {
+      this.logout();
+      return false;
+    }
 
+    try {
+      const dadosToken = jwtDecode(token);
+
+      const agora = Math.floor(Date.now() / 1000);
+
+      if (dadosToken.exp && dadosToken.exp > agora) {
+        return true;
+      }
+
+      this.logout();
+      return false;
+    } catch {
+      this.logout();
+      return false;
+    }
+  }
+
+  logout(): void {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('usuario');
+  }
+
+  obterUsuario(): UsuarioAutenticadoResponse | null {
+    const usuario = sessionStorage.getItem('usuario');
+
+    if (!usuario) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(usuario) as UsuarioAutenticadoResponse;
+    } catch {
+      return null;
+    }
+  }
 }

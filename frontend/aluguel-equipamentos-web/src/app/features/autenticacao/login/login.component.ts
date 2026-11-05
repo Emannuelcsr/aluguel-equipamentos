@@ -6,6 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -19,22 +20,35 @@ export class LoginComponent {
     senha: new FormControl('', [Validators.required]),
   });
 
-  constructor(private autenticacaoService: AutenticacaoService) {}
+  mensagemErro = '';
+  autenticando = false;
+
+  constructor(
+    private autenticacaoService: AutenticacaoService,
+    private router: Router,
+  ) {}
 
   entrar(): void {
+    this.mensagemErro = '';
+
     if (this.formularioLogin.invalid) {
       return;
     }
 
     const { email, senha } = this.formularioLogin.getRawValue();
 
+    this.autenticando = true;
     this.autenticacaoService.login(email!, senha!).subscribe({
       next: (resposta) => {
+        this.autenticando = false;
         sessionStorage.setItem('token', resposta.token);
-        console.log('Token armazenado?', !!sessionStorage.getItem('token'));
+        sessionStorage.setItem('usuario', JSON.stringify(resposta.usuario));
+        this.router.navigate(['/clientes']);
       },
       error: (erro) => {
-        console.error('Falha ao realizar login. Status HTTP:', erro.status);
+        this.autenticando = false;
+        this.mensagemErro =
+          erro.error?.mensagens?.[0] ?? 'Ocorreu um erro inesperado';
       },
     });
   }

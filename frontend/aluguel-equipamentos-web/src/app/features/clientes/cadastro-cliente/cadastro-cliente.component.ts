@@ -160,7 +160,6 @@ export class CadastroClienteComponent {
         });
       },
       error: (erro) => {
-        console.log('Erro retornado pelo backend:', erro);
         this.criando = false;
         this.mensagemErro =
           erro.error?.mensagens?.[0] ?? 'Ocorreu um erro inesperado';

@@ -1,0 +1,62 @@
+<div class="layout">
+
+<header class="cabecalho">
+  <h1>Aluguel de Equipamentos</h1>
+
+  <div class="area-usuario">
+    @if (usuario) {
+      <div class="informacoes-usuario">
+        <span>{{ usuario.nome }}</span>
+        <small>{{ usuario.perfil }}</small>
+      </div>
+    }
+
+    <button type="button" class="botao-sair" (click)="sair()">
+      Sair
+    </button>
+  </div>
+</header>
+
+    <div class="corpo">
+
+        <aside class="menu-lateral">
+
+            <nav aria-label="Menu principal">
+
+                <ul>
+                    <li>🏠 Início</li>
+                    <li class="grupo-clientes">
+                        <span class="titulo-grupo">👥 Clientes</span>
+
+                        <ul class="submenu">
+                            <li>
+                                <a routerLink="/clientes" routerLinkActive="ativo"
+                                    [routerLinkActiveOptions]="{ exact: true }">
+                                    Listar clientes
+                                </a>
+                            </li>
+
+                            <li>
+                                <a routerLink="/clientes/novo" routerLinkActive="ativo">
+                                    Novo cliente
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>🔧 Equipamentos</li>
+                    <li>📅 Reservas</li>
+                    <li>📦 Retiradas</li>
+                    <li>↩️ Devoluções</li>
+                </ul>
+
+            </nav>
+
+        </aside>
+
+        <main class="conteudo">
+            <router-outlet></router-outlet>
+        </main>
+
+    </div>
+
+</div>
