@@ -1,276 +1,302 @@
-@if(mensagemErro){
-<p>{{mensagemErro}}</p>
-}
+<div class="cabecalho-pagina">
+    <h2>Novo cliente</h2>
+    <p>Preencha os dados abaixo para cadastrar um cliente.</p>
+</div>
 
-<form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
-    <div>
-        <label for="tipo">Tipo de Cliente</label>
+<div class="painel-cadastro">
+    <h3>Dados do cliente</h3>
 
-        <select id="tipo" formControlName="tipo">
-            <option value="">Selecione o tipo</option>
-            <option value="PF">Pessoa Física</option>
-            <option value="PJ">Pessoa Jurídica</option>
-        </select>
-
-        @if (
-        formularioCadastro.controls.tipo.touched &&
-        formularioCadastro.controls.tipo.invalid
-        ) {
-        @if (formularioCadastro.controls.tipo.hasError('required')) {
-        <p>Selecione o tipo de cliente.</p>
-        }
-        }
-    </div>
-
-    <div>
-        <label for="nomeRazaoSocial">Nome/Razão Social</label>
-
-        <input id="nomeRazaoSocial" formControlName="nomeRazaoSocial" type="text"
-            placeholder="Digite seu Nome ou Razão Social">
-
-        @if (
-        formularioCadastro.controls.nomeRazaoSocial.touched &&
-        formularioCadastro.controls.nomeRazaoSocial.invalid
-        ) {
-
-        @if (formularioCadastro.controls.nomeRazaoSocial.hasError('required')) {
-        <p>Nome ou razão social é obrigatório.</p>
-        }
-
-        @if (formularioCadastro.controls.nomeRazaoSocial.hasError('minlength')) {
-        <p>Nome ou razão social deve ter pelo menos 3 caracteres.</p>
-        }
-
-        @if (formularioCadastro.controls.nomeRazaoSocial.hasError('maxlength')) {
-        <p>Nome ou razão social deve ter no máximo 150 caracteres.</p>
-        }
-
-        }
-    </div>
-
-    @if (formularioCadastro.controls.tipo.value === 'PJ') {
-    <div>
-        <label for="nomeFantasia">Nome Fantasia</label>
-        <input id="nomeFantasia" formControlName="nomeFantasia" type="text" placeholder="Digite seu Nome Fantasia">
-
-        @if (
-        formularioCadastro.controls.nomeFantasia.touched &&
-        formularioCadastro.controls.nomeFantasia.invalid
-        ) {
-        @if (formularioCadastro.controls.nomeFantasia.hasError('maxlength')) {
-        <p>Nome fantasia deve ter no máximo 150 caracteres.</p>
-        }
-        }
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
     </div>
     }
 
-    <div>
-        <label for="documento">CPF/CNPJ</label>
+    <form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
+        <div>
+            <label for="tipo">Tipo de Cliente</label>
 
-        <input id="documento" formControlName="documento" type="text" [mask]="formularioCadastro.controls.tipo.value === 'PJ'
+            <select id="tipo" formControlName="tipo">
+                <option value="">Selecione o tipo</option>
+                <option value="PF">Pessoa Física</option>
+                <option value="PJ">Pessoa Jurídica</option>
+            </select>
+
+            @if (
+            formularioCadastro.controls.tipo.touched &&
+            formularioCadastro.controls.tipo.invalid
+            ) {
+            @if (formularioCadastro.controls.tipo.hasError('required')) {
+            <p>Selecione o tipo de cliente.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="nomeRazaoSocial">Nome/Razão Social</label>
+
+            <input id="nomeRazaoSocial" formControlName="nomeRazaoSocial" type="text"
+                placeholder="Digite seu Nome ou Razão Social">
+
+            @if (
+            formularioCadastro.controls.nomeRazaoSocial.touched &&
+            formularioCadastro.controls.nomeRazaoSocial.invalid
+            ) {
+
+            @if (formularioCadastro.controls.nomeRazaoSocial.hasError('required')) {
+            <p>Nome ou razão social é obrigatório.</p>
+            }
+
+            @if (formularioCadastro.controls.nomeRazaoSocial.hasError('minlength')) {
+            <p>Nome ou razão social deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioCadastro.controls.nomeRazaoSocial.hasError('maxlength')) {
+            <p>Nome ou razão social deve ter no máximo 150 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        @if (formularioCadastro.controls.tipo.value === 'PJ') {
+        <div>
+            <label for="nomeFantasia">Nome Fantasia</label>
+            <input id="nomeFantasia" formControlName="nomeFantasia" type="text" placeholder="Digite seu Nome Fantasia">
+
+            @if (
+            formularioCadastro.controls.nomeFantasia.touched &&
+            formularioCadastro.controls.nomeFantasia.invalid
+            ) {
+            @if (formularioCadastro.controls.nomeFantasia.hasError('maxlength')) {
+            <p>Nome fantasia deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
+        }
+
+        <div>
+            <label for="documento">CPF/CNPJ</label>
+
+            <input id="documento" formControlName="documento" type="text" [mask]="formularioCadastro.controls.tipo.value === 'PJ'
     ? '00.000.000/0000-00'
     : '000.000.000-00'" placeholder="Digite seu número de documento">
 
-        @if (
-        formularioCadastro.controls.documento.touched &&
-        formularioCadastro.controls.documento.invalid
-        ) {
+            @if (
+            formularioCadastro.controls.documento.touched &&
+            formularioCadastro.controls.documento.invalid
+            ) {
 
-        @if (formularioCadastro.controls.documento.hasError('required')) {
-        <p>Documento é obrigatório.</p>
-        }
+            @if (formularioCadastro.controls.documento.hasError('required')) {
+            <p>Documento é obrigatório.</p>
+            }
 
-        @if (
-        formularioCadastro.controls.documento.invalid &&
-        !formularioCadastro.controls.documento.hasError('required')
-        ) {
+            @if (
+            formularioCadastro.controls.documento.invalid &&
+            !formularioCadastro.controls.documento.hasError('required')
+            ) {
 
-        @if (formularioCadastro.controls.tipo.value === 'PF') {
-        <p>CPF deve conter exatamente 11 dígitos numéricos.</p>
-        }
+            @if (formularioCadastro.controls.tipo.value === 'PF') {
+            <p>CPF deve conter exatamente 11 dígitos numéricos.</p>
+            }
 
-        @if (formularioCadastro.controls.tipo.value === 'PJ') {
-        <p>CNPJ deve conter exatamente 14 dígitos numéricos.</p>
-        }
+            @if (formularioCadastro.controls.tipo.value === 'PJ') {
+            <p>CNPJ deve conter exatamente 14 dígitos numéricos.</p>
+            }
 
-        }
-        }
-    </div>
+            }
+            }
+        </div>
 
-    <div>
-        <label for="email">E-mail</label>
-        <input id="email" formControlName="email" type="email" placeholder="Digite seu email">
-        @if (
-        formularioCadastro.controls.email.touched &&
-        formularioCadastro.controls.email.invalid
-        ) {
+        <div>
+            <label for="email">E-mail</label>
+            <input id="email" formControlName="email" type="email" placeholder="Digite seu email">
+            @if (
+            formularioCadastro.controls.email.touched &&
+            formularioCadastro.controls.email.invalid
+            ) {
 
-        @if (formularioCadastro.controls.email.hasError('required')) {
-        <p>E-mail é obrigatório.</p>
-        }
+            @if (formularioCadastro.controls.email.hasError('required')) {
+            <p>E-mail é obrigatório.</p>
+            }
 
-        @if (formularioCadastro.controls.email.hasError('email')) {
-        <p>E-mail com formato inválido</p>
-        }
+            @if (formularioCadastro.controls.email.hasError('email')) {
+            <p>E-mail com formato inválido</p>
+            }
 
-        @if (formularioCadastro.controls.email.hasError('maxlength')) {
-        <p>E-mail deve ter no máximo 150 caracteres.</p>
-        }
-        }
-    </div>
+            @if (formularioCadastro.controls.email.hasError('maxlength')) {
+            <p>E-mail deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
 
-    <div>
-        <label for="telefone">Telefone</label>
-        <input id="telefone" formControlName="telefone" type="tel" inputmode="numeric"
-            mask="(00) 0000-0000||(00) 00000-0000" placeholder="Digite seu número de telefone">
+        <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" formControlName="telefone" type="tel" inputmode="numeric"
+                mask="(00) 0000-0000||(00) 00000-0000" placeholder="Digite seu número de telefone">
 
-        @if (
-        formularioCadastro.controls.telefone.touched &&
-        formularioCadastro.controls.telefone.invalid
-        ) {
+            @if (
+            formularioCadastro.controls.telefone.touched &&
+            formularioCadastro.controls.telefone.invalid
+            ) {
 
-        @if (formularioCadastro.controls.telefone.hasError('required')) {
-        <p>Telefone é obrigatório.</p>
-        }
+            @if (formularioCadastro.controls.telefone.hasError('required')) {
+            <p>Telefone é obrigatório.</p>
+            }
 
-        @if (formularioCadastro.controls.telefone.hasError('pattern')) {
-        <p>Telefone deve conter 10 ou 11 dígitos numéricos.</p>
-        }
-        }
-    </div>
+            @if (formularioCadastro.controls.telefone.hasError('pattern')) {
+            <p>Telefone deve conter 10 ou 11 dígitos numéricos.</p>
+            }
+            }
+        </div>
 
+        <div class="titulo-secao">
+            <h3>Endereço</h3>
+        </div>
 
-
-    <div>
-        <label for="cep">Cep</label>
-        <input id="cep" formControlName="cep" type="text" inputmode="numeric" mask="00000-000"
-            placeholder="Digite seu CEP">
-        @if (
-        formularioCadastro.controls.cep.touched &&
-        formularioCadastro.controls.cep.invalid
-        ) {
-
-        @if (formularioCadastro.controls.cep.hasError('required')) {
-        <p>CEP é obrigatório.</p>
-        }
-
-        @if (formularioCadastro.controls.cep.hasError('pattern')) {
-        <p>CEP deve conter 8 dígitos numéricos.</p>
-        }
-        }
-
-    </div>
+        <div>
 
 
-    <!-- LOGRADOURO -->
-    <div>
-        <label for="logradouro">Logradouro</label>
-        <input id="logradouro" formControlName="logradouro" type="text" placeholder="Digite seu logradouro">
 
-        @if (
-        formularioCadastro.controls.logradouro.touched &&
-        formularioCadastro.controls.logradouro.invalid
-        ) {
-        @if (formularioCadastro.controls.logradouro.hasError('required')) {
-        <p>Logradouro é obrigatório.</p>
-        }
+            <label for="cep">Cep</label>
+            <input id="cep" formControlName="cep" type="text" inputmode="numeric" mask="00000-000"
+                placeholder="Digite seu CEP">
+            @if (
+            formularioCadastro.controls.cep.touched &&
+            formularioCadastro.controls.cep.invalid
+            ) {
 
-        @if (formularioCadastro.controls.logradouro.hasError('maxlength')) {
-        <p>Logradouro deve ter no máximo 150 caracteres.</p>
-        }
-        }
-    </div>
+            @if (formularioCadastro.controls.cep.hasError('required')) {
+            <p>CEP é obrigatório.</p>
+            }
 
-    <!-- NÚMERO -->
-    <div>
-        <label for="numero">Número</label>
-        <input id="numero" formControlName="numero" type="text" placeholder="Digite o número">
+            @if (formularioCadastro.controls.cep.hasError('pattern')) {
+            <p>CEP deve conter 8 dígitos numéricos.</p>
+            }
+            }
 
-        @if (
-        formularioCadastro.controls.numero.touched &&
-        formularioCadastro.controls.numero.invalid
-        ) {
-        @if (formularioCadastro.controls.numero.hasError('required')) {
-        <p>Número é obrigatório.</p>
-        }
+        </div>
 
-        @if (formularioCadastro.controls.numero.hasError('maxlength')) {
-        <p>Número deve ter no máximo 20 caracteres.</p>
-        }
-        }
-    </div>
 
-    <!-- COMPLEMENTO -->
-    <div>
-        <label for="complemento">Complemento</label>
-        <input id="complemento" formControlName="complemento" type="text" placeholder="Digite seu complemento">
+        <!-- LOGRADOURO -->
+        <div>
+            <label for="logradouro">Logradouro</label>
+            <input id="logradouro" formControlName="logradouro" type="text" placeholder="Digite seu logradouro">
 
-        @if (
-        formularioCadastro.controls.complemento.touched &&
-        formularioCadastro.controls.complemento.invalid
-        ) {
-        @if (formularioCadastro.controls.complemento.hasError('maxlength')) {
-        <p>Complemento deve ter no máximo 100 caracteres.</p>
-        }
-        }
-    </div>
+            @if (
+            formularioCadastro.controls.logradouro.touched &&
+            formularioCadastro.controls.logradouro.invalid
+            ) {
+            @if (formularioCadastro.controls.logradouro.hasError('required')) {
+            <p>Logradouro é obrigatório.</p>
+            }
 
-    <!-- BAIRRO -->
-    <div>
-        <label for="bairro">Bairro</label>
-        <input id="bairro" formControlName="bairro" type="text" placeholder="Digite seu bairro">
+            @if (formularioCadastro.controls.logradouro.hasError('maxlength')) {
+            <p>Logradouro deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
 
-        @if (
-        formularioCadastro.controls.bairro.touched &&
-        formularioCadastro.controls.bairro.invalid
-        ) {
-        @if (formularioCadastro.controls.bairro.hasError('required')) {
-        <p>Bairro é obrigatório.</p>
-        }
+        <!-- NÚMERO -->
+        <div>
+            <label for="numero">Número</label>
+            <input id="numero" formControlName="numero" type="text" placeholder="Digite o número">
 
-        @if (formularioCadastro.controls.bairro.hasError('maxlength')) {
-        <p>Bairro deve ter no máximo 100 caracteres.</p>
-        }
-        }
-    </div>
+            @if (
+            formularioCadastro.controls.numero.touched &&
+            formularioCadastro.controls.numero.invalid
+            ) {
+            @if (formularioCadastro.controls.numero.hasError('required')) {
+            <p>Número é obrigatório.</p>
+            }
 
-    <!-- CIDADE -->
-    <div>
-        <label for="cidade">Cidade</label>
-        <input id="cidade" formControlName="cidade" type="text" placeholder="Digite sua cidade">
+            @if (formularioCadastro.controls.numero.hasError('maxlength')) {
+            <p>Número deve ter no máximo 20 caracteres.</p>
+            }
+            }
+        </div>
 
-        @if (
-        formularioCadastro.controls.cidade.touched &&
-        formularioCadastro.controls.cidade.invalid
-        ) {
-        @if (formularioCadastro.controls.cidade.hasError('required')) {
-        <p>Cidade é obrigatória.</p>
-        }
+        <!-- COMPLEMENTO -->
+        <div>
+            <label for="complemento">Complemento</label>
+            <input id="complemento" formControlName="complemento" type="text" placeholder="Digite seu complemento">
 
-        @if (formularioCadastro.controls.cidade.hasError('maxlength')) {
-        <p>Cidade deve ter no máximo 100 caracteres.</p>
-        }
-        }
-    </div>
+            @if (
+            formularioCadastro.controls.complemento.touched &&
+            formularioCadastro.controls.complemento.invalid
+            ) {
+            @if (formularioCadastro.controls.complemento.hasError('maxlength')) {
+            <p>Complemento deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
 
-    <!-- ESTADO -->
-    <div>
-        <label for="estado">Estado (UF)</label>
-        <input id="estado" formControlName="estado" type="text" maxlength="2" placeholder="Ex.: SC">
+        <!-- BAIRRO -->
+        <div>
+            <label for="bairro">Bairro</label>
+            <input id="bairro" formControlName="bairro" type="text" placeholder="Digite seu bairro">
 
-        @if (
-        formularioCadastro.controls.estado.touched &&
-        formularioCadastro.controls.estado.invalid
-        ) {
-        @if (formularioCadastro.controls.estado.hasError('required')) {
-        <p>Estado é obrigatório.</p>
-        }
+            @if (
+            formularioCadastro.controls.bairro.touched &&
+            formularioCadastro.controls.bairro.invalid
+            ) {
+            @if (formularioCadastro.controls.bairro.hasError('required')) {
+            <p>Bairro é obrigatório.</p>
+            }
 
-        @if (formularioCadastro.controls.estado.hasError('pattern')) {
-        <p>Estado deve conter exatamente 2 letras. Ex.: SC, PR ou SP.</p>
-        }
-        }
-    </div>
+            @if (formularioCadastro.controls.bairro.hasError('maxlength')) {
+            <p>Bairro deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
 
-    <button type="submit" [disabled]="criando">Cadastrar</button>
-</form>
+        <!-- CIDADE -->
+        <div>
+            <label for="cidade">Cidade</label>
+            <input id="cidade" formControlName="cidade" type="text" placeholder="Digite sua cidade">
+
+            @if (
+            formularioCadastro.controls.cidade.touched &&
+            formularioCadastro.controls.cidade.invalid
+            ) {
+            @if (formularioCadastro.controls.cidade.hasError('required')) {
+            <p>Cidade é obrigatória.</p>
+            }
+
+            @if (formularioCadastro.controls.cidade.hasError('maxlength')) {
+            <p>Cidade deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- ESTADO -->
+        <div>
+            <label for="estado">Estado (UF)</label>
+            <input id="estado" formControlName="estado" type="text" maxlength="2" placeholder="Ex.: SC">
+
+            @if (
+            formularioCadastro.controls.estado.touched &&
+            formularioCadastro.controls.estado.invalid
+            ) {
+            @if (formularioCadastro.controls.estado.hasError('required')) {
+            <p>Estado é obrigatório.</p>
+            }
+
+            @if (formularioCadastro.controls.estado.hasError('pattern')) {
+            <p>Estado deve conter exatamente 2 letras. Ex.: SC, PR ou SP.</p>
+            }
+            }
+        </div>
+
+        <div class="acoes-formulario">
+            <a routerLink="/clientes" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="criando">
+                {{ criando ? 'Cadastrando...' : 'Cadastrar cliente' }}
+            </button>
+        </div>
+    </form>
+
+</div>

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { LoginResponse } from '../models/login-response';
 import { jwtDecode } from 'jwt-decode';
 import { UsuarioAutenticadoResponse } from '../models/usuario-autenticado-response';
+import { API_URL } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class AutenticacaoService {
     };
 
     return this.http.post<LoginResponse>(
-      'http://localhost:8080/api/autenticacao/login',
+      `${API_URL}/autenticacao/login`,
       dadosLogin,
     );
   }

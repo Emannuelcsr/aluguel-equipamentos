@@ -10,10 +10,11 @@ import { CadastrarClienteRequest } from '../../../core/models/cadastrar-cliente-
 import { ClienteResponse } from '../../../core/models/cliente-response';
 import { Router } from '@angular/router';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-cadastro-cliente',
-  imports: [ReactiveFormsModule, NgxMaskDirective],
+  imports: [ReactiveFormsModule, NgxMaskDirective, RouterLink],
   providers: [provideNgxMask()],
   templateUrl: './cadastro-cliente.component.html',
   styleUrl: './cadastro-cliente.component.scss',
@@ -97,7 +98,9 @@ export class CadastroClienteComponent {
 
   ngOnInit(): void {
     this.formularioCadastro.controls.tipo.valueChanges.subscribe((tipo) => {
+      this.formularioCadastro.controls.documento.reset();
       if (tipo === 'PF') {
+        this.formularioCadastro.controls.nomeFantasia.reset();
         this.formularioCadastro.controls.documento.setValidators([
           Validators.required,
           Validators.minLength(11),
@@ -130,7 +133,6 @@ export class CadastroClienteComponent {
     }
 
     const dadosCadastro = this.formularioCadastro.getRawValue();
-  console.log('Dados do formulário:', dadosCadastro);
 
     if (dadosCadastro.tipo === '') {
       return;
@@ -161,8 +163,14 @@ export class CadastroClienteComponent {
       },
       error: (erro) => {
         this.criando = false;
+        if (erro.status === 0) {
+          this.mensagemErro =
+            'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
+          return;
+        }
+
         this.mensagemErro =
-          erro.error?.mensagens?.[0] ?? 'Ocorreu um erro inesperado';
+          erro.error?.mensagens?.[0] ?? 'Não foi possível cadastrar o cliente.';
       },
     });
   }

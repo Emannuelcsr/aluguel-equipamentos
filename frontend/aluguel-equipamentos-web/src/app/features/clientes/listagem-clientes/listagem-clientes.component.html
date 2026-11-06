@@ -1,42 +1,75 @@
-@if (mensagemErro) {
-  <p>{{ mensagemErro }}</p>
-}
-@if (carregando) {
+<div class="cabecalho-pagina">
+  <div>
+    <h2>Clientes</h2>
+    <p>Gerencie os clientes cadastrados no sistema.</p>
+  </div>
+
+  <a routerLink="/clientes/novo" class="botao-novo-cliente">
+    + Novo cliente
+  </a>
+</div>
+
+<div class="painel-clientes">
+
+  @if (mensagemErro) {
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+  </div>
+  }
+
+  @if (carregando) {
   <p>Carregando clientes...</p>
-}
+  }
 
-@if (mensagemSucesso) {
-  <p>{{ mensagemSucesso }}</p>
-}
+  @if (mensagemSucesso) {
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
+  }
 
-<table>
+  <table>
 
-  <thead>
-<tr>
-  <th>ID</th>
-  <th>TIPO</th>
-  <th>DOCUMENTO</th>
-  <th>NOME/RAZAO SOCIAL</th>
-</tr>
-</thead>
-<tbody>
-  
-@for (cliente of clientes; track cliente.id) {
-  <tr>
-  <td>{{ cliente.id }}</td>
-   <td>{{ cliente.tipo }}</td>
-   <td>{{ cliente.documento }}</td>
-   <td>{{ cliente.nomeRazaoSocial }}</td>
-   </tr>
-} @empty {
-  <tr>
-  <td colspan="4">Nenhum cliente encontrado.</td>
-  </tr>
-}
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>TIPO</th>
+        <th>DOCUMENTO</th>
+        <th>NOME/RAZAO SOCIAL</th>
+      </tr>
+    </thead>
+    <tbody>
 
-</tbody>
-</table>
+      @for (cliente of clientes; track cliente.id) {
+      <tr>
+        <td>{{ cliente.id }}</td>
+        <td>{{ cliente.tipo }}</td>
+        <td>{{ cliente.documento }}</td>
+        <td>{{ cliente.nomeRazaoSocial }}</td>
+      </tr>
+      }@empty {
+      @if (!carregando && !mensagemErro) {
+      <tr>
+        <td colspan="4">Nenhum cliente encontrado.</td>
+      </tr>
+      }
+      }
 
-<button (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">Voltar</button>
-<span>Pagina {{paginaAtual}} de {{totalPaginas}}</span>
-<button (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">Próxima</button>
+    </tbody>
+  </table>
+
+  <div class="paginacao">
+    <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+      ← Voltar
+    </button>
+
+    <span class="informacao-pagina">
+      Página {{ paginaAtual }} de {{ totalPaginas }}
+    </span>
+
+    <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+      Próxima →
+    </button>
+  </div>
+</div>

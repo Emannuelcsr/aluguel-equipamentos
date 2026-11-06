@@ -1,0 +1,203 @@
+.pagina-login {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+// Lado esquerdo: apresentação do sistema
+.apresentacao-login {
+    background-color: #17263d;
+    color: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding: 60px;
+
+    .marca-login {
+        width: 64px;
+        height: 64px;
+        background-color: #344f75;
+        border-radius: 16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 32px;
+        margin-bottom: 24px;
+    }
+
+    h1 {
+        max-width: 420px;
+        margin: 0 0 16px;
+
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    p {
+        max-width: 420px;
+        margin: 0;
+
+        font-size: 16px;
+        line-height: 1.7;
+        color: #cbd5e1;
+    }
+}
+
+// Lado direito: formulário de login
+.area-login {
+    background-color: #f3f6fa;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
+}
+
+.cartao-login {
+    width: 100%;
+    max-width: 420px;
+
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 40px;
+
+    box-shadow: 0 8px 30px rgba(23, 38, 61, 0.06);
+    box-sizing: border-box;
+
+    h2 {
+        margin: 0 0 8px;
+
+        font-size: 28px;
+        font-weight: 700;
+        color: #17263d;
+    }
+
+    .subtitulo-login {
+        margin: 0 0 30px;
+
+        font-size: 14px;
+        line-height: 1.5;
+        color: #64748b;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+.campo-login {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    input {
+        width: 100%;
+        height: 46px;
+        padding: 0 14px;
+
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+
+        color: #17263d;
+        font-size: 14px;
+        box-sizing: border-box;
+
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &::placeholder {
+            color: #94a3b8;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+    }
+}
+
+.cartao-login button {
+    width: 100%;
+    min-height: 46px;
+
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+        background-color: #1d4ed8;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 3px;
+    }
+}
+
+.alerta-login {
+    padding: 12px 14px;
+
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    color: #b91c1c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+// Telas menores
+@media (max-width: 768px) {
+    .pagina-login {
+        grid-template-columns: 1fr;
+    }
+
+    .apresentacao-login {
+        padding: 36px 24px;
+
+        h1 {
+            font-size: 26px;
+        }
+
+        p {
+            font-size: 14px;
+        }
+    }
+
+    .area-login {
+        padding: 24px;
+    }
+
+    .cartao-login {
+        padding: 28px 24px;
+    }
+}

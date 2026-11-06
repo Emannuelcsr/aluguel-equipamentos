@@ -1,25 +1,61 @@
-<h1>Aluguel de Equipamentos</h1>
 
-<h2>Entrar no sistema</h2>
+<div class="pagina-login">
 
-<form [formGroup]="formularioLogin" (ngSubmit)="entrar()">
+  <section class="apresentacao-login">
+    <div class="marca-login">🔧</div>
 
-  <div>
-    <label for="email">E-mail</label>
-    <input id="email" type="email" formControlName="email" placeholder="Digite seu e-mail">
-  </div>
+    <h1>Aluguel de Equipamentos</h1>
 
-  <div>
-    <label for="senha">Senha</label>
-    <input id="senha" type="password" formControlName="senha" placeholder="Digite sua senha">
-  </div>
+    <p>
+      Gerencie clientes, equipamentos e reservas
+      de forma simples e organizada.
+    </p>
+  </section>
 
-  @if (mensagemErro) {
-  <p role="alert">{{ mensagemErro }}</p>
-  }
+  <section class="area-login">
+    <div class="cartao-login">
 
-  <button type="submit" [disabled]="autenticando">
-    {{ autenticando ? 'Entrando...' : 'Entrar' }}
-  </button>
+      <h2>Bem-vindo!</h2>
+      <p class="subtitulo-login">
+        Entre com suas credenciais para acessar o sistema.
+      </p>
 
-</form>
+      <form [formGroup]="formularioLogin" (ngSubmit)="entrar()">
+
+        <div class="campo-login">
+          <label for="email">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            placeholder="Digite seu e-mail"
+          />
+        </div>
+
+        <div class="campo-login">
+          <label for="senha">Senha</label>
+          <input
+            id="senha"
+            type="password"
+            formControlName="senha"
+            autocomplete="current-password"
+            placeholder="Digite sua senha"
+          />
+        </div>
+
+        @if (mensagemErro) {
+          <div class="alerta-login" role="alert">
+            {{ mensagemErro }}
+          </div>
+        }
+
+        <button type="submit" [disabled]="autenticando">
+          {{ autenticando ? 'Entrando...' : 'Entrar no sistema' }}
+        </button>
+
+      </form>
+    </div>
+  </section>
+
+</div>

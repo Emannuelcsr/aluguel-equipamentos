@@ -3,10 +3,11 @@ import { ClienteService } from '../service/cliente.service';
 import { ClienteResponse } from '../../../core/models/cliente-response';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-listagem-clientes',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './listagem-clientes.component.html',
   styleUrl: './listagem-clientes.component.scss',
 })
@@ -37,6 +38,9 @@ export class ListagemClientesComponent implements OnInit {
   }
 
   listar(pagina: number) {
+    if (this.carregando) {
+      return;
+    }
     this.carregando = true;
     this.mensagemErro = '';
     this.clienteService.listar(pagina, this.tamanhoPagina).subscribe({
@@ -49,9 +53,10 @@ export class ListagemClientesComponent implements OnInit {
         this.totalElementos = resposta.totalElementos;
         this.paginaAtual = resposta.paginaAtual;
       },
-      error: () => {
+      error: (erro) => {
         this.carregando = false;
-        this.mensagemErro = 'Ocorreu um erro inesperado';
+        this.mensagemErro =
+          erro.error?.mensagens?.[0] ?? 'Ocorreu um erro inesperado';
       },
     });
   }
@@ -67,6 +72,4 @@ export class ListagemClientesComponent implements OnInit {
       this.listar(this.paginaAtual - 1);
     }
   }
-
-
 }

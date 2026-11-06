@@ -4,13 +4,13 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AutenticacaoService } from '../services/autenticacao.service';
+import { API_URL } from '../config/api.config';
 
 export const autenticacaoInterceptor: HttpInterceptorFn = (req, next) => {
   const token = sessionStorage.getItem('token');
 
-  const urlApi = 'http://localhost:8080/api/';
-
-  const urlLogin = 'http://localhost:8080/api/autenticacao/login';
+  const urlApi = `${API_URL}/`;
+  const urlLogin = `${API_URL}/autenticacao/login`;
 
   const router = inject(Router);
 
