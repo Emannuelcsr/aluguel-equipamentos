@@ -37,6 +37,7 @@
         <th>TIPO</th>
         <th>DOCUMENTO</th>
         <th>NOME/RAZAO SOCIAL</th>
+        <th>AÇÕES</th>
       </tr>
     </thead>
     <tbody>
@@ -47,6 +48,11 @@
         <td>{{ cliente.tipo }}</td>
         <td>{{ cliente.documento }}</td>
         <td>{{ cliente.nomeRazaoSocial }}</td>
+        <td class="coluna-acao">
+          <a class="botao-detalhes" [routerLink]="['/clientes/detalhes/', cliente.id]">
+            Detalhes
+          </a>
+        </td>
       </tr>
       }@empty {
       @if (!carregando && !mensagemErro) {

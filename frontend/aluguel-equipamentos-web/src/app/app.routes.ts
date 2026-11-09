@@ -5,6 +5,7 @@ import { CadastroClienteComponent } from './features/clientes/cadastro-cliente/c
 import { autenticacaoGuard } from './core/guards/autenticacao.guard';
 import { loginGuard } from './core/guards/login.guard';
 import { LayoutComponent } from './layout/layout/layout.component';
+import { DetalhesClienteComponent } from './features/clientes/detalhes-cliente/detalhes-cliente.component';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,10 @@ export const routes: Routes = [
       {
         path: 'clientes/novo',
         component: CadastroClienteComponent,
+      },
+      {
+        path: 'clientes/detalhes/:id',
+        component: DetalhesClienteComponent,
       },
     ],
   },

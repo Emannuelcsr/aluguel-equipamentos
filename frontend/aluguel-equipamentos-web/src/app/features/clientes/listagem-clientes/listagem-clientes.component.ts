@@ -23,7 +23,7 @@ export class ListagemClientesComponent implements OnInit {
   totalElementos = 0;
   carregando = false;
 
-  constructor(private clienteService: ClienteService) {}
+  constructor(private clienteService: ClienteService,private router: Router) {}
   ngOnInit(): void {
     this.mensagemSucesso = history.state.mensagemSucesso ?? '';
 

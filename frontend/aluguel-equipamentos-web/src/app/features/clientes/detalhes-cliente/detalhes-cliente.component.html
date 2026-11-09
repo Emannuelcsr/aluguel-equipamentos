@@ -1,0 +1,105 @@
+@if (mensagemErro) {
+<div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+</div>
+}
+
+@if (carregando) {
+<p>Carregando cliente...</p>
+}
+
+@if (cliente) {
+<div class="dados-cliente">
+    <h3>Dados do cliente</h3>
+    <h2>{{ cliente.nomeRazaoSocial }}</h2>
+
+    @if (cliente.tipo === 'PF') {
+    <p>
+        <strong>CPF:</strong>
+        <span>{{ cliente.documento }}</span>
+    </p>
+    }
+
+    @if (cliente.tipo === 'PJ') {
+    <p>
+        <strong>CNPJ:</strong>
+        <span>{{ cliente.documento }}</span>
+    </p>
+    }
+
+    @if (cliente.ativo) {
+    <p>
+        <strong>Situação:</strong>
+        <span class="status-ativo">Ativo</span>
+    </p>
+    } @else {
+    <p>
+        <strong>Situação:</strong>
+        <span class="status-inativo">Inativo</span>
+    </p>
+    }
+
+    <p>
+        <strong>E-mail:</strong>
+        <span>{{ cliente.email }}</span>
+    </p>
+
+    <p>
+        <strong>Telefone:</strong>
+        <span>{{ cliente.telefone }}</span>
+    </p>
+
+    @if (cliente.tipo === 'PJ' && cliente.nomeFantasia) {
+    <p>
+        <strong>Nome fantasia:</strong>
+        <span>{{ cliente.nomeFantasia }}</span>
+    </p>
+    }
+</div>
+
+<div class="endereco-cliente">
+    <h3>Endereço</h3>
+
+    <p>
+        <strong>CEP:</strong>
+        <span>{{ cliente.cep }}</span>
+    </p>
+
+    <p>
+        <strong>Logradouro:</strong>
+        <span>{{ cliente.logradouro }}</span>
+    </p>
+
+    <p>
+        <strong>Número:</strong>
+        <span>{{ cliente.numero }}</span>
+    </p>
+
+    @if (cliente.complemento) {
+    <p>
+        <strong>Complemento:</strong>
+        <span>{{ cliente.complemento }}</span>
+    </p>
+    }
+
+    <p>
+        <strong>Bairro:</strong>
+        <span>{{ cliente.bairro }}</span>
+    </p>
+
+    <p>
+        <strong>Cidade:</strong>
+        <span>{{ cliente.cidade }}</span>
+    </p>
+
+    <p>
+        <strong>Estado:</strong>
+        <span>{{ cliente.estado }}</span>
+    </p>
+</div>
+}
+
+<a routerLink="/clientes">
+    ← Voltar à listagem
+</a>

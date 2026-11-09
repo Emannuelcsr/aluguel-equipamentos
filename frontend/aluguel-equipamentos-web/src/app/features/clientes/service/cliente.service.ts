@@ -25,5 +25,11 @@ cadastrar(dados: CadastrarClienteRequest) {
   );
 }
 
+buscarPorId(id: number) {
+  return this.http.get<ClienteResponse>(
+    `${API_URL}/clientes/${id}`
+  );
+}
+
 
 }
