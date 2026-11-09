@@ -1,0 +1,255 @@
+<div class="cabecalho-pagina">
+    <h2>Editar cliente</h2>
+    <p>Atualize as informações cadastrais do cliente.</p>
+</div>
+
+@if (carregando) {
+<p>Carregando dados do cliente...</p>
+}
+<div class="painel-cadastro">
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+@if (cliente && !carregando) {
+    <form [formGroup]="formularioAtualizacao" (ngSubmit)="atualizar()">
+
+
+        <div>
+            <label for="nomeRazaoSocial">Nome/Razão Social</label>
+
+            <input id="nomeRazaoSocial" formControlName="nomeRazaoSocial" type="text"
+                placeholder="Digite seu Nome ou Razão Social">
+
+            @if (
+            formularioAtualizacao.controls.nomeRazaoSocial.touched &&
+            formularioAtualizacao.controls.nomeRazaoSocial.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.nomeRazaoSocial.hasError('required')) {
+            <p>Nome ou razão social é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nomeRazaoSocial.hasError('minlength')) {
+            <p>Nome ou razão social deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nomeRazaoSocial.hasError('maxlength')) {
+            <p>Nome ou razão social deve ter no máximo 150 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        @if (cliente?.tipo === 'PJ') {
+        <div>
+            <label for="nomeFantasia">Nome Fantasia</label>
+            <input id="nomeFantasia" formControlName="nomeFantasia" type="text" placeholder="Digite seu Nome Fantasia">
+
+            @if (
+            formularioAtualizacao.controls.nomeFantasia.touched &&
+            formularioAtualizacao.controls.nomeFantasia.invalid
+            ) {
+            @if (formularioAtualizacao.controls.nomeFantasia.hasError('maxlength')) {
+            <p>Nome fantasia deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
+        }
+
+        <div>
+            <label for="email">E-mail</label>
+            <input id="email" formControlName="email" type="email" placeholder="Digite seu email">
+            @if (
+            formularioAtualizacao.controls.email.touched &&
+            formularioAtualizacao.controls.email.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.email.hasError('required')) {
+            <p>E-mail é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.email.hasError('email')) {
+            <p>E-mail com formato inválido</p>
+            }
+
+            @if (formularioAtualizacao.controls.email.hasError('maxlength')) {
+            <p>E-mail deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" formControlName="telefone" type="tel" inputmode="numeric"
+                mask="(00) 0000-0000||(00) 00000-0000" placeholder="Digite seu número de telefone">
+
+            @if (
+            formularioAtualizacao.controls.telefone.touched &&
+            formularioAtualizacao.controls.telefone.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.telefone.hasError('required')) {
+            <p>Telefone é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.telefone.hasError('pattern')) {
+            <p>Telefone deve conter 10 ou 11 dígitos numéricos.</p>
+            }
+            }
+        </div>
+
+        <div class="titulo-secao">
+            <h3>Endereço</h3>
+        </div>
+
+        <div>
+
+
+
+            <label for="cep">Cep</label>
+            <input id="cep" formControlName="cep" type="text" inputmode="numeric" mask="00000-000"
+                placeholder="Digite seu CEP">
+            @if (
+            formularioAtualizacao.controls.cep.touched &&
+            formularioAtualizacao.controls.cep.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.cep.hasError('required')) {
+            <p>CEP é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.cep.hasError('pattern')) {
+            <p>CEP deve conter 8 dígitos numéricos.</p>
+            }
+            }
+
+        </div>
+
+
+        <!-- LOGRADOURO -->
+        <div>
+            <label for="logradouro">Logradouro</label>
+            <input id="logradouro" formControlName="logradouro" type="text" placeholder="Digite seu logradouro">
+
+            @if (
+            formularioAtualizacao.controls.logradouro.touched &&
+            formularioAtualizacao.controls.logradouro.invalid
+            ) {
+            @if (formularioAtualizacao.controls.logradouro.hasError('required')) {
+            <p>Logradouro é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.logradouro.hasError('maxlength')) {
+            <p>Logradouro deve ter no máximo 150 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- NÚMERO -->
+        <div>
+            <label for="numero">Número</label>
+            <input id="numero" formControlName="numero" type="text" placeholder="Digite o número">
+
+            @if (
+            formularioAtualizacao.controls.numero.touched &&
+            formularioAtualizacao.controls.numero.invalid
+            ) {
+            @if (formularioAtualizacao.controls.numero.hasError('required')) {
+            <p>Número é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.numero.hasError('maxlength')) {
+            <p>Número deve ter no máximo 20 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- COMPLEMENTO -->
+        <div>
+            <label for="complemento">Complemento</label>
+            <input id="complemento" formControlName="complemento" type="text" placeholder="Digite seu complemento">
+
+            @if (
+            formularioAtualizacao.controls.complemento.touched &&
+            formularioAtualizacao.controls.complemento.invalid
+            ) {
+            @if (formularioAtualizacao.controls.complemento.hasError('maxlength')) {
+            <p>Complemento deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- BAIRRO -->
+        <div>
+            <label for="bairro">Bairro</label>
+            <input id="bairro" formControlName="bairro" type="text" placeholder="Digite seu bairro">
+
+            @if (
+            formularioAtualizacao.controls.bairro.touched &&
+            formularioAtualizacao.controls.bairro.invalid
+            ) {
+            @if (formularioAtualizacao.controls.bairro.hasError('required')) {
+            <p>Bairro é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.bairro.hasError('maxlength')) {
+            <p>Bairro deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- CIDADE -->
+        <div>
+            <label for="cidade">Cidade</label>
+            <input id="cidade" formControlName="cidade" type="text" placeholder="Digite sua cidade">
+
+            @if (
+            formularioAtualizacao.controls.cidade.touched &&
+            formularioAtualizacao.controls.cidade.invalid
+            ) {
+            @if (formularioAtualizacao.controls.cidade.hasError('required')) {
+            <p>Cidade é obrigatória.</p>
+            }
+
+            @if (formularioAtualizacao.controls.cidade.hasError('maxlength')) {
+            <p>Cidade deve ter no máximo 100 caracteres.</p>
+            }
+            }
+        </div>
+
+        <!-- ESTADO -->
+        <div>
+            <label for="estado">Estado (UF)</label>
+            <input id="estado" formControlName="estado" type="text" maxlength="2" placeholder="Ex.: SC">
+
+            @if (
+            formularioAtualizacao.controls.estado.touched &&
+            formularioAtualizacao.controls.estado.invalid
+            ) {
+            @if (formularioAtualizacao.controls.estado.hasError('required')) {
+            <p>Estado é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.estado.hasError('pattern')) {
+            <p>Estado deve conter exatamente 2 letras. Ex.: SC, PR ou SP.</p>
+            }
+            }
+        </div>
+
+        <div class="acoes-formulario">
+            <a routerLink="/clientes" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="atualizando">
+                {{ atualizando ? 'Salvando...' : 'Salvar alterações' }}
+            </button>
+        </div>
+    </form>
+}
+
+</div>

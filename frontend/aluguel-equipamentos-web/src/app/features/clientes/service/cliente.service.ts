@@ -4,6 +4,9 @@ import { PaginaResponse } from '../../../shared/pagina-response';
 import { ClienteResponse } from '../../../core/models/cliente-response';
 import { CadastrarClienteRequest } from '../../../core/models/cadastrar-cliente-request';
 import { API_URL } from '../../../core/config/api.config';
+import { AtualizarClienteRequest } from '../../../core/models/atualizar-cliente-request';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,7 @@ export class ClienteService {
 
 listar(pagina: number, tamanho: number) {
   return this.http.get<PaginaResponse<ClienteResponse>>(
-    `${API_URL}/clientes?page=${pagina}&size=${tamanho}`
+    `${API_URL}/clientes?page=${pagina}&size=${tamanho}&sort=id,asc`
   );
 }
 
@@ -28,6 +31,12 @@ cadastrar(dados: CadastrarClienteRequest) {
 buscarPorId(id: number) {
   return this.http.get<ClienteResponse>(
     `${API_URL}/clientes/${id}`
+  );
+}
+
+editarCliente(id:number, dados: AtualizarClienteRequest){
+  return this.http.put<ClienteResponse>(
+    `${API_URL}/clientes/${id}`,dados
   );
 }
 

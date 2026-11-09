@@ -37,7 +37,7 @@
         <th>TIPO</th>
         <th>DOCUMENTO</th>
         <th>NOME/RAZAO SOCIAL</th>
-        <th>AÇÕES</th>
+        <th colspan="3">AÇÕES</th>
       </tr>
     </thead>
     <tbody>
@@ -52,12 +52,15 @@
           <a class="botao-detalhes" [routerLink]="['/clientes/detalhes/', cliente.id]">
             Detalhes
           </a>
+   <a class="botao-editar" [routerLink]="['/clientes/editar/', cliente.id]">
+  Editar
+</a>
         </td>
       </tr>
       }@empty {
       @if (!carregando && !mensagemErro) {
       <tr>
-        <td colspan="4">Nenhum cliente encontrado.</td>
+        <td colspan="5">Nenhum cliente encontrado.</td>
       </tr>
       }
       }

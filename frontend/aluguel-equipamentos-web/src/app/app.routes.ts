@@ -6,6 +6,7 @@ import { autenticacaoGuard } from './core/guards/autenticacao.guard';
 import { loginGuard } from './core/guards/login.guard';
 import { LayoutComponent } from './layout/layout/layout.component';
 import { DetalhesClienteComponent } from './features/clientes/detalhes-cliente/detalhes-cliente.component';
+import { EditarClientesComponent } from './features/clientes/editar-clientes/editar-clientes.component';
 
 export const routes: Routes = [
   {
@@ -29,6 +30,10 @@ export const routes: Routes = [
       {
         path: 'clientes/detalhes/:id',
         component: DetalhesClienteComponent,
+      },
+     {
+        path: 'clientes/editar/:id',
+        component: EditarClientesComponent,
       },
     ],
   },

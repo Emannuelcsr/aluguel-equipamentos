@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ClienteService } from '../service/cliente.service';
 import { ClienteResponse } from '../../../core/models/cliente-response';
 
@@ -11,7 +11,6 @@ import { ClienteResponse } from '../../../core/models/cliente-response';
 })
 export class DetalhesClienteComponent implements OnInit {
   cliente!: ClienteResponse;
-  mensagemSucesso = '';
   mensagemErro = '';
   carregando = false;
   id!: number;

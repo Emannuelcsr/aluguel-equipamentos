@@ -168,3 +168,66 @@ table {
     border-color: #bbf7d0;
     color: #166534;
 }
+
+.botao-detalhes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+.botao-editar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+.coluna-acao {
+  white-space: nowrap;
+
+  .botao-detalhes {
+    margin-right: 8px;
+  }
+}

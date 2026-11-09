@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ClienteService } from '../service/cliente.service';
 import { ClienteResponse } from '../../../core/models/cliente-response';
-import { AutenticacaoService } from '../../../core/services/autenticacao.service';
-import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -23,7 +21,7 @@ export class ListagemClientesComponent implements OnInit {
   totalElementos = 0;
   carregando = false;
 
-  constructor(private clienteService: ClienteService,private router: Router) {}
+  constructor(private clienteService: ClienteService) {}
   ngOnInit(): void {
     this.mensagemSucesso = history.state.mensagemSucesso ?? '';
 
