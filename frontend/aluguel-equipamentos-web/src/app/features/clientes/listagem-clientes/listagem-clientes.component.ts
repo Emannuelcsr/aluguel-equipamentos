@@ -20,6 +20,7 @@ export class ListagemClientesComponent implements OnInit {
   ultimaPagina = false;
   totalElementos = 0;
   carregando = false;
+  paginaSolicitada = 1;
 
   constructor(private clienteService: ClienteService) {}
   ngOnInit(): void {
@@ -50,11 +51,18 @@ export class ListagemClientesComponent implements OnInit {
         this.ultimaPagina = resposta.ultimaPagina;
         this.totalElementos = resposta.totalElementos;
         this.paginaAtual = resposta.paginaAtual;
+        
       },
       error: (erro) => {
         this.carregando = false;
+        if (erro.status === 0) {
+          this.mensagemErro =
+            'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
+          return;
+        }
+
         this.mensagemErro =
-          erro.error?.mensagens?.[0] ?? 'Ocorreu um erro inesperado';
+          erro.error?.mensagens?.[0] ?? 'Não foi possível listar os clientes.';
       },
     });
   }

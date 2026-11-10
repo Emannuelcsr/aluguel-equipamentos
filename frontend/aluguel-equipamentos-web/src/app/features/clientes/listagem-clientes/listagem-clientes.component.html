@@ -15,6 +15,9 @@
   <div class="alerta alerta-erro" role="alert">
     <span aria-hidden="true">⚠️</span>
     <span>{{ mensagemErro }}</span>
+    <button type="button" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+      {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+    </button>
   </div>
   }
 
@@ -52,9 +55,9 @@
           <a class="botao-detalhes" [routerLink]="['/clientes/detalhes/', cliente.id]">
             Detalhes
           </a>
-   <a class="botao-editar" [routerLink]="['/clientes/editar/', cliente.id]">
-  Editar
-</a>
+          <a class="botao-editar" [routerLink]="['/clientes/editar/', cliente.id]">
+            Editar
+          </a>
         </td>
       </tr>
       }@empty {
