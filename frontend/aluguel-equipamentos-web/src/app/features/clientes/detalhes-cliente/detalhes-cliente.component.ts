@@ -14,6 +14,8 @@ export class DetalhesClienteComponent implements OnInit {
   mensagemErro = '';
   carregando = false;
   id!: number;
+  desativando = false;
+  ativando = false;
 
   constructor(
     private clienteService: ClienteService,
@@ -46,5 +48,66 @@ export class DetalhesClienteComponent implements OnInit {
     } else {
       this.mensagemErro = 'ID do cliente não informado.';
     }
+  }
+
+  desativarCliente() {
+    if (this.desativando) {
+      return;
+    }
+
+    const confirmou = confirm('Deseja realmente desativar este cliente?');
+
+    if (!confirmou) {
+      return;
+    }
+
+    this.desativando = true;
+    this.clienteService.desativarCliente(this.id).subscribe({
+      next: (resposta) => {
+        this.desativando = false;
+        this.cliente.ativo = resposta.ativo;
+      },
+      error: (erro) => {
+        this.desativando = false;
+        if (erro.status === 0) {
+          this.mensagemErro =
+            'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
+          return;
+        }
+
+        this.mensagemErro =
+          erro.error?.mensagens?.[0] ?? 'Não foi possível desativar o cliente.';
+      },
+    });
+  }
+
+  ativarCliente() {
+    if (this.ativando) {
+      return;
+    }
+
+    const confirmou = confirm('Deseja realmente ativar este cliente?');
+
+    if (!confirmou) {
+      return;
+    }
+    this.ativando = true;
+    this.clienteService.ativarCliente(this.id).subscribe({
+      next: (resposta) => {
+        this.ativando = false;
+        this.cliente.ativo = resposta.ativo;
+      },
+      error: (erro) => {
+        this.ativando = false;
+        if (erro.status === 0) {
+          this.mensagemErro =
+            'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
+          return;
+        }
+
+        this.mensagemErro =
+          erro.error?.mensagens?.[0] ?? 'Não foi possível ativar o cliente.';
+      },
+    });
   }
 }

@@ -130,6 +130,8 @@ export class EditarClientesComponent implements OnInit {
             'Não foi possível carregar os dados do cliente.';
         },
       });
+    } else {
+      this.mensagemErro = 'ID do cliente não informado.';
     }
   }
   atualizar() {
@@ -157,9 +159,14 @@ export class EditarClientesComponent implements OnInit {
 
     this.atualizando = true;
     this.clienteService.editarCliente(this.id, dadosAtualizacao).subscribe({
-      next: (clienteAtualizado) => {
+      next: () => {
         this.atualizando = false;
-        this.router.navigate(['/clientes']);
+
+        this.router.navigate(['/clientes'], {
+          state: {
+            mensagemSucesso: 'Cliente atualizado com sucesso!',
+          },
+        });
       },
 
       error: (erro) => {

@@ -33,11 +33,13 @@
         <strong>Situação:</strong>
         <span class="status-ativo">Ativo</span>
     </p>
+
     } @else {
     <p>
         <strong>Situação:</strong>
         <span class="status-inativo">Inativo</span>
     </p>
+
     }
 
     <p>
@@ -57,6 +59,8 @@
     </p>
     }
 </div>
+
+
 
 <div class="endereco-cliente">
     <h3>Endereço</h3>
@@ -97,6 +101,17 @@
         <strong>Estado:</strong>
         <span>{{ cliente.estado }}</span>
     </p>
+</div>
+<div class="acoes-cliente">
+    @if (cliente.ativo) {
+    <button type="button" class="botao-desativar" (click)="desativarCliente()" [disabled]="desativando">
+        {{ desativando ? 'Desativando...' : 'Desativar cliente' }}
+    </button>
+    } @else {
+    <button type="button" class="botao-ativar" (click)="ativarCliente()" [disabled]="ativando">
+        {{ ativando ? 'Ativando...' : 'Ativar cliente' }}
+    </button>
+    }
 </div>
 }
 

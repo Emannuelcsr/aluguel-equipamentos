@@ -31,7 +31,7 @@ export const routes: Routes = [
         path: 'clientes/detalhes/:id',
         component: DetalhesClienteComponent,
       },
-     {
+      {
         path: 'clientes/editar/:id',
         component: EditarClientesComponent,
       },
