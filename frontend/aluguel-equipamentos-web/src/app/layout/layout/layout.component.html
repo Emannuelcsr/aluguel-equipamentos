@@ -1,27 +1,27 @@
 <div class="layout">
 
-<header class="cabecalho">
-  <div class="marca-sistema">
-  <span class="icone-marca">🔧</span>
-  <div class="texto-marca">
-    <strong>Aluguel de Equipamentos</strong>
-    <small>Painel administrativo</small>
-  </div>
-</div>
+    <header class="cabecalho">
+        <div class="marca-sistema">
+            <span class="icone-marca">🔧</span>
+            <div class="texto-marca">
+                <strong>Aluguel de Equipamentos</strong>
+                <small>Painel administrativo</small>
+            </div>
+        </div>
 
-  <div class="area-usuario">
-    @if (usuario) {
-      <div class="informacoes-usuario">
-        <span>{{ usuario.nome }}</span>
-        <small>{{ usuario.perfil }}</small>
-      </div>
-    }
+        <div class="area-usuario">
+            @if (usuario) {
+            <div class="informacoes-usuario">
+                <span>{{ usuario.nome }}</span>
+                <small>{{ usuario.perfil }}</small>
+            </div>
+            }
 
-    <button type="button" class="botao-sair" (click)="sair()">
-      Sair
-    </button>
-  </div>
-</header>
+            <button type="button" class="botao-sair" (click)="sair()">
+                Sair
+            </button>
+        </div>
+    </header>
 
     <div class="corpo">
 
@@ -30,6 +30,7 @@
             <nav aria-label="Menu principal">
 
                 <ul>
+
                     <li>🏠 Início</li>
                     <li class="grupo-clientes">
                         <span class="titulo-grupo">👥 Clientes</span>
@@ -49,7 +50,7 @@
                             </li>
                         </ul>
                     </li>
-                               <li class="grupo-clientes">
+                    <li class="grupo-clientes">
                         <span class="titulo-grupo">👥 Categorias</span>
 
                         <ul class="submenu">
@@ -59,26 +60,21 @@
                                     Listar categorias
                                 </a>
                             </li>
-
+                            @if(ehAdministrador){
                             <li>
                                 <a routerLink="/categorias/novo" routerLinkActive="ativo">
                                     Nova categoria
                                 </a>
                             </li>
+                            }
                         </ul>
                     </li>
-
-
-
-
-
-
-
 
                     <li>🔧 Equipamentos</li>
                     <li>📅 Reservas</li>
                     <li>📦 Retiradas</li>
                     <li>↩️ Devoluções</li>
+
                 </ul>
 
             </nav>
@@ -88,7 +84,7 @@
         <main class="conteudo">
             <router-outlet></router-outlet>
         </main>
-
     </div>
+
 
 </div>

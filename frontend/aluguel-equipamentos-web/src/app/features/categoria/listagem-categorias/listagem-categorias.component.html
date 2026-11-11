@@ -4,9 +4,12 @@
     <p>Gerencie as categorias cadastrados no sistema.</p>
   </div>
 
+  @if(ehAdministrador){
   <a routerLink="/categorias/novo" class="botao-novo-categoria">
     + Nova Categoria
   </a>
+  }
+
 </div>
 
 <div class="painel-categorias">
@@ -39,6 +42,7 @@
         <th>ID</th>
         <th>NOME</th>
         <th>DESCRIÇÃO</th>
+        <th>AÇÕES</th>
       </tr>
     </thead>
     <tbody>
@@ -48,7 +52,18 @@
         <td>{{ categoria.id }}</td>
         <td>{{ categoria.nome}}</td>
         <td>{{ categoria.descricao }}</td>
-     </tr>
+
+        <td>
+          <a class="botao-detalhes" [routerLink]="['/categorias/detalhes/', categoria.id]">
+            Detalhes
+          </a>
+          @if(ehAdministrador){
+          <a class="botao-editar" [routerLink]="['/categorias/editar/', categoria.id]">
+            Editar
+          </a>
+        }
+        </td>
+      </tr>
       }@empty {
       @if (!carregando && !mensagemErro) {
       <tr>

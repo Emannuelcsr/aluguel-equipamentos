@@ -40,6 +40,7 @@ export class ListagemClientesComponent implements OnInit {
     if (this.carregando) {
       return;
     }
+     this.paginaSolicitada = pagina;
     this.carregando = true;
     this.mensagemErro = '';
     this.clienteService.listar(pagina, this.tamanhoPagina).subscribe({

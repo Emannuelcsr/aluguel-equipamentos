@@ -44,7 +44,7 @@ export class CadastroCategoriaComponent {
     }
 
     if (this.formularioCadastro.invalid) {
-      this.formularioCadastro.markAllAsTouched;
+      this.formularioCadastro.markAllAsTouched();
       return;
     }
 

@@ -4,6 +4,7 @@ import { CategoriaService } from '../service/categoria.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { RouterLink } from '@angular/router';
+import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 
 @Component({
   selector: 'app-listagem-categorias',
@@ -23,9 +24,17 @@ export class ListagemCategoriasComponent implements OnInit {
   totalElementos = 0;
   carregando = false;
   paginaSolicitada = 1;
+  ehAdministrador=false;
 
-  constructor(private categoriaService: CategoriaService) {}
+  constructor(private categoriaService: CategoriaService, private autenticacaoService: AutenticacaoService) {}
   ngOnInit(): void {
+
+    if (this.autenticacaoService.obterUsuario()?.perfil === 'ADMINISTRADOR') {
+      this.ehAdministrador = true;
+    } else {
+      this.ehAdministrador = false;
+    }
+
     this.mensagemSucesso = history.state.mensagemSucesso ?? '';
 
     if (this.mensagemSucesso) {
@@ -42,6 +51,7 @@ export class ListagemCategoriasComponent implements OnInit {
     if (this.carregando) {
       return;
     }
+      this.paginaSolicitada = pagina;
     this.carregando = true;
     this.mensagemErro = '';
 
@@ -64,7 +74,7 @@ export class ListagemCategoriasComponent implements OnInit {
         }
 
         this.mensagemErro =
-          erro.error?.mensagens?.[0] ?? 'Não foi possível listar os clientes.';
+          erro.error?.mensagens?.[0] ?? 'Não foi possível listar as categorias.';
       },
     });
   }

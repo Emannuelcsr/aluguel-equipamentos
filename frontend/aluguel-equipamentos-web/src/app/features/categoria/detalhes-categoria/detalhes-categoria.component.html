@@ -1,0 +1,73 @@
+
+@if (mensagemErro) {
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+  </div>
+}
+
+@if (mensagemSucesso) {
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
+}
+
+@if (carregando) {
+  <p>Carregando categoria...</p>
+}
+
+@if (categoria && !carregando) {
+  <div class="dados-categoria">
+    <h3>Dados da categoria</h3>
+    <h2>{{ categoria.nome }}</h2>
+
+    <p>
+      <strong>Descrição:</strong>
+      <span>{{ categoria.descricao || 'Não informada' }}</span>
+    </p>
+
+    <p>
+      <strong>Situação:</strong>
+      @if (categoria.ativo) {
+        <span class="status-ativo">Ativo</span>
+      } @else {
+        <span class="status-inativo">Inativo</span>
+      }
+    </p>
+
+    <p>
+      <strong>Data de criação:</strong>
+      <span>{{ categoria.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+
+    <p>
+      <strong>Última atualização:</strong>
+      <span>{{ categoria.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+  </div>
+
+  @if (ehAdministrador) {
+    <div class="acoes-categoria">
+      @if (categoria.ativo) {
+        <button type="button"
+                class="botao-desativar"
+                (click)="desativarCategoria()"
+                [disabled]="desativando">
+          {{ desativando ? 'Desativando...' : 'Desativar categoria' }}
+        </button>
+      } @else {
+        <button type="button"
+                class="botao-ativar"
+                (click)="ativarCategoria()"
+                [disabled]="ativando">
+          {{ ativando ? 'Ativando...' : 'Ativar categoria' }}
+        </button>
+      }
+    </div>
+  }
+}
+
+<a routerLink="/categorias" class="botao-voltar">
+  ← Voltar à listagem
+</a>

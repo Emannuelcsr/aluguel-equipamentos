@@ -1,0 +1,71 @@
+<div class="cabecalho-pagina">
+    <h2>Editar categoria</h2>
+    <p>Atualize as informações cadastrais da categoria.</p>
+</div>
+
+@if (carregando) {
+<p>Carregando dados da categoria...</p>
+}
+<div class="painel-cadastro">
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+    @if (categoria && !carregando) {
+    <form [formGroup]="formularioAtualizacao" (ngSubmit)="atualizar()">
+
+        <div>
+            <label for="nome">Nome</label>
+
+            <input id="nome" formControlName="nome" type="text" placeholder="Digite o nome da categoria">
+
+            @if (
+            formularioAtualizacao.controls.nome.touched &&
+            formularioAtualizacao.controls.nome.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.nome.hasError('required')) {
+            <p>Nome é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nome.hasError('minlength')) {
+            <p>Nome deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nome.hasError('maxlength')) {
+            <p>Nome deve ter no máximo 100 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        <div>
+            <label for="descricao">Descrição</label>
+            <input id="descricao" formControlName="descricao" type="text" placeholder="Digite a descrição">
+
+            @if (
+            formularioAtualizacao.controls.descricao.touched &&
+            formularioAtualizacao.controls.descricao.invalid
+            ) {
+            @if (formularioAtualizacao.controls.descricao.hasError('maxlength')) {
+            <p>Descricao deve ter no máximo 255 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div class="acoes-formulario">
+            <a routerLink="/categorias" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="atualizando">
+                {{ atualizando ? 'Atualizando...' : 'Atualizar categoria' }}
+            </button>
+        </div>
+    </form>
+    }
+
+</div>

@@ -16,6 +16,7 @@ import { UsuarioAutenticadoResponse } from '../../core/models/usuario-autenticad
 })
 export class LayoutComponent  implements OnInit{
   usuario: UsuarioAutenticadoResponse | null = null;
+  ehAdministrador = false;
 
   constructor(
     private autenticacaoService: AutenticacaoService,
@@ -23,7 +24,16 @@ export class LayoutComponent  implements OnInit{
   ) {}
 
 ngOnInit(): void {
+  
+
   this.usuario = this.autenticacaoService.obterUsuario();
+
+  if(this.usuario?.perfil == 'ADMINISTRADOR'){
+    this.ehAdministrador = true;
+  }else{
+    this.ehAdministrador = false;
+  }
+  
 }
 
   sair(): void {
