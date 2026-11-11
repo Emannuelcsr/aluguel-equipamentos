@@ -7,6 +7,8 @@ import { loginGuard } from './core/guards/login.guard';
 import { LayoutComponent } from './layout/layout/layout.component';
 import { DetalhesClienteComponent } from './features/clientes/detalhes-cliente/detalhes-cliente.component';
 import { EditarClientesComponent } from './features/clientes/editar-clientes/editar-clientes.component';
+import { ListagemCategoriasComponent } from './features/categoria/listagem-categorias/listagem-categorias.component';
+import { CadastroCategoriaComponent} from './features/categoria/cadastro-categoria/categoria.component';
 
 export const routes: Routes = [
   {
@@ -34,6 +36,14 @@ export const routes: Routes = [
       {
         path: 'clientes/editar/:id',
         component: EditarClientesComponent,
+      },
+            {
+        path: 'categorias',
+        component: ListagemCategoriasComponent,
+      },
+            {
+        path: 'categorias/novo',
+        component: CadastroCategoriaComponent,
       },
     ],
   },

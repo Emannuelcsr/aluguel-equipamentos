@@ -1,0 +1,76 @@
+<div class="cabecalho-pagina">
+  <div>
+    <h2>Categorias</h2>
+    <p>Gerencie as categorias cadastrados no sistema.</p>
+  </div>
+
+  <a routerLink="/categorias/novo" class="botao-novo-categoria">
+    + Nova Categoria
+  </a>
+</div>
+
+<div class="painel-categorias">
+
+  @if (mensagemErro) {
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+    <button type="button" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+      {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+    </button>
+  </div>
+  }
+
+  @if (carregando) {
+  <p>Carregando categorias...</p>
+  }
+
+  @if (mensagemSucesso) {
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
+  }
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>NOME</th>
+        <th>DESCRIÇÃO</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      @for (categoria of categorias; track categoria.id) {
+      <tr>
+        <td>{{ categoria.id }}</td>
+        <td>{{ categoria.nome}}</td>
+        <td>{{ categoria.descricao }}</td>
+     </tr>
+      }@empty {
+      @if (!carregando && !mensagemErro) {
+      <tr>
+        <td colspan="5">Nenhuma categoria encontrada.</td>
+      </tr>
+      }
+      }
+
+    </tbody>
+  </table>
+
+  <div class="paginacao">
+    <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+      ← Voltar
+    </button>
+
+    <span class="informacao-pagina">
+      Página {{ paginaAtual }} de {{ totalPaginas }}
+    </span>
+
+    <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+      Próxima →
+    </button>
+  </div>
+</div>

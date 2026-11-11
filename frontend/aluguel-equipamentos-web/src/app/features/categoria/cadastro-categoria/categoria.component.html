@@ -1,0 +1,67 @@
+<div class="cabecalho-pagina">
+    <h2>Novo categoria</h2>
+    <p>Preencha os dados abaixo para cadastrar um categoria.</p>
+</div>
+
+<div class="painel-cadastro">
+    <h3>Dados do categoria</h3>
+
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+    <form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
+        <div>
+            <label for="nome">Nome</label>
+
+            <input id="nome" formControlName="nome" type="text" placeholder="Digite o nome da categoria">
+
+            @if (
+            formularioCadastro.controls.nome.touched &&
+            formularioCadastro.controls.nome.invalid
+            ) {
+
+            @if (formularioCadastro.controls.nome.hasError('required')) {
+            <p>Nome é obrigatório.</p>
+            }
+
+            @if (formularioCadastro.controls.nome.hasError('minlength')) {
+            <p>Nome ou razão social deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioCadastro.controls.nome.hasError('maxlength')) {
+            <p>Nome ou razão social deve ter no máximo 100 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        <div>
+            <label for="descricao">Descricao</label>
+            <input id="descricao" formControlName="descricao" type="text" placeholder="Digite a descrição">
+
+            @if (
+            formularioCadastro.controls.descricao.touched &&
+            formularioCadastro.controls.descricao.invalid
+            ) {
+            @if (formularioCadastro.controls.descricao.hasError('maxlength')) {
+            <p>Descricao deve ter no máximo 255 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div class="acoes-formulario">
+            <a routerLink="/categorias" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="criando">
+                {{ criando ? 'Cadastrando...' : 'Cadastrar categoria' }}
+            </button>
+        </div>
+    </form>
+
+</div>
