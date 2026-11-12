@@ -1,0 +1,83 @@
+
+@if (mensagemErro) {
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+  </div>
+}
+
+@if (mensagemSucesso) {
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
+}
+
+@if (carregando) {
+  <p>Carregando equipamento...</p>
+}
+
+@if (equipamento && !carregando) {
+  <div class="dados-equipamento">
+    <h3>Dados da equipamento</h3>
+    <h2>{{ equipamento.nome }}</h2>
+
+    <p>
+      <strong>Descrição:</strong>
+      <span>{{ equipamento.descricao || 'Não informada' }}</span>
+    </p>
+
+       <p>
+      <strong>Valor da diária:</strong>
+      <span>R$:{{ equipamento.valorDiaria }}</span>
+    </p>
+
+    <p>
+      <strong>Situação:</strong>
+      @if (equipamento.ativo) {
+        <span class="status-ativo">Ativo</span>
+      } @else {
+        <span class="status-inativo">Inativo</span>
+      }
+    </p>
+
+    <p>
+      <strong>Data de criação:</strong>
+      <span>{{ equipamento.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+
+    <p>
+      <strong>Última atualização:</strong>
+      <span>{{ equipamento.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+
+        <p>
+      <strong>Categoria:</strong>
+      <span>{{ equipamento.categoriaNome}}</span>
+    </p>
+  </div>
+
+  @if (ehAdministrador) {
+    <div class="acoes-equipamento">
+      @if (equipamento.ativo) {
+        <button type="button"
+                class="botao-desativar"
+                (click)="desativarEquipamento()"
+                [disabled]="desativando">
+          {{ desativando ? 'Desativando...' : 'Desativar equipamento' }}
+        </button>
+      } @else {
+        <button type="button"
+                class="botao-ativar"
+                (click)="ativarEquipamento()"
+                [disabled]="ativando">
+          {{ ativando ? 'Ativando...' : 'Ativar equipamento' }}
+        </button>
+      }
+    </div>
+  }
+}
+
+<a routerLink="/equipamentos" class="botao-voltar">
+  ← Voltar à listagem
+</a>

@@ -1,5 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.categoria.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +55,15 @@ public class CategoriaController {
 
 		return ResponseEntity.ok(resposta);
 	}
+	
+	@GetMapping("/listarAtivas")
+	public ResponseEntity<List<CategoriaResponse>> listarAtivas(){
+
+		List<CategoriaResponse> response = categoriaService.listarAtivoTrue();
+
+		return ResponseEntity.ok(response);
+	}
+	
 
 	@PutMapping("/{id}")
 	public ResponseEntity<CategoriaResponse> atualizar(@PathVariable Long id,

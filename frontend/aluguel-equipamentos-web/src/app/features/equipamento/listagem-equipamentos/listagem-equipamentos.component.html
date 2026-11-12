@@ -1,0 +1,91 @@
+<div class="cabecalho-pagina">
+  <div>
+    <h2>Equipamentos</h2>
+    <p>Gerencie os equipamentos cadastrados no sistema.</p>
+  </div>
+
+  @if(ehAdministrador){
+  <a routerLink="/equipamentos/novo" class="botao-novo-equipamento">
+    + Novo equipamento
+  </a>
+  }
+
+</div>
+
+<div class="painel-equipamentos">
+
+  @if (mensagemErro) {
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+    <button type="button" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+      {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+    </button>
+  </div>
+  }
+
+  @if (carregando) {
+  <p>Carregando equipamentos...</p>
+  }
+
+  @if (mensagemSucesso) {
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
+  }
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>NOME</th>
+        <th>DESCRIÇÃO</th>        
+        <th>AÇÕES</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      @for (equipamento of equipamentos; track equipamento.id) {
+      <tr>
+        <td>{{ equipamento.id }}</td>
+        <td>{{ equipamento.nome}}</td>
+        <td>{{ equipamento.descricao }}</td>
+
+        <td>
+          <a class="botao-detalhes" [routerLink]="['/equipamentos/detalhes/', equipamento.id]">
+            Detalhes
+          </a>
+          @if(ehAdministrador){
+          <a class="botao-editar" [routerLink]="['/equipamentos/editar/', equipamento.id]">
+            Editar
+          </a>
+        }
+        </td>
+      </tr>
+      }@empty {
+      @if (!carregando && !mensagemErro) {
+      <tr>
+        <td colspan="5">Nenhuma equipamento encontrado.</td>
+      </tr>
+      }
+      }
+
+    </tbody>
+  </table>
+
+  <div class="paginacao">
+    <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+      ← Voltar
+    </button>
+
+    <span class="informacao-pagina">
+      Página {{ paginaAtual }} de {{ totalPaginas }}
+    </span>
+
+    <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+      Próxima →
+    </button>
+  </div>
+</div>

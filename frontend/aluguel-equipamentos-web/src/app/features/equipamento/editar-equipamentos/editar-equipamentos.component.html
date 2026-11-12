@@ -1,0 +1,122 @@
+<div class="cabecalho-pagina">
+    <h2>Editar equipamento</h2>
+    <p>Atualize as informações cadastrais do equipamento.</p>
+</div>
+
+@if (carregando) {
+<p>Carregando dados do equipamento...</p>
+}
+<div class="painel-cadastro">
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+    @if (equipamento && !carregando) {
+    <form [formGroup]="formularioAtualizacao" (ngSubmit)="atualizar()">
+
+        <div>
+            <label for="nome">Nome</label>
+
+            <input id="nome" formControlName="nome" type="text" placeholder="Digite o nome do equipamento">
+
+            @if (
+            formularioAtualizacao.controls.nome.touched &&
+            formularioAtualizacao.controls.nome.invalid
+            ) {
+
+            @if (formularioAtualizacao.controls.nome.hasError('required')) {
+            <p>Nome é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nome.hasError('minlength')) {
+            <p>Nome deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioAtualizacao.controls.nome.hasError('maxlength')) {
+            <p>Nome deve ter no máximo 150 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        <div>
+            <label for="descricao">Descricao</label>
+            <input id="descricao" formControlName="descricao" type="text" placeholder="Digite a descrição">
+
+            @if (
+            formularioAtualizacao.controls.descricao.touched &&
+            formularioAtualizacao.controls.descricao.invalid
+            ) {
+            @if (formularioAtualizacao.controls.descricao.hasError('maxlength')) {
+            <p>Descricao deve ter no máximo 500 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="valorDiaria">Valor da diária</label>
+            <input id="valorDiaria" formControlName="valorDiaria" type="number" placeholder="Digite o valor da diária">
+
+            @if (
+            formularioAtualizacao.controls.valorDiaria.touched &&
+            formularioAtualizacao.controls.valorDiaria.invalid
+            )
+
+            {
+            @if (formularioAtualizacao.controls.valorDiaria.hasError('required')) {
+            <p>Valor da Diaria é obrigatório.</p>
+            }
+
+            @if (formularioAtualizacao.controls.valorDiaria.hasError('min')) {
+            <p>Valor da diária é no min R$1,00.</p>
+            }
+            @if (formularioAtualizacao.controls.valorDiaria.hasError('max')) {
+            <p>Valor da diária é no max R$100.000,00.</p>
+            }
+            }
+        </div>
+
+
+        <div>
+            <label for="equipamentoId">equipamento</label>
+
+            <select id="categoriaId" formControlName="equipamentoId">
+                <option [ngValue]="null">Selecione a categoria</option>
+                @for (categoria of categorias; track categoria.id) {
+                <option [ngValue]="categoria.id">
+                    {{ categoria.nome }}
+                </option>
+                }
+            </select>
+
+            @if (
+            formularioAtualizacao.controls.categoriaId.touched &&
+            formularioAtualizacao.controls.categoriaId.invalid
+            ) {
+            @if (formularioAtualizacao.controls.categoriaId.hasError('required')) {
+            <p>Selecione uma categoria.</p>
+            }
+            }
+        </div>
+
+
+
+
+
+
+        <div class="acoes-formulario">
+            <a routerLink="/equipamentos" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="atualizando">
+                {{ atualizando ? 'Atualizando...' : 'Atualizar equipamento' }}
+            </button>
+        </div>
+    </form>
+    }
+
+</div>

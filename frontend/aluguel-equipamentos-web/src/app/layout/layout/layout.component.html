@@ -70,7 +70,29 @@
                         </ul>
                     </li>
 
-                    <li>🔧 Equipamentos</li>
+                    <li class="grupo-clientes">
+                        <span class="titulo-grupo">🔧 Equipamentos</span>
+
+                        <ul class="submenu">
+                            <li>
+                                <a routerLink="/equipamentos" routerLinkActive="ativo"
+                                    [routerLinkActiveOptions]="{ exact: true }">
+                                    Listar Equipamentos
+                                </a>
+                            </li>
+                            @if(ehAdministrador){
+                            <li>
+                                <a routerLink="/equipamentos/novo" routerLinkActive="ativo">
+                                    Nova equipamento
+                                </a>
+                            </li>
+                            }
+                        </ul>
+                    </li>
+
+
+
+
                     <li>📅 Reservas</li>
                     <li>📦 Retiradas</li>
                     <li>↩️ Devoluções</li>

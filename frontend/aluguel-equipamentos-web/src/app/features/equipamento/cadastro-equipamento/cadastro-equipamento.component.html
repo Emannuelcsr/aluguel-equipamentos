@@ -1,0 +1,121 @@
+<div class="cabecalho-pagina">
+    <h2>Novo equipamento</h2>
+    <p>Preencha os dados abaixo para cadastrar um equipamento.</p>
+</div>
+
+<div class="painel-cadastro">
+    <h3>Dados do equipamento</h3>
+
+    @if (mensagemErro) {
+    <div class="alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+    <form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
+        <div>
+            <label for="nome">Nome</label>
+
+            <input id="nome" formControlName="nome" type="text" placeholder="Digite o nome do equipamento">
+
+            @if (
+            formularioCadastro.controls.nome.touched &&
+            formularioCadastro.controls.nome.invalid
+            ) {
+
+            @if (formularioCadastro.controls.nome.hasError('required')) {
+            <p>Nome é obrigatório.</p>
+            }
+
+            @if (formularioCadastro.controls.nome.hasError('minlength')) {
+            <p>Nome deve ter pelo menos 3 caracteres.</p>
+            }
+
+            @if (formularioCadastro.controls.nome.hasError('maxlength')) {
+            <p>Nome deve ter no máximo 150 caracteres.</p>
+            }
+
+            }
+        </div>
+
+        <div>
+            <label for="descricao">Descricao</label>
+            <input id="descricao" formControlName="descricao" type="text" placeholder="Digite a descrição">
+
+            @if (
+            formularioCadastro.controls.descricao.touched &&
+            formularioCadastro.controls.descricao.invalid
+            ) {
+            @if (formularioCadastro.controls.descricao.hasError('maxlength')) {
+            <p>Descricao deve ter no máximo 500 caracteres.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="valorDiaria">Valor da diária</label>
+            <input id="valorDiaria" formControlName="valorDiaria" type="number" placeholder="Digite o valor da diária">
+
+            @if (
+            formularioCadastro.controls.valorDiaria.touched &&
+            formularioCadastro.controls.valorDiaria.invalid
+            )
+
+            {
+            @if (formularioCadastro.controls.valorDiaria.hasError('required')) {
+            <p>Valor da Diaria é obrigatório.</p>
+            }
+
+            @if (formularioCadastro.controls.valorDiaria.hasError('min')) {
+            <p>Valor da diária é no min R$1,00.</p>
+            }
+            @if (formularioCadastro.controls.valorDiaria.hasError('max')) {
+            <p>Valor da diária é no max R$100.000,00.</p>
+            }
+            }
+        </div>
+
+
+        <div>
+            <label for="categoriaId">Categoria</label>
+
+            <select id="categoriaId" formControlName="categoriaId">
+                <option [ngValue]="null">Selecione a categoria</option>
+                @for (categoria of categorias; track categoria.id) {
+                <option [ngValue]="categoria.id">
+                    {{ categoria.nome }}
+                </option>
+                }
+            </select>
+
+            @if (
+            formularioCadastro.controls.categoriaId.touched &&
+            formularioCadastro.controls.categoriaId.invalid
+            ) {
+            @if (formularioCadastro.controls.categoriaId.hasError('required')) {
+            <p>Selecione uma categoria.</p>
+            }
+            }
+
+
+        </div>
+
+
+
+
+
+
+
+        <div class="acoes-formulario">
+            <a routerLink="/equipamentos" class="botao-voltar">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao-cadastrar" [disabled]="criando || categorias.length === 0">
+                {{ criando ? 'Cadastrando...' : 'Cadastrar equipamento' }}
+            </button>
+        </div>
+    </form>
+
+</div>

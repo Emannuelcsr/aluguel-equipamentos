@@ -11,6 +11,11 @@ import { ListagemCategoriasComponent } from './features/categoria/listagem-categ
 import { CadastroCategoriaComponent } from './features/categoria/cadastro-categoria/categoria.component';
 import { EditarCategoriasComponent } from './features/categoria/editar-categorias/editar-categorias.component';
 import { DetalhesCategoriaComponent } from './features/categoria/detalhes-categoria/detalhes-categoria.component';
+import { administradorGuard } from './core/guards/administrador.guard';
+import { CadastroEquipamentoComponent } from './features/equipamento/cadastro-equipamento/cadastro-equipamento.component';
+import { ListagemEquipamentosComponent } from './features/equipamento/listagem-equipamentos/listagem-equipamentos.component';
+import { DetalhesEquipamentosComponent } from './features/equipamento/detalhes-equipamentos/detalhes-equipamentos.component';
+import { EditarEquipamentosComponent } from './features/equipamento/editar-equipamentos/editar-equipamentos.component';
 
 export const routes: Routes = [
   {
@@ -46,14 +51,34 @@ export const routes: Routes = [
       {
         path: 'categorias/novo',
         component: CadastroCategoriaComponent,
+        canActivate: [administradorGuard],
       },
       {
         path: 'categorias/editar/:id',
         component: EditarCategoriasComponent,
+        canActivate: [administradorGuard],
       },
       {
         path: 'categorias/detalhes/:id',
         component: DetalhesCategoriaComponent,
+      },
+      {
+        path: 'equipamentos',
+        component: ListagemEquipamentosComponent,
+      },
+      {
+        path: 'equipamentos/novo',
+        component: CadastroEquipamentoComponent,
+        canActivate: [administradorGuard],
+      },
+      {
+        path: 'equipamentos/detalhes/:id',
+        component: DetalhesEquipamentosComponent,
+      },
+      {
+        path: 'equipamentos/editar/:id',
+        component: EditarEquipamentosComponent,
+        canActivate: [administradorGuard],
       },
     ],
   },

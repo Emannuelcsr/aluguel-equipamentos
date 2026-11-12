@@ -1,5 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.categoria.service;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -121,6 +122,22 @@ public class CategoriaService {
 
 	}
 
+	@Transactional(readOnly = true)
+	public List<CategoriaResponse> listarAtivoTrue() {
+
+		List<Categoria> categorias = categoriaRepository.findAllByAtivoTrue();
+		
+		List<CategoriaResponse> respostas = categorias.stream()
+			    .map(categoria -> CategoriaResponse.de(categoria))
+			    .toList();
+		
+		
+		return respostas;
+
+	}
+	
+	
+	
 	@Transactional
 	public CategoriaResponse atualizar(AtualizarCategoriaRequest request, Long id) {
 

@@ -22,6 +22,12 @@ export class CategoriaService {
     );
   }
 
+  listarAtivas() {
+    return this.http.get<CategoriaResponse[]>(
+      `${API_URL}/categorias/listarAtivas`,
+    );
+  }
+
   buscarPorId(id: number) {
     return this.http.get<CategoriaResponse>(`${API_URL}/categorias/${id}`);
   }
