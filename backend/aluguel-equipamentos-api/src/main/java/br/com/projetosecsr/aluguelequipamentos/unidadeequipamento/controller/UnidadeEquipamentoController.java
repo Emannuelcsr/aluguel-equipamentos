@@ -52,6 +52,19 @@ public class UnidadeEquipamentoController {
 
 		return ResponseEntity.ok(resposta);
 	}
+	
+	
+	@GetMapping("/equipamento/{equipamentoId}")
+	public ResponseEntity<PaginaResponse<UnidadeEquipamentoResponse>> listarPaginadoEquipamentoEspecifico(
+	        Pageable paginacao,
+	        @PathVariable Long equipamentoId) {
+
+	    PaginaResponse<UnidadeEquipamentoResponse> resposta =
+	            unidadeEquipamentoService.listarPaginadoEquipamentoEspecifico(
+	                    paginacao, equipamentoId);
+
+	    return ResponseEntity.ok(resposta);
+	}
 
 	@PatchMapping("/{id}/ativar")
 	public ResponseEntity<UnidadeEquipamentoResponse> ativar(@PathVariable Long id) {

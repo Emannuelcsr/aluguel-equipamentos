@@ -3,11 +3,11 @@ import { EquipamentoResponse } from '../../../core/models/equipamento-response';
 import { EquipamentoService } from '../service/equipamento.service';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-detalhes-equipamentos',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe,CurrencyPipe],
   templateUrl: './detalhes-equipamentos.component.html',
   styleUrl: './detalhes-equipamentos.component.scss',
 })

@@ -40,13 +40,17 @@
         </div>
 
         <div>
-            <label for="descricao">Descricao</label>
+            <label for="descricao">Descrição</label>
             <input id="descricao" formControlName="descricao" type="text" placeholder="Digite a descrição">
 
             @if (
             formularioCadastro.controls.descricao.touched &&
             formularioCadastro.controls.descricao.invalid
             ) {
+            @if (formularioCadastro.controls.descricao.hasError('minlength')) {
+            <p>Descricao deve ter no mínimo 3 caracteres.</p>
+            }
+
             @if (formularioCadastro.controls.descricao.hasError('maxlength')) {
             <p>Descricao deve ter no máximo 500 caracteres.</p>
             }

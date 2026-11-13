@@ -19,7 +19,7 @@
 
 @if (equipamento && !carregando) {
   <div class="dados-equipamento">
-    <h3>Dados da equipamento</h3>
+    <h3>Dados do equipamento</h3>
     <h2>{{ equipamento.nome }}</h2>
 
     <p>
@@ -29,7 +29,7 @@
 
        <p>
       <strong>Valor da diária:</strong>
-      <span>R$:{{ equipamento.valorDiaria }}</span>
+      <span>{{ equipamento.valorDiaria | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
     </p>
 
     <p>

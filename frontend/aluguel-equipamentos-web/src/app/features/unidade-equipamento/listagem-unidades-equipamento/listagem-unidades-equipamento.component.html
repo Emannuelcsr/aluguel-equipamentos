@@ -1,0 +1,121 @@
+<div class="cabecalho-pagina">
+    <div>
+        <h2>{{equipamento?.nome }}</h2>
+        <p>Gerencie as unidades físicas deste equipamento.</p>
+    </div>
+
+    @if (ehAdministrador) {
+    <button type="button" class="botao-cadastrar" (click)="abrirModalCadastro()">
+        + Adicionar unidade
+    </button>
+    }
+
+
+</div>
+
+<div class="painel-equipamentos">
+
+    @if (mensagemErro) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+        <button type="button" (click)="listarPorEquipamento(paginaSolicitada)" [disabled]="carregando">
+            {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+        </button>
+    </div>
+    }
+
+    @if (carregando) {
+    <p>Carregando equipamentos...</p>
+    }
+
+    @if (mensagemSucesso) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucesso }}</span>
+    </div>
+    }
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>CÓDIGO</th>
+                <th>STATUS</th>
+                <th>SITUAÇÃO</th>
+                <th>AÇÕES</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @for (unidadeEquipamento of unidadeEquipamentos; track unidadeEquipamento.id) {
+            <tr>
+                <td>{{ unidadeEquipamento.codigo }}</td>
+                <td>{{ unidadeEquipamento.status}}</td>
+                <td> @if (unidadeEquipamento.ativo) {
+                    <span class="status-ativo">Ativo</span>
+                    } @else {
+                    <span class="status-inativo">Inativo</span>
+                    }
+                </td>
+
+
+
+                <td>
+                    <!-- Aqui ficarão as ações da unidade -->
+                </td>
+
+
+            </tr>
+            }@empty {
+            @if (!carregando && !mensagemErro) {
+            <tr>
+                <td colspan="5">Nenhuma unidade encontrada.</td>
+            </tr>
+            }
+            }
+
+        </tbody>
+    </table>
+
+    <div class="paginacao">
+        <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+            ← Voltar
+        </button>
+
+        <span class="informacao-pagina">
+            Página {{ paginaAtual }} de {{ totalPaginas }}
+        </span>
+
+        <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+            Próxima →
+        </button>
+    </div>
+
+
+</div>
+
+
+@if (modalCadastroAberto) {
+<div class="modal-overlay">
+    <div class="modal-conteudo">
+
+        <h3>Adicionar unidade</h3>
+
+        <p>
+            Deseja cadastrar uma nova unidade para este equipamento?
+        </p>
+
+        <div class="modal-acoes">
+            <button type="button" (click)="fecharModalCadastro()">
+                Cancelar
+            </button>
+
+            <button type="button" (click)="cadastrarUnidade()" [disabled]="cadastrandoUnidade">
+                {{ cadastrandoUnidade ? 'Cadastrando...' : 'Confirmar cadastro' }}
+            </button>
+        </div>
+
+    </div>
+</div>
+}

@@ -41,7 +41,7 @@
       <tr>
         <th>ID</th>
         <th>NOME</th>
-        <th>DESCRIÇÃO</th>        
+        <th>DESCRIÇÃO</th>
         <th>AÇÕES</th>
       </tr>
     </thead>
@@ -51,17 +51,21 @@
       <tr>
         <td>{{ equipamento.id }}</td>
         <td>{{ equipamento.nome}}</td>
-        <td>{{ equipamento.descricao }}</td>
+        <td>{{ equipamento.categoriaNome}}</td>
 
         <td>
           <a class="botao-detalhes" [routerLink]="['/equipamentos/detalhes/', equipamento.id]">
             Detalhes
           </a>
+          <a class="botao-unidades" [routerLink]="['/equipamentos', equipamento.id, 'unidades']">
+            Unidades
+          </a>
+
           @if(ehAdministrador){
           <a class="botao-editar" [routerLink]="['/equipamentos/editar/', equipamento.id]">
             Editar
           </a>
-        }
+          }
         </td>
       </tr>
       }@empty {

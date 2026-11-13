@@ -11,6 +11,7 @@ import {
 import { AtualizarEquipamentoRequest } from '../../../core/models/atualizar-equipamento-request';
 import { CategoriaService } from '../../categoria/service/categoria.service';
 import { CategoriaResponse } from '../../../core/models/categoria-response';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-editar-equipamentos',
@@ -25,6 +26,7 @@ export class EditarEquipamentosComponent implements OnInit {
   id!: number;
   atualizando = false;
   categorias: CategoriaResponse[] = [];
+  categoriaAtualInativa = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -61,51 +63,47 @@ export class EditarEquipamentosComponent implements OnInit {
   ngOnInit(): void {
     const idParametro = this.route.snapshot.paramMap.get('id');
 
-    if (idParametro) {
-      this.id = Number(idParametro);
-
-      if (!Number.isInteger(this.id) || this.id <= 0) {
-        this.mensagemErro = 'ID do equipamento inválido.';
-        return;
-      }
-
-      this.carregando = true;
-
-      this.equipamentoService.buscarPorId(this.id).subscribe({
-        next: (equipamento) => {
-          this.carregando = false;
-          this.equipamento = equipamento;
-          this.formularioAtualizacao.patchValue({
-            nome: equipamento.nome,
-            descricao: equipamento.descricao ?? '',
-            valorDiaria:equipamento.valorDiaria,
-            categoriaId:equipamento.categoriaId,
-          });
-        },
-        error: (erro) => {
-          this.carregando = false;
-          if (erro.status === 0) {
-            this.mensagemErro =
-              'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
-            return;
-          }
-
-          this.mensagemErro =
-            erro.error?.mensagens?.[0] ??
-            'Não foi possível carregar os dados do equipamento.';
-        },
-      });
-    } else {
+    if (!idParametro) {
       this.mensagemErro = 'ID do equipamento não informado.';
+      return;
     }
 
+    this.id = Number(idParametro);
 
- this.categoriaService.listarAtivas().subscribe({
+    if (!Number.isInteger(this.id) || this.id <= 0) {
+      this.mensagemErro = 'ID do equipamento inválido.';
+      return;
+    }
+
+    this.carregando = true;
+
+    forkJoin({
+      equipamento: this.equipamentoService.buscarPorId(this.id),
+      categorias: this.categoriaService.listarAtivas(),
+    }).subscribe({
       next: (resposta) => {
-        this.categorias = resposta;
+        this.carregando = false;
+
+        this.equipamento = resposta.equipamento;
+        this.categorias = resposta.categorias;
+
+        const categoriaEstaAtiva = this.categorias.some(
+          (categoria) => categoria.id === this.equipamento.categoriaId,
+        );
+
+        this.categoriaAtualInativa = !categoriaEstaAtiva;
+
+        this.formularioAtualizacao.patchValue({
+          nome: this.equipamento.nome,
+          descricao: this.equipamento.descricao ?? '',
+          valorDiaria: this.equipamento.valorDiaria,
+          categoriaId: categoriaEstaAtiva ? this.equipamento.categoriaId : null,
+        });
       },
+
       error: (erro) => {
-        
+        this.carregando = false;
+
         if (erro.status === 0) {
           this.mensagemErro =
             'Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.';
@@ -114,10 +112,9 @@ export class EditarEquipamentosComponent implements OnInit {
 
         this.mensagemErro =
           erro.error?.mensagens?.[0] ??
-          'Não foi possível carregar as categorias.';
+          'Não foi possível carregar os dados do equipamento ou as categorias.';
       },
     });
-
   }
 
   atualizar() {
@@ -129,8 +126,6 @@ export class EditarEquipamentosComponent implements OnInit {
       this.formularioAtualizacao.markAllAsTouched();
       return;
     }
-
-    const dados = this.formularioAtualizacao.getRawValue();
 
     const dadosCadastro = this.formularioAtualizacao.getRawValue();
 
@@ -156,7 +151,7 @@ export class EditarEquipamentosComponent implements OnInit {
       next: (resposta) => {
         this.atualizando = false;
 
-        this.router.navigate(['/categorias'], {
+        this.router.navigate(['/equipamentos'], {
           state: {
             mensagemSucesso: 'Equipamento atualizado com sucesso!',
           },
@@ -172,7 +167,8 @@ export class EditarEquipamentosComponent implements OnInit {
         }
 
         this.mensagemErro =
-          erro.error?.mensagens?.[0] ?? 'Não foi possível editar o equipamento.';
+          erro.error?.mensagens?.[0] ??
+          'Não foi possível editar o equipamento.';
       },
     });
   }

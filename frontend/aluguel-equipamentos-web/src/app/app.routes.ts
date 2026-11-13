@@ -16,6 +16,7 @@ import { CadastroEquipamentoComponent } from './features/equipamento/cadastro-eq
 import { ListagemEquipamentosComponent } from './features/equipamento/listagem-equipamentos/listagem-equipamentos.component';
 import { DetalhesEquipamentosComponent } from './features/equipamento/detalhes-equipamentos/detalhes-equipamentos.component';
 import { EditarEquipamentosComponent } from './features/equipamento/editar-equipamentos/editar-equipamentos.component';
+import { ListagemUnidadesEquipamentoComponent } from './features/unidade-equipamento/listagem-unidades-equipamento/listagem-unidades-equipamento.component';
 
 export const routes: Routes = [
   {
@@ -79,6 +80,10 @@ export const routes: Routes = [
         path: 'equipamentos/editar/:id',
         component: EditarEquipamentosComponent,
         canActivate: [administradorGuard],
+      },
+      {
+        path: 'equipamentos/:id/unidades',
+        component: ListagemUnidadesEquipamentoComponent,
       },
     ],
   },

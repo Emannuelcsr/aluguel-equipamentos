@@ -107,6 +107,20 @@ public class UnidadeEquipamentoService {
 
 	}
 
+	
+	@Transactional(readOnly = true)
+	public PaginaResponse<UnidadeEquipamentoResponse> listarPaginadoEquipamentoEspecifico(Pageable paginacao, Long equipamentoId) {
+
+		Page<UnidadeEquipamento> paginaDeUnidades = unidadeEquipamentoRepository.findAllByEquipamento_Id(equipamentoId, paginacao);
+
+		Page<UnidadeEquipamentoResponse> paginaDeRespostas = paginaDeUnidades
+				.map(unidadeEquipamento -> UnidadeEquipamentoResponse.de(unidadeEquipamento));
+
+		return converterPagina(paginaDeRespostas);
+
+	}
+	
+	
 	@Transactional
 	public UnidadeEquipamentoResponse ativar(Long id) {
 
