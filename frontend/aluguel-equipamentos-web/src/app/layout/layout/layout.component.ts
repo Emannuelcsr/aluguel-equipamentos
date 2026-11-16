@@ -17,6 +17,8 @@ import { UsuarioAutenticadoResponse } from '../../core/models/usuario-autenticad
 export class LayoutComponent  implements OnInit{
   usuario: UsuarioAutenticadoResponse | null = null;
   ehAdministrador = false;
+menuAberto = false;
+
 
   constructor(
     private autenticacaoService: AutenticacaoService,
@@ -40,4 +42,13 @@ ngOnInit(): void {
     this.autenticacaoService.logout();
     this.router.navigate(['/login']);
   }
+
+  alternarMenu(): void {
+  this.menuAberto = !this.menuAberto;
+}
+
+fecharMenu(): void {
+  this.menuAberto = false;
+}
+
 }

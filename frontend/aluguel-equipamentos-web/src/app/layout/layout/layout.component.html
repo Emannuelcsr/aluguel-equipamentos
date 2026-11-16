@@ -1,13 +1,26 @@
 <div class="layout">
 
-    <header class="cabecalho">
-        <div class="marca-sistema">
-            <span class="icone-marca">🔧</span>
-            <div class="texto-marca">
-                <strong>Aluguel de Equipamentos</strong>
-                <small>Painel administrativo</small>
-            </div>
-        </div>
+  <header class="cabecalho">
+
+    <button
+      type="button"
+      class="botao-menu"
+      (click)="alternarMenu()"
+      [attr.aria-expanded]="menuAberto"
+      aria-controls="menu-principal"
+      aria-label="Abrir ou fechar menu"
+    >
+      {{ menuAberto ? '✕' : '☰' }}
+    </button>
+
+    <div class="marca-sistema">
+      <span class="icone-marca">🔧</span>
+
+      <div class="texto-marca">
+        <strong>Aluguel de Equipamentos</strong>
+        <small>Painel administrativo</small>
+      </div>
+    </div>
 
         <div class="area-usuario">
             @if (usuario) {
@@ -25,83 +38,141 @@
 
     <div class="corpo">
 
-        <aside class="menu-lateral">
 
-            <nav aria-label="Menu principal">
+<aside
+  id="menu-principal"
+  class="menu-lateral"
+  [class.menu-aberto]="menuAberto"
+>
+  <nav aria-label="Menu principal">
+    <ul>
 
-                <ul>
+      <!-- FUNCIONALIDADES FUTURAS -->
+      <li class="item-indisponivel">
+        <span>🏠 Início</span>
+        <small>Em breve</small>
+      </li>
 
-                    <li>🏠 Início</li>
-                    <li class="grupo-clientes">
-                        <span class="titulo-grupo">👥 Clientes</span>
+      <!-- CLIENTES -->
+      <li class="grupo-clientes">
+        <span class="titulo-grupo">👥 Clientes</span>
 
-                        <ul class="submenu">
-                            <li>
-                                <a routerLink="/clientes" routerLinkActive="ativo"
-                                    [routerLinkActiveOptions]="{ exact: true }">
-                                    Listar clientes
-                                </a>
-                            </li>
+        <ul class="submenu">
+          <li>
+            <a
+              routerLink="/clientes"
+              routerLinkActive="ativo"
+              #listarClientes="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-current]="listarClientes.isActive ? 'page' : null"
+              (click)="fecharMenu()"
+            >
+              Listar clientes
+            </a>
+          </li>
 
-                            <li>
-                                <a routerLink="/clientes/novo" routerLinkActive="ativo">
-                                    Novo cliente
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="grupo-clientes">
-                        <span class="titulo-grupo">👥 Categorias</span>
+          <li>
+            <a
+              routerLink="/clientes/novo"
+              routerLinkActive="ativo"
+              #novoCliente="routerLinkActive"
+              [attr.aria-current]="novoCliente.isActive ? 'page' : null"
+              (click)="fecharMenu()"
+            >
+              Novo cliente
+            </a>
+          </li>
+        </ul>
+      </li>
 
-                        <ul class="submenu">
-                            <li>
-                                <a routerLink="/categorias" routerLinkActive="ativo"
-                                    [routerLinkActiveOptions]="{ exact: true }">
-                                    Listar categorias
-                                </a>
-                            </li>
-                            @if(ehAdministrador){
-                            <li>
-                                <a routerLink="/categorias/novo" routerLinkActive="ativo">
-                                    Nova categoria
-                                </a>
-                            </li>
-                            }
-                        </ul>
-                    </li>
+      <!-- CATEGORIAS -->
+      <li class="grupo-clientes">
+        <span class="titulo-grupo">📂 Categorias</span>
 
-                    <li class="grupo-clientes">
-                        <span class="titulo-grupo">🔧 Equipamentos</span>
+        <ul class="submenu">
+          <li>
+            <a
+              routerLink="/categorias"
+              routerLinkActive="ativo"
+              #listarCategorias="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-current]="listarCategorias.isActive ? 'page' : null"
+              (click)="fecharMenu()"
+            >
+              Listar categorias
+            </a>
+          </li>
 
-                        <ul class="submenu">
-                            <li>
-                                <a routerLink="/equipamentos" routerLinkActive="ativo"
-                                    [routerLinkActiveOptions]="{ exact: true }">
-                                    Listar Equipamentos
-                                </a>
-                            </li>
-                            @if(ehAdministrador){
-                            <li>
-                                <a routerLink="/equipamentos/novo" routerLinkActive="ativo">
-                                    Nova equipamento
-                                </a>
-                            </li>
-                            }
-                        </ul>
-                    </li>
+          @if (ehAdministrador) {
+            <li>
+              <a
+                routerLink="/categorias/novo"
+                routerLinkActive="ativo"
+                #novaCategoria="routerLinkActive"
+                [attr.aria-current]="novaCategoria.isActive ? 'page' : null"
+                (click)="fecharMenu()"
+              >
+                Nova categoria
+              </a>
+            </li>
+          }
+        </ul>
+      </li>
 
+      <!-- EQUIPAMENTOS -->
+      <li class="grupo-clientes">
+        <span class="titulo-grupo">🔧 Equipamentos</span>
 
+        <ul class="submenu">
+          <li>
+            <a
+              routerLink="/equipamentos"
+              routerLinkActive="ativo"
+              #listarEquipamentos="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-current]="listarEquipamentos.isActive ? 'page' : null"
+              (click)="fecharMenu()"
+            >
+              Listar equipamentos
+            </a>
+          </li>
 
+          @if (ehAdministrador) {
+            <li>
+              <a
+                routerLink="/equipamentos/novo"
+                routerLinkActive="ativo"
+                #novoEquipamento="routerLinkActive"
+                [attr.aria-current]="novoEquipamento.isActive ? 'page' : null"
+                (click)="fecharMenu()"
+              >
+                Novo equipamento
+              </a>
+            </li>
+          }
+        </ul>
+      </li>
 
-                    <li>📅 Reservas</li>
-                    <li>📦 Retiradas</li>
-                    <li>↩️ Devoluções</li>
+      <!-- MÓDULOS FUTUROS -->
+      <li class="item-indisponivel">
+        <span>📅 Reservas</span>
+        <small>Em breve</small>
+      </li>
 
-                </ul>
+      <li class="item-indisponivel">
+        <span>📦 Retiradas</span>
+        <small>Em breve</small>
+      </li>
 
-            </nav>
+      <li class="item-indisponivel">
+        <span>↩️ Devoluções</span>
+        <small>Em breve</small>
+      </li>
 
-        </aside>
+    </ul>
+  </nav>
+</aside>
+
 
         <main class="conteudo">
             <router-outlet></router-outlet>
