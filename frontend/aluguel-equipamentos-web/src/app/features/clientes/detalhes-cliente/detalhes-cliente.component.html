@@ -17,7 +17,7 @@
 }
 
 @if (cliente) {
-<div class="dados-cliente">
+<div class="painel-detalhes dados-cliente">
     <h3>Dados do cliente</h3>
     <h2>{{ cliente.nomeRazaoSocial }}</h2>
 
@@ -69,7 +69,7 @@
 
 
 
-<div class="endereco-cliente">
+<div class="painel-detalhes endereco-cliente">
     <h3>Endereço</h3>
 
     <p>
@@ -112,11 +112,11 @@
 @if (ehAdministrador) {
 <div class="acoes-cliente">
     @if (cliente.ativo ) {
-    <button type="button" class="botao-desativar" (click)="desativarCliente()" [disabled]="desativando">
+    <button type="button" class="botao botao-desativar"(click)="desativarCliente()" [disabled]="desativando">
         {{ desativando ? 'Desativando...' : 'Desativar cliente' }}
     </button>
     } @else {
-    <button type="button" class="botao-ativar" (click)="ativarCliente()" [disabled]="ativando">
+    <button type="button" class="botao botao-ativar" (click)="ativarCliente()" [disabled]="ativando">
         {{ ativando ? 'Ativando...' : 'Ativar cliente' }}
     </button>
     }
@@ -124,6 +124,6 @@
 }
 }
 
-<a routerLink="/clientes" class="botao-voltar">
+<a routerLink="/clientes" class="botao botao-secundario">
     ← Voltar à listagem
 </a>

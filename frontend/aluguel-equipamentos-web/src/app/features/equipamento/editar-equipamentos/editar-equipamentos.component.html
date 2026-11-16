@@ -1,4 +1,4 @@
-<div class="cabecalho-pagina">
+<div class="cabecalho-pagina cabecalho-formulario">
     <h2>Editar equipamento</h2>
     <p>Atualize as informações cadastrais do equipamento.</p>
 </div>
@@ -8,7 +8,7 @@
 }
 <div class="painel-cadastro">
     @if (mensagemErro) {
-    <div class="alerta-erro" role="alert">
+    <div  class="alerta alerta-erro" role="alert">
         <span aria-hidden="true">⚠️</span>
         <span>{{ mensagemErro }}</span>
     </div>
@@ -119,11 +119,11 @@
 
 
         <div class="acoes-formulario">
-            <a routerLink="/equipamentos" class="botao-voltar">
+            <a routerLink="/equipamentos" class="botao botao-secundario">
                 Voltar
             </a>
 
-            <button type="submit" class="botao-cadastrar" [disabled]="atualizando">
+            <button type="submit" class="botao botao-primario" [disabled]="atualizando">
                 {{ atualizando ? 'Atualizando...' : 'Atualizar equipamento' }}
             </button>
         </div>

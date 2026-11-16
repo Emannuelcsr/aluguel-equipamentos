@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ClienteService } from '../service/cliente.service';
 import { ClienteResponse } from '../../../core/models/cliente-response';
 import { RouterLink } from '@angular/router';
+import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 
 @Component({
   selector: 'app-listagem-clientes',
@@ -21,9 +22,19 @@ export class ListagemClientesComponent implements OnInit {
   totalElementos = 0;
   carregando = false;
   paginaSolicitada = 1;
+  ehAdministrador = false;
 
-  constructor(private clienteService: ClienteService) {}
+  constructor(
+    private clienteService: ClienteService,
+    private autenticacaoService: AutenticacaoService,
+  ) {}
   ngOnInit(): void {
+    if (this.autenticacaoService.obterUsuario()?.perfil === 'ADMINISTRADOR') {
+      this.ehAdministrador = true;
+    } else {
+      this.ehAdministrador = false;
+    }
+
     this.mensagemSucesso = history.state.mensagemSucesso ?? '';
 
     if (this.mensagemSucesso) {
@@ -40,7 +51,7 @@ export class ListagemClientesComponent implements OnInit {
     if (this.carregando) {
       return;
     }
-     this.paginaSolicitada = pagina;
+    this.paginaSolicitada = pagina;
     this.carregando = true;
     this.mensagemErro = '';
     this.clienteService.listar(pagina, this.tamanhoPagina).subscribe({
@@ -52,7 +63,6 @@ export class ListagemClientesComponent implements OnInit {
         this.ultimaPagina = resposta.ultimaPagina;
         this.totalElementos = resposta.totalElementos;
         this.paginaAtual = resposta.paginaAtual;
-        
       },
       error: (erro) => {
         this.carregando = false;

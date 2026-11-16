@@ -18,7 +18,7 @@
 }
 
 @if (equipamento && !carregando) {
-  <div class="dados-equipamento">
+  <div class="painel-detalhes dados-equipamento">
     <h3>Dados do equipamento</h3>
     <h2>{{ equipamento.nome }}</h2>
 
@@ -61,14 +61,14 @@
     <div class="acoes-equipamento">
       @if (equipamento.ativo) {
         <button type="button"
-                class="botao-desativar"
+                class="botao botao-desativar"
                 (click)="desativarEquipamento()"
                 [disabled]="desativando">
           {{ desativando ? 'Desativando...' : 'Desativar equipamento' }}
         </button>
       } @else {
         <button type="button"
-                class="botao-ativar"
+                class="botao botao-ativar"
                 (click)="ativarEquipamento()"
                 [disabled]="ativando">
           {{ ativando ? 'Ativando...' : 'Ativar equipamento' }}
@@ -78,6 +78,6 @@
   }
 }
 
-<a routerLink="/equipamentos" class="botao-voltar">
+<a routerLink="/equipamentos" class="botao botao-secundario">
   ← Voltar à listagem
 </a>

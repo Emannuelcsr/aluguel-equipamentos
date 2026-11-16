@@ -1,4 +1,4 @@
-<div class="cabecalho-pagina">
+<div class="cabecalho-pagina cabecalho-formulario">
     <h2>Novo equipamento</h2>
     <p>Preencha os dados abaixo para cadastrar um equipamento.</p>
 </div>
@@ -7,7 +7,7 @@
     <h3>Dados do equipamento</h3>
 
     @if (mensagemErro) {
-    <div class="alerta-erro" role="alert">
+    <div  class="alerta alerta-erro" role="alert">
         <span aria-hidden="true">⚠️</span>
         <span>{{ mensagemErro }}</span>
     </div>
@@ -112,11 +112,11 @@
 
 
         <div class="acoes-formulario">
-            <a routerLink="/equipamentos" class="botao-voltar">
+            <a routerLink="/equipamentos" class="botao botao-secundario">
                 Voltar
             </a>
 
-            <button type="submit" class="botao-cadastrar" [disabled]="criando || categorias.length === 0">
+            <button type="submit" class="botao botao-primario"[disabled]="criando || categorias.length === 0">
                 {{ criando ? 'Cadastrando...' : 'Cadastrar equipamento' }}
             </button>
         </div>

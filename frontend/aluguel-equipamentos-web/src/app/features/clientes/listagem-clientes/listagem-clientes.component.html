@@ -4,15 +4,15 @@
     <p>Gerencie os clientes cadastrados no sistema.</p>
   </div>
 
-  <a routerLink="/clientes/novo" class="botao-novo-cliente">
+  <a routerLink="/clientes/novo" class="botao botao-primario">
     + Novo cliente
   </a>
 </div>
 
-<div class="painel-clientes">
+<div class="painel-padrao">
 
   @if (mensagemErro) {
-  <div class="alerta alerta-erro" role="alert">
+  <div class="alerta alerta-erro" role="alert" class="botao botao-secundario">
     <span aria-hidden="true">⚠️</span>
     <span>{{ mensagemErro }}</span>
     <button type="button" (click)="listar(paginaSolicitada)" [disabled]="carregando">
@@ -32,47 +32,55 @@
   </div>
   }
 
-  <table>
+  <div class="tabela-responsiva">
+    <table class="tabela-padrao">
 
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>TIPO</th>
-        <th>DOCUMENTO</th>
-        <th>NOME/RAZAO SOCIAL</th>
-        <th>AÇÕES</th>
-      </tr>
-    </thead>
-    <tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>TIPO</th>
+          <th>DOCUMENTO</th>
+          <th>NOME/RAZAO SOCIAL</th>
+          <th>AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>
 
-      @for (cliente of clientes; track cliente.id) {
-      <tr>
-        <td>{{ cliente.id }}</td>
-        <td>{{ cliente.tipo }}</td>
-        <td>{{ cliente.documento }}</td>
-        <td>{{ cliente.nomeRazaoSocial }}</td>
-        <td class="coluna-acao">
-          <a class="botao-detalhes" [routerLink]="['/clientes/detalhes/', cliente.id]">
-            Detalhes
-          </a>
-          <a class="botao-editar" [routerLink]="['/clientes/editar/', cliente.id]">
-            Editar
-          </a>
-        </td>
-      </tr>
-      }@empty {
-      @if (!carregando && !mensagemErro) {
-      <tr>
-        <td colspan="5">Nenhum cliente encontrado.</td>
-      </tr>
-      }
-      }
+        @for (cliente of clientes; track cliente.id) {
+        <tr>
+          <td>{{ cliente.id }}</td>
+          <td>{{ cliente.tipo }}</td>
+          <td>{{ cliente.documento }}</td>
+          <td>{{ cliente.nomeRazaoSocial }}</td>
+          <td>
+            <div class="acoes-tabela">
+              <a class="botao botao-secundario" [routerLink]="['/clientes/detalhes', cliente.id]">
+                Detalhes
+              </a>
 
-    </tbody>
-  </table>
+              @if (ehAdministrador) {
+              <a class="botao botao-secundario" [routerLink]="['/clientes/editar', cliente.id]">
+                Editar
+              </a>
+              }
+            </div>
+          </td>
+        </tr>
+        }@empty {
+        @if (!carregando && !mensagemErro) {
+        <tr>
+          <td colspan="5">Nenhum cliente encontrado.</td>
+        </tr>
+        }
+        }
+
+      </tbody>
+    </table>
+  </div>
 
   <div class="paginacao">
-    <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+    <button type="button" class="botao botao-secundario" (click)="voltarPagina()"
+      [disabled]="primeiraPagina || carregando">
       ← Voltar
     </button>
 
@@ -80,7 +88,8 @@
       Página {{ paginaAtual }} de {{ totalPaginas }}
     </span>
 
-    <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+    <button type="button" class="botao botao-secundario" (click)="proximaPagina()"
+      [disabled]="ultimaPagina || carregando">
       Próxima →
     </button>
   </div>

@@ -18,7 +18,7 @@
 }
 
 @if (categoria && !carregando) {
-  <div class="dados-categoria">
+  <div class="painel-detalhes dados-categoria">
     <h3>Dados da categoria</h3>
     <h2>{{ categoria.nome }}</h2>
 
@@ -51,14 +51,14 @@
     <div class="acoes-categoria">
       @if (categoria.ativo) {
         <button type="button"
-                class="botao-desativar"
+                class="botao botao-desativar"
                 (click)="desativarCategoria()"
                 [disabled]="desativando">
           {{ desativando ? 'Desativando...' : 'Desativar categoria' }}
         </button>
       } @else {
         <button type="button"
-                class="botao-ativar"
+                class="botao botao-ativar"
                 (click)="ativarCategoria()"
                 [disabled]="ativando">
           {{ ativando ? 'Ativando...' : 'Ativar categoria' }}
@@ -68,6 +68,6 @@
   }
 }
 
-<a routerLink="/categorias" class="botao-voltar">
+<a routerLink="/categorias" class="botao botao-secundario">
   ← Voltar à listagem
 </a>

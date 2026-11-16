@@ -1,4 +1,4 @@
-<div class="cabecalho-pagina">
+<div class="cabecalho-pagina cabecalho-formulario">
     <h2>Novo cliente</h2>
     <p>Preencha os dados abaixo para cadastrar um cliente.</p>
 </div>
@@ -7,7 +7,7 @@
     <h3>Dados do cliente</h3>
 
     @if (mensagemErro) {
-    <div class="alerta-erro" role="alert">
+    <div  class="alerta alerta-erro" role="alert">
         <span aria-hidden="true">⚠️</span>
         <span>{{ mensagemErro }}</span>
     </div>
@@ -289,11 +289,11 @@
         </div>
 
         <div class="acoes-formulario">
-            <a routerLink="/clientes" class="botao-voltar">
+            <a routerLink="/clientes" class="botao botao-secundario">
                 Voltar
             </a>
 
-            <button type="submit" class="botao-cadastrar" [disabled]="criando">
+            <button type="submit" class="botao botao-primario" [disabled]="criando">
                 {{ criando ? 'Cadastrando...' : 'Cadastrar cliente' }}
             </button>
         </div>
