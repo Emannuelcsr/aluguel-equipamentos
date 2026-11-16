@@ -19,7 +19,8 @@
     <div class="alerta alerta-erro" role="alert">
         <span aria-hidden="true">⚠️</span>
         <span>{{ mensagemErro }}</span>
-        <button type="button" (click)="listarPorEquipamento(paginaSolicitada)" [disabled]="carregando">
+        <button type="button" class="botao botao-secundario" (click)="listarPorEquipamento(paginaSolicitada)"
+            [disabled]="carregando">
             {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
         </button>
     </div>

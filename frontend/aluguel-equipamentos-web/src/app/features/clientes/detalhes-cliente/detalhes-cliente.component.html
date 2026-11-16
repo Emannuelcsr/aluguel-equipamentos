@@ -110,7 +110,7 @@
     </p>
 </div>
 @if (ehAdministrador) {
-<div class="acoes-cliente">
+<div class="acoes-detalhes">
     @if (cliente.ativo ) {
     <button type="button" class="botao botao-desativar"(click)="desativarCliente()" [disabled]="desativando">
         {{ desativando ? 'Desativando...' : 'Desativar cliente' }}
