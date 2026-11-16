@@ -13,7 +13,7 @@
 
 </div>
 
-<div class="painel-equipamentos">
+<div class="painel-padrao">
 
     @if (mensagemErro) {
     <div class="alerta alerta-erro" role="alert">
@@ -26,7 +26,7 @@
     }
 
     @if (carregando) {
-    <p>Carregando equipamentos...</p>
+    <p>Carregando unidades...</p>
     }
 
     @if (mensagemSucesso) {
@@ -36,53 +36,58 @@
     </div>
     }
 
-    <table>
 
-        <thead>
-            <tr>
-                <th>CÓDIGO</th>
-                <th>STATUS</th>
-                <th>SITUAÇÃO</th>
-                <th>AÇÕES</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (unidadeEquipamento of unidadeEquipamentos; track unidadeEquipamento.id) {
-            <tr>
-                <td>{{ unidadeEquipamento.codigo }}</td>
+    <div class="tabela-responsiva">
+        <table class="tabela-padrao">
 
-                <td>
-                    <span class="etiqueta-status" [class.status-disponivel]="unidadeEquipamento.status === 'DISPONIVEL'"
-                        [class.status-reservado]="unidadeEquipamento.status === 'RESERVADO'"
-                        [class.status-manutencao]="unidadeEquipamento.status === 'MANUTENCAO'">
-                        {{ unidadeEquipamento.status.replaceAll('_', ' ') }}
-                    </span>
-                </td>
+            <thead>
+                <tr>
+                    <th>CÓDIGO</th>
+                    <th>STATUS</th>
+                    <th>SITUAÇÃO</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (unidadeEquipamento of unidadeEquipamentos; track unidadeEquipamento.id) {
+                <tr>
+                    <td>{{ unidadeEquipamento.codigo }}</td>
 
-                <td>
-                    @if (unidadeEquipamento.ativo) {
-                    <span class="etiqueta-status status-ativo">Ativo</span>
-                    } @else {
-                    <span class="etiqueta-status status-inativo">Inativo</span>
-                    }
-                </td>
+                    <td>
+                        <span class="etiqueta-status"
+                            [class.status-disponivel]="unidadeEquipamento.status === 'DISPONIVEL'"
+                            [class.status-reservado]="unidadeEquipamento.status === 'RESERVADO'"
+                            [class.status-manutencao]="unidadeEquipamento.status === 'MANUTENCAO'">
+                            {{ unidadeEquipamento.status.replaceAll('_', ' ') }}
+                        </span>
+                    </td>
 
-                <td>
-                    <!-- Aqui ficarão as ações da unidade -->
-                </td>
-            </tr>
-            } @empty {
-            @if (!carregando && !mensagemErro) {
-            <tr>
-                <td colspan="4">Nenhuma unidade encontrada.</td>
-            </tr>
-            }
-            }
-        </tbody>
-    </table>
+                    <td>
+                        @if (unidadeEquipamento.ativo) {
+                        <span class="etiqueta-status status-ativo">Ativo</span>
+                        } @else {
+                        <span class="etiqueta-status status-inativo">Inativo</span>
+                        }
+                    </td>
+
+                    <td>
+                        <!-- Aqui ficarão as ações da unidade -->
+                    </td>
+                </tr>
+                } @empty {
+                @if (!carregando && !mensagemErro) {
+                <tr>
+                    <td colspan="4">Nenhuma unidade encontrada.</td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
 
     <div class="paginacao">
-        <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+        <button type="button" class="botao botao-secundario" (click)="voltarPagina()"
+            [disabled]="primeiraPagina || carregando">
             ← Voltar
         </button>
 
@@ -90,7 +95,8 @@
             Página {{ paginaAtual }} de {{ totalPaginas }}
         </span>
 
-        <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+        <button type="button" class="botao botao-secundario" (click)="proximaPagina()"
+            [disabled]="ultimaPagina || carregando">
             Próxima →
         </button>
     </div>

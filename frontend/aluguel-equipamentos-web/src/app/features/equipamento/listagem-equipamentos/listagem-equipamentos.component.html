@@ -12,13 +12,13 @@
 
 </div>
 
-<div class="painel-equipamentos">
+<div class="painel-padrao">
 
   @if (mensagemErro) {
   <div class="alerta alerta-erro" role="alert">
     <span aria-hidden="true">⚠️</span>
     <span>{{ mensagemErro }}</span>
-    <button type="button" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+    <button type="button" class="botao botao-secundario" (click)="listar(paginaSolicitada)" [disabled]="carregando">
       {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
     </button>
   </div>
@@ -35,55 +35,58 @@
   </div>
   }
 
-  <table>
+  <div class="tabela-responsiva">
+    <table class="tabela-padrao">
 
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>NOME</th>
-        <th>DESCRIÇÃO</th>
-        <th>AÇÕES</th>
-      </tr>
-    </thead>
-    <tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>NOME</th>
+          <th>DESCRIÇÃO</th>
+          <th>AÇÕES</th>
+        </tr>
+      </thead>
+      <tbody>
 
-      @for (equipamento of equipamentos; track equipamento.id) {
-      <tr>
-        <td>{{ equipamento.id }}</td>
-        <td>{{ equipamento.nome}}</td>
-        <td>{{ equipamento.categoriaNome}}</td>
+        @for (equipamento of equipamentos; track equipamento.id) {
+        <tr>
+          <td>{{ equipamento.id }}</td>
+          <td>{{ equipamento.nome}}</td>
+          <td>{{ equipamento.categoriaNome}}</td>
 
-        <td>
-          <div class="acoes-tabela">
-            <a class="botao botao-secundario" [routerLink]="['/equipamentos/detalhes', equipamento.id]">
-              Detalhes
-            </a>
+          <td>
+            <div class="acoes-tabela">
+              <a class="botao botao-secundario" [routerLink]="['/equipamentos/detalhes', equipamento.id]">
+                Detalhes
+              </a>
 
-            <a class="botao botao-secundario" [routerLink]="['/equipamentos', equipamento.id, 'unidades']">
-              Unidades
-            </a>
+              <a class="botao botao-secundario" [routerLink]="['/equipamentos', equipamento.id, 'unidades']">
+                Unidades
+              </a>
 
-            @if (ehAdministrador) {
-            <a class="botao botao-secundario" [routerLink]="['/equipamentos/editar', equipamento.id]">
-              Editar
-            </a>
-            }
-          </div>
-        </td>
-      </tr>
-      }@empty {
-      @if (!carregando && !mensagemErro) {
-      <tr>
-        <td colspan="5">Nenhuma equipamento encontrado.</td>
-      </tr>
-      }
-      }
+              @if (ehAdministrador) {
+              <a class="botao botao-secundario" [routerLink]="['/equipamentos/editar', equipamento.id]">
+                Editar
+              </a>
+              }
+            </div>
+          </td>
+        </tr>
+        }@empty {
+        @if (!carregando && !mensagemErro) {
+        <tr>
+          <td colspan="4">Nenhuma equipamento encontrado.</td>
+        </tr>
+        }
+        }
 
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
 
   <div class="paginacao">
-    <button type="button" (click)="voltarPagina()" [disabled]="primeiraPagina || carregando">
+    <button type="button" class="botao botao-secundario" (click)="voltarPagina()"
+      [disabled]="primeiraPagina || carregando">
       ← Voltar
     </button>
 
@@ -91,7 +94,8 @@
       Página {{ paginaAtual }} de {{ totalPaginas }}
     </span>
 
-    <button type="button" (click)="proximaPagina()" [disabled]="ultimaPagina || carregando">
+    <button type="button" class="botao botao-secundario" (click)="proximaPagina()"
+      [disabled]="ultimaPagina || carregando">
       Próxima →
     </button>
   </div>

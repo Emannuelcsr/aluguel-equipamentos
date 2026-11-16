@@ -112,7 +112,7 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
 
           this.mensagemErro =
             erro.error?.mensagens?.[0] ??
-            'Não foi possível listar os equipamentos.';
+            'Não foi possível listar as unidades.';
         },
       });
   }
@@ -147,7 +147,7 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
         this.fecharModalCadastro();
 
         this.mensagemSucesso = 'Unidade cadastrada com sucesso!';
-        this.listarPorEquipamento(0);
+        this.listarPorEquipamento(1);
       },
       error: (erro) => {
         this.cadastrandoUnidade = false;
