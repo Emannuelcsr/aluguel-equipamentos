@@ -5,7 +5,7 @@
   </div>
 
   @if(ehAdministrador){
-  <a routerLink="/equipamentos/novo" class="botao-novo-equipamento">
+  <a routerLink="/equipamentos/novo" class="botao botao-primario">
     + Novo equipamento
   </a>
   }
@@ -54,18 +54,21 @@
         <td>{{ equipamento.categoriaNome}}</td>
 
         <td>
-          <a class="botao-detalhes" [routerLink]="['/equipamentos/detalhes/', equipamento.id]">
-            Detalhes
-          </a>
-          <a class="botao-unidades" [routerLink]="['/equipamentos', equipamento.id, 'unidades']">
-            Unidades
-          </a>
+          <div class="acoes-tabela">
+            <a class="botao botao-secundario" [routerLink]="['/equipamentos/detalhes', equipamento.id]">
+              Detalhes
+            </a>
 
-          @if(ehAdministrador){
-          <a class="botao-editar" [routerLink]="['/equipamentos/editar/', equipamento.id]">
-            Editar
-          </a>
-          }
+            <a class="botao botao-secundario" [routerLink]="['/equipamentos', equipamento.id, 'unidades']">
+              Unidades
+            </a>
+
+            @if (ehAdministrador) {
+            <a class="botao botao-secundario" [routerLink]="['/equipamentos/editar', equipamento.id]">
+              Editar
+            </a>
+            }
+          </div>
         </td>
       </tr>
       }@empty {
