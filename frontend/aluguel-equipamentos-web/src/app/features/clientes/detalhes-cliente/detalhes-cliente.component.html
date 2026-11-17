@@ -110,19 +110,36 @@
     </p>
 </div>
 @if (ehAdministrador) {
+
 <div class="acoes-detalhes">
-    @if (cliente.ativo ) {
-    <button type="button" class="botao botao-desativar"(click)="desativarCliente()" [disabled]="desativando">
+
+  <a routerLink="/clientes" class="botao botao-secundario">
+    ← Voltar à listagem
+  </a>
+
+  @if (ehAdministrador) {
+    @if (cliente.ativo) {
+      <button
+        type="button"
+        class="botao botao-desativar"
+        (click)="desativarCliente()"
+        [disabled]="desativando"
+      >
         {{ desativando ? 'Desativando...' : 'Desativar cliente' }}
-    </button>
+      </button>
     } @else {
-    <button type="button" class="botao botao-ativar" (click)="ativarCliente()" [disabled]="ativando">
+      <button
+        type="button"
+        class="botao botao-ativar"
+        (click)="ativarCliente()"
+        [disabled]="ativando"
+      >
         {{ ativando ? 'Ativando...' : 'Ativar cliente' }}
-    </button>
+      </button>
     }
-    <a routerLink="/clientes" class="botao botao-secundario">
-        ← Voltar à listagem
-    </a>
+  }
+
 </div>
 }
+
 }

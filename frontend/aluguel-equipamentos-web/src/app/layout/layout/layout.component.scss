@@ -292,3 +292,38 @@
     }
   }
 }
+
+@media (max-width: 480px) {
+  .cabecalho {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .botao-menu {
+    flex-shrink: 0;
+  }
+
+  .marca-sistema {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .texto-marca {
+    min-width: 0;
+
+    strong {
+      font-size: 12px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .area-usuario {
+    flex-shrink: 0;
+  }
+
+  .botao-sair {
+    padding: 8px;
+    white-space: nowrap;
+  }
+}
