@@ -451,7 +451,34 @@ textarea {
     background-color: #dcfce7;
   }
 }
+.botao-enviarManutencao{
+  background-color: #f01326;
+  color: #ffffff;
+  border-color: #bbf7d0;
 
+  &:hover:not(:disabled) {
+    background-color: #f76773;
+  }
+
+}
 .acoes-detalhes > .botao-secundario {
   order: -1;
+}
+
+.acoes-retorno {
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .paginacao {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .paginacao .informacao-pagina {
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
 }

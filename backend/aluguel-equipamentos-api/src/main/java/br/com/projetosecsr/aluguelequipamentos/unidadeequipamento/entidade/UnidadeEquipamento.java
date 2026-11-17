@@ -107,7 +107,7 @@ public class UnidadeEquipamento {
 
 	public void enviarParaManutencao() {
 
-		if (this.status == StatusUnidadeEquipamento.EM_MANUTENCAO || this.status == StatusUnidadeEquipamento.ALUGADO) {
+		if (this.status != StatusUnidadeEquipamento.DISPONIVEL) {
 
 			throw new OperacaoInvalidaException(
 					"A unidade só pode ser enviada para manutenção quando estiver disponível.");
@@ -120,7 +120,7 @@ public class UnidadeEquipamento {
 
 	public void liberarDaManutencao() {
 
-		if (this.status == StatusUnidadeEquipamento.DISPONIVEL || this.status == StatusUnidadeEquipamento.ALUGADO) {
+		if (this.status != StatusUnidadeEquipamento.EM_MANUTENCAO) {
 
 			throw new OperacaoInvalidaException("A unidade só pode sair da manutenção se estiver em manutenção.");
 

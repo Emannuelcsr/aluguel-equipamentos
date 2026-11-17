@@ -1,15 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UnidadeEquipamentoService } from '../service/unidade-equipamento.service';
 import { UnidadeEquipamentoResponse } from '../../../core/models/unidade-equipamento-response';
 import { AutenticacaoService } from '../../../core/services/autenticacao.service';
 import { CadastrarUnidadeEquipamentoRequest } from '../../../core/models/cadastrar-unidade-equipamento-request';
 import { EquipamentoService } from '../../equipamento/service/equipamento.service';
 import { EquipamentoResponse } from '../../../core/models/equipamento-response';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 
 @Component({
   selector: 'app-listagem-unidades-equipamento',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './listagem-unidades-equipamento.component.html',
   styleUrl: './listagem-unidades-equipamento.component.scss',
 })
@@ -37,6 +43,30 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
     private autenticacaoService: AutenticacaoService,
     private equipamentoService: EquipamentoService,
   ) {}
+
+  @HostListener('document:keydown.escape')
+  aoPressionarEscape(): void {
+    if (this.modalCadastroAberto && !this.cadastrandoUnidade) {
+      this.fecharModalCadastro();
+    }
+  }
+
+  @ViewChild('botaoAdicionar')
+  botaoAdicionar?: ElementRef<HTMLButtonElement>;
+
+  @ViewChild('botaoConfirmar')
+  botaoConfirmar?: ElementRef<HTMLButtonElement>;
+
+  @ViewChild('conteudoModal')
+  conteudoModal?: ElementRef<HTMLDivElement>;
+
+  @ViewChild('botaoCancelar')
+  set definirFocoModal(elemento: ElementRef<HTMLButtonElement> | undefined) {
+    this.botaoCancelar = elemento;
+    elemento?.nativeElement.focus();
+  }
+
+  botaoCancelar?: ElementRef<HTMLButtonElement>;
 
   ngOnInit(): void {
     if (this.autenticacaoService.obterUsuario()?.perfil === 'ADMINISTRADOR') {
@@ -79,6 +109,7 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
 
   fecharModalCadastro() {
     this.modalCadastroAberto = false;
+    this.botaoAdicionar?.nativeElement.focus();
   }
 
   listarPorEquipamento(pagina: number) {
@@ -139,6 +170,7 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
     };
 
     this.mensagemErro = '';
+    this.conteudoModal?.nativeElement.focus();
     this.cadastrandoUnidade = true;
 
     this.unidadeEquipamentoService.cadastrar(dadosCadastro).subscribe({
@@ -156,5 +188,31 @@ export class ListagemUnidadesEquipamentoComponent implements OnInit {
           erro.error?.mensagens?.[0] ?? 'Não foi possível cadastrar a unidade.';
       },
     });
+  }
+
+  controlarTabModal(evento: KeyboardEvent): void {
+    if (evento.key !== 'Tab') {
+      return;
+    }
+
+    if (this.cadastrandoUnidade) {
+      evento.preventDefault();
+      return;
+    }
+
+    const cancelar = this.botaoCancelar?.nativeElement;
+    const confirmar = this.botaoConfirmar?.nativeElement;
+
+    if (!cancelar || !confirmar) {
+      return;
+    }
+
+    if (evento.shiftKey && evento.target === cancelar) {
+      evento.preventDefault();
+      confirmar.focus();
+    } else if (!evento.shiftKey && evento.target === confirmar) {
+      evento.preventDefault();
+      cancelar.focus();
+    }
   }
 }

@@ -1,0 +1,92 @@
+@if (mensagemErro) {
+<div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+</div>
+}
+
+@if (mensagemSucesso) {
+<div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+</div>
+}
+
+@if (carregando) {
+<p>Carregando unidades de unidadeEquipamento...</p>
+}
+
+@if (unidadeEquipamento && !carregando) {
+<div class="painel-detalhes dados-unidadeEquipamento">
+    <h3>Dados da unidade de Equipamento</h3>
+    <h2>{{ unidadeEquipamento.equipamentoNome }}</h2>
+
+    <p>
+        <strong>Código:</strong>
+        <span>{{ unidadeEquipamento.codigo }}</span>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <span>{{ unidadeEquipamento.status}}</span>
+    </p>
+
+    <p>
+        <strong>Situação:</strong>
+        @if (unidadeEquipamento.ativo) {
+        <span class="status-ativo">Ativo</span>
+        } @else {
+        <span class="status-inativo">Inativo</span>
+        }
+    </p>
+
+    <p>
+        <strong>Data de criação:</strong>
+        <span>{{ unidadeEquipamento.dataCriacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+
+    <p>
+        <strong>Última atualização:</strong>
+        <span>{{ unidadeEquipamento.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}</span>
+    </p>
+
+    @if (unidadeEquipamento.status == 'DISPONIVEL') {
+    <button type="button" class="botao botao-enviarManutencao" (click)="enviarManutencao(unidadeEquipamento.id)"
+        [disabled]="manutencao">
+        {{ manutencao ? 'Enviando...' : 'Enviar manutenção' }}
+    </button>
+    }
+
+    @if (unidadeEquipamento.status == 'EM_MANUTENCAO') {
+    <button type="button" class="botao botao-unidades" (click)="liberarManutencao(unidadeEquipamento.id)"
+        [disabled]="manutencao">
+        {{ manutencao ? 'Liberando...' : 'Liberar da manutenção' }}
+    </button>
+    }
+</div>
+
+
+
+<div class="acoes-detalhes">
+
+    <a [routerLink]="['/equipamentos', unidadeEquipamento.equipamentoId,'unidades']" class="botao botao-secundario">
+        ← Voltar à listagem
+    </a>
+
+    @if (ehAdministrador) {
+    @if (unidadeEquipamento.ativo) {
+    <button type="button" class="botao botao-desativar" (click)="desativarunidadeEquipamento()"
+        [disabled]="desativando">
+        {{ desativando ? 'Desativando...' : 'Desativar unidade de Equipamento' }}
+    </button>
+    } @else {
+    <button type="button" class="botao botao-ativar" (click)="ativarunidadeEquipamento()" [disabled]="ativando">
+        {{ ativando ? 'Ativando...' : 'Ativar unidade de equipamento' }}
+    </button>
+    }
+    }
+
+</div>
+
+
+}

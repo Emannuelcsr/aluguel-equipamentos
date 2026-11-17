@@ -42,7 +42,7 @@
         <tr>
           <th>ID</th>
           <th>NOME</th>
-          <th>DESCRIÇÃO</th>
+          <th>CATEGORIA</th>
           <th>AÇÕES</th>
         </tr>
       </thead>
@@ -65,6 +65,8 @@
                 Unidades
               </a>
 
+
+
               @if (ehAdministrador) {
               <a class="botao botao-editar" [routerLink]="['/equipamentos/editar', equipamento.id]">
                 Editar
@@ -73,6 +75,9 @@
 
             </div>
           </td>
+
+
+
         </tr>
         }@empty {
         @if (!carregando && !mensagemErro) {

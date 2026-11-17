@@ -17,6 +17,7 @@ import { ListagemEquipamentosComponent } from './features/equipamento/listagem-e
 import { DetalhesEquipamentosComponent } from './features/equipamento/detalhes-equipamentos/detalhes-equipamentos.component';
 import { EditarEquipamentosComponent } from './features/equipamento/editar-equipamentos/editar-equipamentos.component';
 import { ListagemUnidadesEquipamentoComponent } from './features/unidade-equipamento/listagem-unidades-equipamento/listagem-unidades-equipamento.component';
+import { DetalhesUnidadeEquipamentoComponent } from './features/unidade-equipamento/detalhes-unidade-equipamento/detalhes-unidade-equipamento.component';
 
 export const routes: Routes = [
   {
@@ -84,6 +85,10 @@ export const routes: Routes = [
       {
         path: 'equipamentos/:id/unidades',
         component: ListagemUnidadesEquipamentoComponent,
+      },
+      {
+        path: 'equipamentos/unidades/detalhes/:id',
+        component: DetalhesUnidadeEquipamentoComponent,
       },
     ],
   },
