@@ -50,23 +50,23 @@
 
 <div class="acoes-detalhes">
 
-  <a routerLink="/categorias" class="botao botao-secundario">
-    ← Voltar à listagem
-  </a>
-
+  
   @if (ehAdministrador) {
   @if (categoria.ativo) {
-  <button type="button" class="botao botao-desativar" (click)="desativarCategoria()" [disabled]="desativando">
-    {{ desativando ? 'Desativando...' : 'Desativar categoria' }}
-  </button>
+    <button type="button" class="botao botao-desativar" (click)="desativarCategoria()" [disabled]="desativando">
+      {{ desativando ? 'Desativando...' : 'Desativar categoria' }}
+    </button>
   } @else {
-  <button type="button" class="botao botao-ativar" (click)="ativarCategoria()" [disabled]="ativando">
-    {{ ativando ? 'Ativando...' : 'Ativar categoria' }}
-  </button>
+    <button type="button" class="botao botao-ativar" (click)="ativarCategoria()" [disabled]="ativando">
+      {{ ativando ? 'Ativando...' : 'Ativar categoria' }}
+    </button>
   }
-  }
+}
 
 </div>
 
 
 }
+<a routerLink="/categorias" class="botao botao-secundario">
+  ← Voltar à listagem
+</a>

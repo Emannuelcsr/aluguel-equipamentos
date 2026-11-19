@@ -60,22 +60,23 @@
 
 <div class="acoes-detalhes">
 
-  <a routerLink="/equipamentos" class="botao botao-secundario">
-    ← Voltar à listagem
-  </a>
-
+  
   @if (ehAdministrador) {
-  @if (equipamento.ativo) {
-  <button type="button" class="botao botao-desativar" (click)="desativarEquipamento()" [disabled]="desativando">
-    {{ desativando ? 'Desativando...' : 'Desativar equipamento' }}
-  </button>
-  } @else {
+    @if (equipamento.ativo) {
+      <button type="button" class="botao botao-desativar" (click)="desativarEquipamento()" [disabled]="desativando">
+        {{ desativando ? 'Desativando...' : 'Desativar equipamento' }}
+      </button>
+    } @else {
   <button type="button" class="botao botao-ativar" (click)="ativarEquipamento()" [disabled]="ativando">
     {{ ativando ? 'Ativando...' : 'Ativar equipamento' }}
   </button>
-  }
-  }
+}
+}
 
 </div>
 }
 
+
+<a routerLink="/equipamentos" class="botao botao-secundario">
+  ← Voltar à listagem
+</a>

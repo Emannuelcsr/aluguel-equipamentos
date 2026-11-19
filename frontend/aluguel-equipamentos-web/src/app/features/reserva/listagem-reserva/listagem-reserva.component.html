@@ -1,0 +1,103 @@
+<div class="cabecalho-pagina">
+    <div>
+        <h2>Reservas</h2>
+        <p>Gerencie as reservas cadastradas no sistema.</p>
+    </div>
+</div>
+
+<div class="painel-padrao">
+
+    @if (mensagemErro) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+        <button type="button" class="botao botao-secundario" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+            {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+        </button>
+    </div>
+    }
+
+    @if (carregando) {
+    <p>Carregando reservas...</p>
+    }
+
+    @if (mensagemSucesso) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucesso }}</span>
+    </div>
+    }
+
+    <div class="tabela-responsiva">
+        <table class="tabela-padrao">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOME DO CLIENTE</th>
+                    <th>PERIODO</th>
+                    <th>STATUS</th>
+                    <th>VALOR TOTAL</th>
+                    <th>AÇÕES</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @for (reserva of reservas; track reserva.id) {
+                <tr>
+                    <td>{{ reserva.id }}</td>
+                    <td>{{ reserva.clienteNome}}</td>
+                    <td>
+                        {{ reserva.dataInicial | date:'dd/MM/yyyy':'UTC' }}
+                        a
+                        {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}
+                    </td>
+                    <td>{{ reserva.status}}</td>
+                    <td>{{ reserva.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+                    <td>
+                        <div class="acoes-tabela">
+                            <a class="botao botao-secundario" [routerLink]="['/reservas/detalhes', reserva.id]">
+                                Detalhes
+                            </a>
+                        </div>
+                    </td>
+
+                </tr>
+                
+                }@empty {
+                @if (!carregando && !mensagemErro) {
+                <tr>
+                    <td colspan="6 ">Nenhuma reserva encontrada.</td>
+                </tr>
+                }
+
+                }
+
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="paginacao">
+        <button type="button" class="botao botao-secundario" (click)="voltarPagina()"
+            [disabled]="primeiraPagina || carregando">
+            ← Voltar
+        </button>
+
+        @if (totalPaginas > 0) {
+        <span class="informacao-pagina">
+            Página {{ paginaAtual }} de {{ totalPaginas }}
+        </span>
+        } @else {
+        <span class="informacao-pagina">
+            Nenhuma página disponível
+        </span>
+        }
+        <button type="button" class="botao botao-secundario" (click)="proximaPagina()"
+            [disabled]="ultimaPagina || carregando">
+            Próxima →
+        </button>
+    </div>
+</div>

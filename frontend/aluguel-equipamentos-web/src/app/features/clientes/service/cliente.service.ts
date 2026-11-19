@@ -5,6 +5,7 @@ import { ClienteResponse } from '../../../core/models/cliente-response';
 import { CadastrarClienteRequest } from '../../../core/models/cadastrar-cliente-request';
 import { API_URL } from '../../../core/config/api.config';
 import { AtualizarClienteRequest } from '../../../core/models/atualizar-cliente-request';
+import { ClienteResumoResponse } from '../../../core/models/cliente-resumo-response';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,12 @@ export class ClienteService {
       `${API_URL}/clientes?page=${pagina}&size=${tamanho}&sort=id,asc`,
     );
   }
+
+listarAtivos() {
+  return this.http.get<ClienteResumoResponse[]>(
+    `${API_URL}/clientes/ativos`
+  );
+}
 
   cadastrar(dados: CadastrarClienteRequest) {
     return this.http.post<ClienteResponse>(`${API_URL}/clientes`, dados);

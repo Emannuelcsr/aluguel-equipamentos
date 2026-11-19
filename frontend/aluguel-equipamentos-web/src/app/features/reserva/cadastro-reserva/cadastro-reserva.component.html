@@ -1,0 +1,117 @@
+<div class="cabecalho-pagina cabecalho-formulario">
+    <h2>Nova reserva</h2>
+    <p>Preencha os dados abaixo para cadastrar uma reserva.</p>
+</div>
+
+<div class="painel-cadastro">
+    <h3>Dados da reserva</h3>
+
+    @if (mensagemErro) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+
+    @if (mensagemSucesso) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucesso }}</span>
+    </div>
+    }
+
+    <form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
+        <div>
+            <label for="clienteId">Cliente:</label>
+
+            <select id="clienteId" formControlName="clienteId">
+                <option [ngValue]="null">Selecione um cliente</option>
+
+                @for (cliente of clientes; track cliente.id) {
+                <option [ngValue]="cliente.id">
+                    {{ cliente.nomeRazaoSocial }}
+                </option>
+                }
+            </select>
+
+            @if (
+            formularioCadastro.controls.clienteId.touched &&
+            formularioCadastro.controls.clienteId.invalid
+            ) {
+
+            @if (formularioCadastro.controls.clienteId.hasError('required')) {
+            <p>ID é obrigatório.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="dataInicial">Data inicial</label>
+            <input id="dataInicial" formControlName="dataInicial" type="date">
+
+            @if (
+            formularioCadastro.controls.dataInicial.touched &&
+            formularioCadastro.controls.dataInicial.invalid
+            ) {
+            @if (formularioCadastro.controls.dataInicial.hasError('required')) {
+            <p>Data inicial é obrigatória.</p>
+            }
+            }
+        </div>
+
+        <div>
+            <label for="dataFinal">Data final</label>
+            <input id="dataFinal" formControlName="dataFinal" type="date">
+
+            @if (
+            formularioCadastro.controls.dataFinal.touched &&
+            formularioCadastro.controls.dataFinal.invalid
+            ) {
+            @if (formularioCadastro.controls.dataFinal.hasError('required')) {
+            <p>Data final é obrigatória.</p>
+            }
+            }
+        </div>
+
+        @if (
+        formularioCadastro.hasError('periodoInvalido') &&
+        formularioCadastro.touched
+        ) {
+        <div class="mensagem-erro">
+            A data final não pode ser anterior à data inicial.
+        </div>
+        }
+
+
+        @for (unidade of unidades; track unidade.id) {
+        <div>
+            <label>
+                <input type="checkbox" [value]="unidade.id" (change)="alterarSelecaoUnidade(unidade.id, $event)" />
+                {{ unidade.codigo }} - {{ unidade.equipamentoNome }}
+            </label>
+
+        </div>
+        } @empty {
+        <p>Nenhuma unidade disponível.</p>
+        }
+
+        @if (
+        formularioCadastro.controls.unidadesIds.touched &&
+        formularioCadastro.controls.unidadesIds.invalid
+        ) {
+        <p class="mensagem-erro">
+            Selecione pelo menos uma unidade de equipamento.
+        </p>
+        }
+        <div class="acoes-formulario">
+            <a routerLink="/reservas" class="botao botao-secundario">
+                Voltar
+            </a>
+
+            <button type="submit" class="botao botao-primario" [disabled]="criando">
+                {{ criando ? 'Cadastrando...' : 'Cadastrar reserva' }}
+            </button>
+        </div>
+    </form>
+
+</div>

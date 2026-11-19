@@ -1,5 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.cliente.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +67,16 @@ public class ClienteController {
 
 		return ResponseEntity.ok(resposta);
 	}
+	
+	@GetMapping("/ativos")
+	public ResponseEntity<List<ClienteResumoResponse>> listarAtivos() {
+
+		List<ClienteResumoResponse> resposta = clienteService.listarAtivos();
+
+		return ResponseEntity.ok(resposta);
+	}
+
+	
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ClienteResponse> atualizar(@PathVariable Long id,

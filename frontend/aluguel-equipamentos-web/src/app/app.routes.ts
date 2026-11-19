@@ -18,6 +18,9 @@ import { DetalhesEquipamentosComponent } from './features/equipamento/detalhes-e
 import { EditarEquipamentosComponent } from './features/equipamento/editar-equipamentos/editar-equipamentos.component';
 import { ListagemUnidadesEquipamentoComponent } from './features/unidade-equipamento/listagem-unidades-equipamento/listagem-unidades-equipamento.component';
 import { DetalhesUnidadeEquipamentoComponent } from './features/unidade-equipamento/detalhes-unidade-equipamento/detalhes-unidade-equipamento.component';
+import { CadastroReservaComponent } from './features/reserva/cadastro-reserva/cadastro-reserva.component';
+import { ListagemReservaComponent } from './features/reserva/listagem-reserva/listagem-reserva.component';
+import { DetalhesReservaComponent } from './features/reserva/detalhes-reserva/detalhes-reserva.component';
 
 export const routes: Routes = [
   {
@@ -89,6 +92,18 @@ export const routes: Routes = [
       {
         path: 'equipamentos/unidades/detalhes/:id',
         component: DetalhesUnidadeEquipamentoComponent,
+      },
+      {
+        path: 'reserva/novo',
+        component:CadastroReservaComponent,
+      },
+      {
+        path: 'reservas',
+        component: ListagemReservaComponent,
+      },
+      {
+        path: 'reservas/detalhes/:id',
+        component: DetalhesReservaComponent,
       },
     ],
   },

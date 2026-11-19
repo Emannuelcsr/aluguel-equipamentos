@@ -154,9 +154,39 @@
       </li>
 
       <!-- MÓDULOS FUTUROS -->
-      <li class="item-indisponivel">
-        <span>📅 Reservas</span>
-        <small>Em breve</small>
+      <li class="grupo-clientes">
+        <span class="titulo-grupo">📅 Reservas</span>
+
+                <ul class="submenu">
+          <li>
+            <a
+              routerLink="/reservas"
+              routerLinkActive="ativo"
+              #listarReservas="routerLinkActive"
+              [routerLinkActiveOptions]="{ exact: true }"
+              [attr.aria-current]="listarReservas.isActive ? 'page' : null"
+              (click)="fecharMenu()"
+            >
+              Listar reservas
+            </a>
+          </li>
+
+         
+            <li>
+              <a
+                routerLink="/reserva/novo"
+                routerLinkActive="ativo"
+                #novaReserva="routerLinkActive"
+                [attr.aria-current]="novaReserva.isActive ? 'page' : null"
+                (click)="fecharMenu()"
+              >
+                Nova reserva
+              </a>
+            </li>
+          
+        </ul>
+
+    
       </li>
 
       <li class="item-indisponivel">

@@ -1,5 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import br.com.projetosecsr.aluguelequipamentos.equipamento.entidade.Equipamento;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.repository.EquipamentoRepository;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.StatusUnidadeEquipamento;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.UnidadeEquipamento;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaAtivaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoJaInativaException;
@@ -107,6 +109,20 @@ public class UnidadeEquipamentoService {
 
 	}
 
+	@Transactional(readOnly = true)
+	public List<UnidadeEquipamentoResponse> listarDisponiveis() {
+
+		List<UnidadeEquipamento> unidadesDisponiveis = unidadeEquipamentoRepository.findAllByAtivoTrueAndStatus(StatusUnidadeEquipamento.DISPONIVEL);
+
+		List<UnidadeEquipamentoResponse> respostas = unidadesDisponiveis
+			    .stream()
+			    .map(unidade -> UnidadeEquipamentoResponse.de(unidade))
+			    .toList();
+
+		return respostas;
+
+	}
+	
 	
 	@Transactional(readOnly = true)
 	public PaginaResponse<UnidadeEquipamentoResponse> listarPaginadoEquipamentoEspecifico(Pageable paginacao, Long equipamentoId) {

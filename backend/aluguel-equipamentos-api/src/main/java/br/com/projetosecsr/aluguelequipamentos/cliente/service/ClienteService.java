@@ -1,5 +1,6 @@
 package br.com.projetosecsr.aluguelequipamentos.cliente.service;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -178,6 +179,18 @@ public class ClienteService {
 
 	}
 
+	@Transactional(readOnly = true)
+	public List<ClienteResumoResponse> listarAtivos() {
+		
+		List<Cliente>clientes = clienteRepository.findAllByAtivoTrue();
+		
+		List<ClienteResumoResponse> resposta = clientes.stream()
+				.map(cliente -> ClienteResumoResponse.de(cliente)).toList();
+		
+		return resposta;
+
+	}		
+	
 	@Transactional
 	public ClienteResponse atualizar(AtualizarClienteRequest request, Long id) {
 

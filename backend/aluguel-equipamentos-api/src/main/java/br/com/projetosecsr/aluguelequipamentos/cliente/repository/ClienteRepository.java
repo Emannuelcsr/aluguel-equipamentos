@@ -1,5 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.cliente.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.projetosecsr.aluguelequipamentos.cliente.entidade.Cliente;
@@ -11,5 +13,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 	boolean existsByEmail(String email);
 
 	boolean existsByEmailAndIdNot(String email, Long id);
+	
+	List<Cliente> findAllByAtivoTrue();
 
 }

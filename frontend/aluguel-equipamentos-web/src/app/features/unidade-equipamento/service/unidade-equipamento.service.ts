@@ -69,5 +69,12 @@ listarPorEquipamento(
   );
 }
 
+listarDisponiveis(){
+return this.http.get<UnidadeEquipamentoResponse[]>(
+      `${API_URL}/unidades-equipamento/disponiveis`,
+    );
+
+}
+
   }
 

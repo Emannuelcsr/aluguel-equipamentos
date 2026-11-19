@@ -1,5 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,15 @@ public class UnidadeEquipamentoController {
 	public ResponseEntity<PaginaResponse<UnidadeEquipamentoResponse>> listarPaginado(Pageable paginacao) {
 
 		PaginaResponse<UnidadeEquipamentoResponse> resposta = unidadeEquipamentoService.listarPaginado(paginacao);
+
+		return ResponseEntity.ok(resposta);
+	}
+	
+
+	@GetMapping("/disponiveis")
+	public ResponseEntity<List<UnidadeEquipamentoResponse>> unidadesDisponiveis() {
+
+		List<UnidadeEquipamentoResponse> resposta = unidadeEquipamentoService.listarDisponiveis();
 
 		return ResponseEntity.ok(resposta);
 	}
