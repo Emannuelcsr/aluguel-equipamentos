@@ -112,7 +112,7 @@ public class UnidadeEquipamentoService {
 	@Transactional(readOnly = true)
 	public List<UnidadeEquipamentoResponse> listarDisponiveis() {
 
-		List<UnidadeEquipamento> unidadesDisponiveis = unidadeEquipamentoRepository.findAllByAtivoTrueAndStatus(StatusUnidadeEquipamento.DISPONIVEL);
+		List<UnidadeEquipamento> unidadesDisponiveis = unidadeEquipamentoRepository.findAllByAtivoTrueAndStatusOrderByIdAsc(StatusUnidadeEquipamento.DISPONIVEL);
 
 		List<UnidadeEquipamentoResponse> respostas = unidadesDisponiveis
 			    .stream()

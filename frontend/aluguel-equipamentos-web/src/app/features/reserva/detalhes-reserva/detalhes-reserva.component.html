@@ -1,93 +1,136 @@
+
 @if (mensagemErro) {
-<div class="alerta alerta-erro" role="alert">
-  <span aria-hidden="true">⚠️</span>
-  <span>{{ mensagemErro }}</span>
-</div>
+  <div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+  </div>
 }
 
 @if (mensagemSucesso) {
-<div class="alerta alerta-sucesso" role="status">
-  <span aria-hidden="true">✅</span>
-  <span>{{ mensagemSucesso }}</span>
-</div>
+  <div class="alerta alerta-sucesso" role="status">
+    <span aria-hidden="true">✅</span>
+    <span>{{ mensagemSucesso }}</span>
+  </div>
 }
 
 @if (carregando) {
-<p>Carregando reserva...</p>
+  <p>Carregando reserva...</p>
 }
 
 @if (reserva && !carregando) {
-<div class="painel-detalhes dados-reserva">
-  <h3>Dados da reserva</h3>
-  <h2>{{ reserva.clienteNome }}</h2>
 
+  <div class="painel-detalhes dados-reserva">
 
-  <p><strong>Itens:</strong></p>
+    <h3>Dados da reserva</h3>
 
-  <ul>
-    @for (item of reserva.itens; track item.id) {
-    <li>
-      <p> {{ item.equipamentoNome }} ({{ item.codigoUnidade }})</p>
-      <p>
-        Diária: {{ item.valorDiaria | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
-        | Dias: {{ item.quantidadeDias }}
-      </p>
-      <p>Subtotal: {{item.subtotal | currency:'BRL':'symbol':'1.2-2':'pt-BR'}}</p>
-    </li>
-    }
-  </ul>
+    <h2>{{ reserva.clienteNome }}</h2>
 
-  <p>
-    <strong>Período:</strong>
-    <span>{{ reserva.dataInicial | date:'dd/MM/yyyy':'UTC' }} a {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}</span>
-  </p>
+    <p>
+      <strong>Período:</strong>
+      <span>
+        {{ reserva.dataInicial | date:'dd/MM/yyyy':'UTC' }}
+        a
+        {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}
+      </span>
+    </p>
 
-  <p>
-    <strong>Status:</strong>
-    <span>{{reserva.status}}</span>
-  </p>
+    <p>
+      <strong>Status:</strong>
 
+      <span
+        class="status-reserva"
+        [class.status-aprovada]="reserva.status === 'APROVADA'"
+        [class.status-rejeitada]="reserva.status === 'REJEITADA'"
+        [class.status-cancelada]="reserva.status === 'CANCELADA'"
+        [class.status-em-andamento]="reserva.status === 'EM_ANDAMENTO'"
+        [class.status-finalizada]="reserva.status === 'FINALIZADA'">
+        {{ reserva.status }}
+      </span>
+    </p>
 
-  <p>
-    <strong>Valor total:</strong>
-    <span>{{ reserva.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
-  </p>
-</div>
+    <div class="itens-reserva">
 
+      <p><strong>Itens:</strong></p>
 
+      <ul>
+        @for (item of reserva.itens; track item.id) {
+          <li>
 
-<div class="acoes-detalhes">
+            <p>
+              {{ item.equipamentoNome }}
+              ({{ item.codigoUnidade }})
+            </p>
 
-  
-  @if (ehAdministrador) {
-    
-    
+            <p>
+              Diária:
+              {{ item.valorDiaria | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              | Dias: {{ item.quantidadeDias }}
+            </p>
+
+            <p>
+              Subtotal:
+              {{ item.subtotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+            </p>
+
+          </li>
+        } @empty {
+          <li>Nenhum equipamento encontrado nesta reserva.</li>
+        }
+      </ul>
+
+    </div>
+
+    <p class="valor-total-reserva">
+      <strong>Valor total:</strong>
+      <span>
+        {{ reserva.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+      </span>
+    </p>
+
+  </div>
+
+}
+
+<div class="acoes-detalhes acoes-reserva">
+
+  <a routerLink="/reservas" class="botao botao-secundario">
+    ← Voltar à listagem
+  </a>
+
+  @if (reserva && !carregando && ehAdministrador) {
 
     @if (reserva.status === 'SOLICITADA') {
-      <button type="button" class="botao botao-ativar" (click)="aprovarReserva();"
-    [disabled]="aprovando || rejeitando || cancelando">
-    {{ aprovando ? 'Aprovando...' : 'Aprovar reserva' }}
-  </button>
-}
-@if (reserva.status === 'SOLICITADA') { "
-<button type="button" class="botao botao-desativar" (click)="rejeitarReserva();"
-[disabled]="aprovando || rejeitando || cancelando">
-{{ rejeitando ? 'Rejeitando...' : 'Rejeitar reserva' }}
-</button>
-}
-@if (reserva.status === 'SOLICITADA' || reserva.status === 'APROVADA') {
-  <button type="button" class="botao botao-desativar" (click)="cancelarReserva();"
-    [disabled]="aprovando || rejeitando || cancelando">
-    {{ cancelando ? 'Cancelando...' : 'Cancelar reserva' }}
-  </button>
-}
 
+      <button
+        type="button"
+        class="botao botao-ativar"
+        (click)="aprovarReserva()"
+        [disabled]="aprovando || rejeitando || cancelando">
+        {{ aprovando ? 'Aprovando...' : 'Aprovar reserva' }}
+      </button>
 
+      <button
+        type="button"
+        class="botao botao-desativar"
+        (click)="rejeitarReserva()"
+        [disabled]="aprovando || rejeitando || cancelando">
+        {{ rejeitando ? 'Rejeitando...' : 'Rejeitar reserva' }}
+      </button>
 
-}
+    }
+
+    @if (reserva.status === 'SOLICITADA' || reserva.status === 'APROVADA') {
+
+      <button
+        type="button"
+        class="botao botao-cancelar"
+        (click)="cancelarReserva()"
+        [disabled]="aprovando || rejeitando || cancelando">
+        {{ cancelando ? 'Cancelando...' : 'Cancelar reserva' }}
+      </button>
+
+    }
+
+  }
 
 </div>
-}
-<a routerLink="/reservas" class="botao botao-secundario">
-  ← Voltar à listagem
-</a>

@@ -5,12 +5,12 @@
 </div>
 }
 
-  @if (mensagemSucesso) {
-  <div class="alerta alerta-sucesso" role="status">
+@if (mensagemSucesso) {
+<div class="alerta alerta-sucesso" role="status">
     <span aria-hidden="true">✅</span>
     <span>{{ mensagemSucesso }}</span>
-  </div>
-  }
+</div>
+}
 
 @if (carregando) {
 <p>Carregando cliente...</p>
@@ -112,35 +112,23 @@
 
 
 <div class="acoes-detalhes">
-    
+
     @if (ehAdministrador) {
-        @if (cliente.ativo) {
-            <button
-        type="button"
-        class="botao botao-desativar"
-        (click)="desativarCliente()"
-        [disabled]="desativando"
-      >
+    @if (cliente.ativo) {
+    <button type="button" class="botao botao-desativar" (click)="desativarCliente()" [disabled]="desativando">
         {{ desativando ? 'Desativando...' : 'Desativar cliente' }}
     </button>
-} @else {
-    <button
-        type="button"
-        class="botao botao-ativar"
-        (click)="ativarCliente()"
-        [disabled]="ativando"
-      >
+    } @else {
+    <button type="button" class="botao botao-ativar" (click)="ativarCliente()" [disabled]="ativando">
         {{ ativando ? 'Ativando...' : 'Ativar cliente' }}
     </button>
-}
-}
+    }
+    }
+    <a routerLink="/clientes" class="botao botao-secundario">
+        ← Voltar à listagem
+    </a>
 
 </div>
 
 
 }
-
-
-  <a routerLink="/clientes" class="botao botao-secundario">
-    ← Voltar à listagem
-  </a>

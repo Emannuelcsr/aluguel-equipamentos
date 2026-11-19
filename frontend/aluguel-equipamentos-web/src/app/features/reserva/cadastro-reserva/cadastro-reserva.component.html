@@ -21,8 +21,8 @@
     }
 
     <form [formGroup]="formularioCadastro" (ngSubmit)="cadastrar()">
-        <div>
-            <label for="clienteId">Cliente:</label>
+      <div class="campo-cliente">
+  <label for="clienteId">Cliente:</label>
 
             <select id="clienteId" formControlName="clienteId">
                 <option [ngValue]="null">Selecione um cliente</option>
@@ -82,19 +82,21 @@
         </div>
         }
 
+        <div class="selecao-unidades">
+            <h3>Equipamentos disponíveis</h3>
+            <p>Selecione as unidades que deseja incluir na reserva.</p>
+            @for (unidade of unidades; track unidade.id) {
+            <div>
+                <label>
+                    <input type="checkbox" [value]="unidade.id" (change)="alterarSelecaoUnidade(unidade.id, $event)" />
+                    {{ unidade.codigo }} - {{ unidade.equipamentoNome }}
+                </label>
 
-        @for (unidade of unidades; track unidade.id) {
-        <div>
-            <label>
-                <input type="checkbox" [value]="unidade.id" (change)="alterarSelecaoUnidade(unidade.id, $event)" />
-                {{ unidade.codigo }} - {{ unidade.equipamentoNome }}
-            </label>
-
+            </div>
+            } @empty {
+            <p>Nenhuma unidade disponível.</p>
+            }
         </div>
-        } @empty {
-        <p>Nenhuma unidade disponível.</p>
-        }
-
         @if (
         formularioCadastro.controls.unidadesIds.touched &&
         formularioCadastro.controls.unidadesIds.invalid

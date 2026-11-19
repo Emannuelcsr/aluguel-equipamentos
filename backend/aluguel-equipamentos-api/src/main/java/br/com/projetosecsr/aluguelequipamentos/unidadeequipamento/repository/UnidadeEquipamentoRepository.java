@@ -18,8 +18,6 @@ public interface UnidadeEquipamentoRepository extends JpaRepository<UnidadeEquip
 		);
 
 	
-	List<UnidadeEquipamento> findAllByAtivoTrueAndStatus(
-		    StatusUnidadeEquipamento status
-		);
+	List<UnidadeEquipamento> findAllByAtivoTrueAndStatusOrderByIdAsc(StatusUnidadeEquipamento status);
 	
 }

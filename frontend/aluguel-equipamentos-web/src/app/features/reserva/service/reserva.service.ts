@@ -20,7 +20,7 @@ constructor(private http: HttpClient) {}
 
   listar(pagina: number, tamanho: number) {
     return this.http.get<PaginaResponse<ReservaResponse>>(
-      `${API_URL}/reservas?page=${pagina}&size=${tamanho}&sort=id,asc`,
+      `${API_URL}/reservas?page=${pagina}&size=${tamanho}`,
     );
   }
 

@@ -3,6 +3,10 @@
         <h2>Reservas</h2>
         <p>Gerencie as reservas cadastradas no sistema.</p>
     </div>
+
+    <a routerLink="/reservas/novo" class="botao botao-primario">
+        + Nova reserva
+    </a>
 </div>
 
 <div class="painel-padrao">
@@ -53,7 +57,16 @@
                         a
                         {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}
                     </td>
-                    <td>{{ reserva.status}}</td>
+                    <td>
+                        <span class="status-reserva" 
+                            [class.status-aprovada]="reserva.status === 'APROVADA'"
+                            [class.status-rejeitada]="reserva.status === 'REJEITADA'"
+                            [class.status-cancelada]="reserva.status === 'CANCELADA'"
+                            [class.status-em-andamento]="reserva.status === 'EM_ANDAMENTO'"
+                            [class.status-finalizada]="reserva.status === 'FINALIZADA'">
+                            {{ reserva.status }}
+                        </span>
+                    </td>
                     <td>{{ reserva.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
 
                     <td>
@@ -65,7 +78,7 @@
                     </td>
 
                 </tr>
-                
+
                 }@empty {
                 @if (!carregando && !mensagemErro) {
                 <tr>

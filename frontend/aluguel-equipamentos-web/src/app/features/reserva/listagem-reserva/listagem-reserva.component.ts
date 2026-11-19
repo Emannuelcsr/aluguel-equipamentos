@@ -38,7 +38,7 @@ export class ListagemReservaComponent implements OnInit {
     this.listar(this.paginaAtual);
   }
 
-      listar(pagina: number) {
+   listar(pagina: number) {
     if (this.carregando) {
       return;
     }
