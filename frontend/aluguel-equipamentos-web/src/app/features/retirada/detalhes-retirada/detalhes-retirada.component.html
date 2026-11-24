@@ -1,0 +1,125 @@
+@if (mensagemErro) {
+<div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+</div>
+}
+
+@if (carregando) {
+<p>Carregando retirada...</p>
+}
+
+@if (retirada && !carregando) {
+
+<div class="painel-detalhes dados-retirada">
+
+    <h3>Dados da retirada</h3>
+
+    <p>
+        <strong>Reserva id:</strong>
+        <span>{{retirada.reservaId}}</span>
+    </p>
+
+
+    <p>
+        <strong>Data da retirada:</strong>
+        <span>
+            {{ retirada.dataHoraRetirada| date:'dd/MM/yyyy':'UTC' }}
+        </span>
+    </p>
+
+    <p>
+        <strong>Nome do recebedor:</strong>
+        <span>{{retirada.nomeRecebedor}}</span>
+    </p>
+
+    <p>
+        <strong>Documento do recebedor:</strong>
+        <span>{{retirada.documentoRecebedor}}</span>
+    </p>
+
+    <p>
+        <strong>Método de verificação da autorização:</strong>
+        <span>
+            @switch (retirada.metodoVerificacao) {
+            @case ('PRESENCIAL') {
+            Presencial
+            }
+            @case ('TELEFONE') {
+            Telefone
+            }
+            @case ('POR_ESCRITO') {
+            Por escrito
+            }
+            @case ('OUTRO') {
+            Outro
+            }
+            }
+        </span>
+    </p>
+
+    @if (retirada.metodoVerificacao === 'OUTRO' && retirada.descricaoOutroMetodo) {
+    <p>
+        <strong>Descrição do método:</strong>
+        <span>{{ retirada.descricaoOutroMetodo }}</span>
+    </p>
+    }
+    <p><strong>Realizada por:</strong>
+        <span> {{retirada.usuarioResponsavelNome}}</span>
+    </p>
+
+
+
+
+    <div class="itens-retirada">
+
+        <p><strong>Itens:</strong></p>
+
+        <ul>
+            @for (item of retirada.itens; track item.id) {
+            <li>
+
+                <p>
+                    {{ item.equipamentoNome }}
+                    ({{ item.codigoUnidade }})
+                </p>
+
+                <p>
+                    <strong>Condição física:</strong>
+                    <span>
+                        {{
+                        item.condicaoFisica === 'SEM_DANOS_APARENTES'
+                        ? 'Sem danos aparentes'
+                        : 'Com observações'
+                        }}
+                    </span>
+                </p>
+                <p>
+                    {{item.observacoes}}
+                </p>
+
+
+            </li>
+            } @empty {
+            <li>Nenhum equipamento encontrado nesta retirada.</li>
+            }
+        </ul>
+
+    </div>
+
+
+</div>
+
+}
+
+<div class="acoes-detalhes acoes-retirada">
+
+    <a routerLink="/retiradas" class="botao botao-secundario">
+        ← Voltar à listagem
+    </a>
+
+
+
+
+
+</div>

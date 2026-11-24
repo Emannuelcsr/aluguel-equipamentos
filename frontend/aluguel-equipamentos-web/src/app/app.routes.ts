@@ -22,6 +22,8 @@ import { CadastroReservaComponent } from './features/reserva/cadastro-reserva/ca
 import { ListagemReservaComponent } from './features/reserva/listagem-reserva/listagem-reserva.component';
 import { DetalhesReservaComponent } from './features/reserva/detalhes-reserva/detalhes-reserva.component';
 import { CadastroRetiradaComponent } from './features/retirada/cadastro-retirada/cadastro-retirada.component';
+import { ListagemRetiradasComponent } from './features/retirada/listagem-retiradas/listagem-retiradas.component';
+import { DetalhesRetiradaComponent } from './features/retirada/detalhes-retirada/detalhes-retirada.component';
 
 export const routes: Routes = [
   {
@@ -95,7 +97,7 @@ export const routes: Routes = [
         component: DetalhesUnidadeEquipamentoComponent,
       },
       {
-        path: 'reserva/novo',
+        path: 'reservas/novo',
         component: CadastroReservaComponent,
       },
       {
@@ -109,6 +111,14 @@ export const routes: Routes = [
       {
         path: 'retiradas/nova/:reservaId',
         component: CadastroRetiradaComponent,
+      },
+      {
+        path: 'retiradas',
+        component: ListagemRetiradasComponent,
+      },
+            {
+        path: 'retiradas/detalhes/:id',
+        component: DetalhesRetiradaComponent,
       },
     ],
   },

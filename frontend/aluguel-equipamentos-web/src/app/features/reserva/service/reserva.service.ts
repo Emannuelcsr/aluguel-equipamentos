@@ -28,6 +28,11 @@ constructor(private http: HttpClient) {}
     return this.http.get<ReservaResponse>(`${API_URL}/reservas/${id}`);
   }
 
+  listarAprovadas(pagina: number, tamanho: number) {
+    return this.http.get<PaginaResponse<ReservaResponse>>(
+      `${API_URL}/reservas/aprovadas?page=${pagina}&size=${tamanho}`,
+    );
+  }
 
 
 

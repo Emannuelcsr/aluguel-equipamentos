@@ -38,6 +38,7 @@ import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.Unidad
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeEquipamentoNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.UnidadeIndisponivelParaReservaException;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.repository.UnidadeEquipamentoRepository;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.response.UnidadeEquipamentoResponse;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
@@ -245,6 +246,21 @@ public class ReservaService {
 
 	}
 
+	@Transactional(readOnly = true)
+	public PaginaResponse<ReservaResponse> listarAprovadas(Pageable paginacao) {
+
+		Page<Reserva> reservasDisponiveis = reservaRepository.findByStatusOrderByIdAsc(StatusReserva.APROVADA,paginacao);
+
+		Page<ReservaResponse> paginaDeRespostas = reservasDisponiveis.map(reserva -> ReservaResponse.de(reserva));			    
+
+		return converterPagina(paginaDeRespostas);
+
+	}
+	
+	
+	
+	
+	
 	@Transactional
 	public ReservaResponse aprovar(Long id) {
 

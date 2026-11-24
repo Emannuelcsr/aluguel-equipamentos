@@ -1,5 +1,7 @@
 package br.com.projetosecsr.aluguelequipamentos.reserva.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaRes
 import br.com.projetosecsr.aluguelequipamentos.reserva.request.CadastrarReservaRequest;
 import br.com.projetosecsr.aluguelequipamentos.reserva.response.ReservaResponse;
 import br.com.projetosecsr.aluguelequipamentos.reserva.service.ReservaService;
+import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.response.UnidadeEquipamentoResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -48,6 +51,15 @@ public class ReservaController {
 	public ResponseEntity<PaginaResponse<ReservaResponse>> listarPaginado(Pageable paginacao) {
 
 		PaginaResponse<ReservaResponse> resposta = reservaService.listarPaginado(paginacao);
+
+		return ResponseEntity.ok(resposta);
+	}
+	
+	
+	@GetMapping("/aprovadas")
+	public ResponseEntity<PaginaResponse<ReservaResponse>> reservasAprovadas(Pageable paginacao) {
+
+		PaginaResponse<ReservaResponse> resposta = reservaService.listarAprovadas(paginacao);
 
 		return ResponseEntity.ok(resposta);
 	}

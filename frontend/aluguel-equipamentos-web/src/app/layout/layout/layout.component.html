@@ -35,135 +35,50 @@
 
     <aside id="menu-principal" class="menu-lateral" [class.menu-aberto]="menuAberto">
       <nav aria-label="Menu principal">
-        <ul>
 
-          <!-- FUNCIONALIDADES FUTURAS -->
-          <li class="item-indisponivel">
-            <span>🏠 Início</span>
-            <small>Em breve</small>
+        <ul>
+          <li class="titulo-grupo">OPERAÇÕES</li>
+
+          <!-- RESERVAS -->
+          <li>
+            <a routerLink="/reservas" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+              (click)="fecharMenu()">
+              📅 Reservas
+            </a>
           </li>
 
+                    <!-- RETIRADAS -->
+          <li>
+            <a routerLink="/retiradas" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+              (click)="fecharMenu()">
+             📦 Retiradas
+            </a>
+          </li>
+
+
+          <li class="titulo-grupo">CADASTROS</li>
           <!-- CLIENTES -->
-          <li class="grupo-clientes">
-            <span class="titulo-grupo">👥 Clientes</span>
-
-            <ul class="submenu">
-              <li>
-                <a routerLink="/clientes" routerLinkActive="ativo" #listarClientes="routerLinkActive"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  [attr.aria-current]="listarClientes.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Listar clientes
-                </a>
-              </li>
-
-              <li>
-                <a routerLink="/clientes/novo" routerLinkActive="ativo" #novoCliente="routerLinkActive"
-                  [attr.aria-current]="novoCliente.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Novo cliente
-                </a>
-              </li>
-            </ul>
+          <li>
+            <a routerLink="/clientes" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+              (click)="fecharMenu()">
+              👥 Clientes
+            </a>
           </li>
 
           <!-- CATEGORIAS -->
-          <li class="grupo-clientes">
-            <span class="titulo-grupo">📂 Categorias</span>
-
-            <ul class="submenu">
-              <li>
-                <a routerLink="/categorias" routerLinkActive="ativo" #listarCategorias="routerLinkActive"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  [attr.aria-current]="listarCategorias.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Listar categorias
-                </a>
-              </li>
-
-              @if (ehAdministrador) {
-              <li>
-                <a routerLink="/categorias/novo" routerLinkActive="ativo" #novaCategoria="routerLinkActive"
-                  [attr.aria-current]="novaCategoria.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Nova categoria
-                </a>
-              </li>
-              }
-            </ul>
+          <li>
+            <a routerLink="/categorias" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+              (click)="fecharMenu()">
+              📂 Categorias
+            </a>
           </li>
 
           <!-- EQUIPAMENTOS -->
-          <li class="grupo-clientes">
-            <span class="titulo-grupo">🔧 Equipamentos</span>
-
-            <ul class="submenu">
-              <li>
-                <a routerLink="/equipamentos" routerLinkActive="ativo" #listarEquipamentos="routerLinkActive"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  [attr.aria-current]="listarEquipamentos.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Listar equipamentos
-                </a>
-              </li>
-
-              @if (ehAdministrador) {
-              <li>
-                <a routerLink="/equipamentos/novo" routerLinkActive="ativo" #novoEquipamento="routerLinkActive"
-                  [attr.aria-current]="novoEquipamento.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Novo equipamento
-                </a>
-              </li>
-              }
-            </ul>
-          </li>
-
-          <!-- MÓDULOS FUTUROS -->
-          <li class="grupo-clientes">
-            <span class="titulo-grupo">📅 Reservas</span>
-
-            <ul class="submenu">
-              <li>
-                <a routerLink="/reservas" routerLinkActive="ativo" #listarReservas="routerLinkActive"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  [attr.aria-current]="listarReservas.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Listar reservas
-                </a>
-              </li>
-
-
-              <li>
-                <a routerLink="/reserva/novo" routerLinkActive="ativo" #novaReserva="routerLinkActive"
-                  [attr.aria-current]="novaReserva.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Nova reserva
-                </a>
-              </li>
-
-            </ul>
-
-
-          </li>
-
-          <li class="grupo-clientes">
-            <span class="titulo-grupo">📦 Retiradas</span>
-            <ul class="submenu">
-              <li>
-                <a routerLink="/retiradas" routerLinkActive="ativo" #listarReservas="routerLinkActive"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  [attr.aria-current]="listarReservas.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Listar retiradas
-                </a>
-              </li>
-
-
-              <li>
-                <a routerLink="/retirada/novo" routerLinkActive="ativo" #novaRetirada="routerLinkActive"
-                  [attr.aria-current]="novaRetirada.isActive ? 'page' : null" (click)="fecharMenu()">
-                  Nova retirada
-                </a>
-              </li>
-
-            </ul>
-          </li>
-
-          <li class="item-indisponivel">
-            <span>↩️ Devoluções</span>
-            <small>Em breve</small>
+          <li>
+            <a routerLink="/equipamentos" routerLinkActive="ativo" [routerLinkActiveOptions]="{ exact: true }"
+              (click)="fecharMenu()">
+              🔧 Equipamentos
+            </a>
           </li>
 
         </ul>

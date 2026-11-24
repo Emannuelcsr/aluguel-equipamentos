@@ -26,6 +26,9 @@ export class RetiradaService {
       );
     }
   
+    
+
+
     buscarPorId(id: number) {
       return this.http.get<RetiradaResponse>(`${API_URL}/retiradas/${id}`);
     }

@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { MetodoVerificacaoRetirada } from '../../../core/models/metodo-verificacao-retirada.enum';
 import { CondicaoFisicaRetirada } from '../../../core/models/condicao-fisica-enum';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReservaService } from '../../reserva/service/reserva.service';
 import { ReservaResponse } from '../../../core/models/reserva-response';
 import { RetiradaService } from '../service/retirada.service';
@@ -17,7 +17,7 @@ import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-cadastro-retirada',
-  imports: [ReactiveFormsModule, RouterLink, DatePipe],
+imports: [ReactiveFormsModule, DatePipe],
   templateUrl: './cadastro-retirada.component.html',
   styleUrl: './cadastro-retirada.component.scss',
 })
@@ -26,6 +26,7 @@ export class CadastroRetiradaComponent {
   reserva: ReservaResponse | null = null;
   cadastrando = false;
   mensagemSucesso = '';
+  mensagemSucessoAprovada = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -186,8 +187,12 @@ export class CadastroRetiradaComponent {
     this.retiradaService.cadastrar(dadosRetirada).subscribe({
       next: (resposta) => {
         this.cadastrando = false;
-        console.log('Retirada cadastrada:', resposta);
-        this.mensagemSucesso = 'Retirada registrada com sucesso!';
+
+        this.router.navigate(['/retiradas'], {
+          state: {
+            mensagemSucessoAprovada: 'Retirada realizada com sucesso!',
+          },
+        });
       },
       error: (erro) => {
         this.cadastrando = false;
