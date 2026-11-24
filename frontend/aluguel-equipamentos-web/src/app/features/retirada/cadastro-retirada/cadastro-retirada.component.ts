@@ -8,15 +8,16 @@ import {
 } from '@angular/forms';
 import { MetodoVerificacaoRetirada } from '../../../core/models/metodo-verificacao-retirada.enum';
 import { CondicaoFisicaRetirada } from '../../../core/models/condicao-fisica-enum';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReservaService } from '../../reserva/service/reserva.service';
 import { ReservaResponse } from '../../../core/models/reserva-response';
 import { RetiradaService } from '../service/retirada.service';
 import { CadastrarRetiradaRequest } from '../../../core/models/cadastrar-retirada-request';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-cadastro-retirada',
-  imports: [ReactiveFormsModule,RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe],
   templateUrl: './cadastro-retirada.component.html',
   styleUrl: './cadastro-retirada.component.scss',
 })
@@ -30,6 +31,7 @@ export class CadastroRetiradaComponent {
     private route: ActivatedRoute,
     private reservaService: ReservaService,
     private retiradaService: RetiradaService,
+    private router: Router,
   ) {}
 
   formularioCadastro = new FormGroup({
@@ -194,5 +196,23 @@ export class CadastroRetiradaComponent {
           'Não foi possível registrar a retirada.';
       },
     });
+  }
+
+  confirmarSaida(): boolean {
+    if (this.formularioCadastro.dirty && !this.mensagemSucesso) {
+      return confirm('Existem dados não salvos. Deseja realmente sair?');
+    }
+
+    return true;
+  }
+
+  voltar(): void {
+    if (!this.confirmarSaida()) {
+      return;
+    }
+
+    if (this.reserva) {
+      this.router.navigate(['/reservas/detalhes', this.reserva.id]);
+    }
   }
 }
