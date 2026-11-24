@@ -97,6 +97,14 @@
     ← Voltar à listagem
   </a>
 
+  @if (reserva && !carregando && reserva.status === 'APROVADA') {
+  <a
+    [routerLink]="['/retiradas/nova', reserva.id]"
+    class="botao botao-ativar">
+    Iniciar retirada
+  </a>
+}
+
   @if (reserva && !carregando && ehAdministrador) {
 
     @if (reserva.status === 'SOLICITADA') {

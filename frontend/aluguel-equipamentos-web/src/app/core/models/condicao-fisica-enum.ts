@@ -1,0 +1,4 @@
+export enum CondicaoFisicaRetirada {
+  SEM_DANOS_APARENTES = 'SEM_DANOS_APARENTES',
+  COM_OBSERVACOES = 'COM_OBSERVACOES'
+}

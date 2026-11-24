@@ -1,1 +1,146 @@
-<p>cadastro-retirada works!</p>
+@if (reserva) {
+<p>Reserva: {{ reserva.id }}</p>
+<p>Cliente: {{ reserva.clienteNome }}</p>
+<p>Período: {{ reserva.dataInicial }} até {{ reserva.dataFinal }}</p>
+
+@for (item of reserva.itens; track item.id) {
+<p>{{ item.equipamentoNome }}</p>
+}
+}
+
+@if (mensagemErro) {
+<p class="text-danger">{{ mensagemErro }}</p>
+}
+@if (mensagemSucesso) {
+<p class="text-success">{{ mensagemSucesso }}</p>
+}
+
+<form [formGroup]="formularioCadastro" (ngSubmit)="registrarRetirada()">
+
+    <div>
+        <label for="nomeRecebedor">Nome do recebedor</label>
+        <input id="nomeRecebedor" type="text" formControlName="nomeRecebedor" />
+        @if (
+        formularioCadastro.controls.nomeRecebedor.touched &&
+        formularioCadastro.controls.nomeRecebedor.hasError('required')
+        ) {
+        <small>Informe o nome do recebedor.</small>
+        }
+    </div>
+
+    <div>
+        <label for="documentoRecebedor">CPF do recebedor</label>
+        <input id="documentoRecebedor" type="text" formControlName="documentoRecebedor" />
+        @if (
+        formularioCadastro.controls.documentoRecebedor.touched &&
+        formularioCadastro.controls.documentoRecebedor.invalid
+        ) {
+        <small>Informe um CPF com 11 dígitos numéricos.</small>
+        }
+
+    </div>
+
+    <div>
+        <label for="metodoVerificacao">Método de verificação</label>
+        <select id="metodoVerificacao" formControlName="metodoVerificacao">
+            <option value="">Selecione</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="POR_ESCRITO">Por escrito</option>
+            <option value="TELEFONE">Telefone</option>
+            <option value="OUTRO">Outro</option>
+        </select>
+        @if (
+        formularioCadastro.controls.metodoVerificacao.touched &&
+        formularioCadastro.controls.metodoVerificacao.hasError('required')
+        ) {
+        <small>Selecione o método de verificação.</small>
+        }
+    </div>
+
+    @if (formularioCadastro.controls.metodoVerificacao.value === 'OUTRO') {
+    <div>
+        <label for="descricaoOutroMetodo">Descrição do outro método</label>
+        <input id="descricaoOutroMetodo" type="text" formControlName="descricaoOutroMetodo" />
+        @if (
+        formularioCadastro.controls.descricaoOutroMetodo.touched &&
+        formularioCadastro.controls.descricaoOutroMetodo.hasError('required')
+        ) {
+        <small>Descreva como a autorização foi verificada.</small>
+        }
+    </div>
+    }
+
+    <div>
+        <label>
+            <input type="checkbox" formControlName="autorizacaoConfirmada" />
+            Confirmo que a autorização do recebedor foi verificada.
+        </label>
+        @if (
+        formularioCadastro.controls.autorizacaoConfirmada.touched &&
+        formularioCadastro.controls.autorizacaoConfirmada.hasError('required')
+        ) {
+        <small>Confirme que a autorização do recebedor foi verificada.</small>
+        }
+
+    </div>
+
+    <div>
+        <label>
+            <input type="checkbox" formControlName="recebimentoConfirmado" />
+            Confirmo que os equipamentos foram recebidos.
+        </label>
+        @if (
+        formularioCadastro.controls.recebimentoConfirmado.touched &&
+        formularioCadastro.controls.recebimentoConfirmado.hasError('required')
+        ) {
+        <small>Confirme o recebimento dos equipamentos.</small>
+        }
+    </div>
+
+    <div formArrayName="itens">
+
+        @for (grupo of formularioCadastro.controls.itens.controls; track $index) {
+
+        <div [formGroupName]="$index">
+
+            <p>{{ reserva?.itens?.[$index]?.equipamentoNome }}</p>
+            <p>Código da unidade: {{ reserva?.itens?.[$index]?.codigoUnidade }}</p>
+
+            <div>
+                <label>Condição física</label>
+                <select formControlName="condicaoFisica">
+                    <option value="">Selecione</option>
+                    <option value="SEM_DANOS_APARENTES">Sem danos aparentes</option>
+                    <option value="COM_OBSERVACOES">Com observações</option>
+                </select>
+                @if (
+                grupo.controls['condicaoFisica'].touched &&
+                grupo.controls['condicaoFisica'].hasError('required')
+                ) {
+                <small>Selecione a condição física do equipamento.</small>
+                }
+            </div>
+
+            @if (grupo.controls['condicaoFisica'].value === 'COM_OBSERVACOES') {
+            <div>
+                <label>Observações</label>
+                <textarea formControlName="observacoes" maxlength="500"></textarea>
+                @if (
+                grupo.controls['observacoes'].touched &&
+                grupo.controls['observacoes'].hasError('required')
+                ) {
+                <small>Descreva as condições observadas no equipamento.</small>
+                }
+            </div>
+            }
+
+        </div>
+
+        }
+
+    </div>
+    <button type="submit" [disabled]="cadastrando || !!mensagemSucesso">
+        {{ cadastrando ? 'Registrando...' : 'Registrar retirada' }}
+    </button>
+
+</form>
