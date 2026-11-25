@@ -24,6 +24,9 @@ import { DetalhesReservaComponent } from './features/reserva/detalhes-reserva/de
 import { CadastroRetiradaComponent } from './features/retirada/cadastro-retirada/cadastro-retirada.component';
 import { ListagemRetiradasComponent } from './features/retirada/listagem-retiradas/listagem-retiradas.component';
 import { DetalhesRetiradaComponent } from './features/retirada/detalhes-retirada/detalhes-retirada.component';
+import { CadastroDevolucaoComponent } from './features/devolucao/cadastro-devolucao/cadastro-devolucao.component';
+import { ListagemDevolucaoComponent } from './features/devolucao/listagem-devolucao/listagem-devolucao.component';
+import { DetalhesDevolucaoComponent } from './features/devolucao/detalhes-devolucao/detalhes-devolucao.component';
 
 export const routes: Routes = [
   {
@@ -116,9 +119,22 @@ export const routes: Routes = [
         path: 'retiradas',
         component: ListagemRetiradasComponent,
       },
-            {
+      {
         path: 'retiradas/detalhes/:id',
         component: DetalhesRetiradaComponent,
+      },
+
+      {
+        path: 'devolucoes/nova/:reservaId',
+        component: CadastroDevolucaoComponent,
+      },
+      {
+        path: 'devolucoes',
+        component: ListagemDevolucaoComponent,
+      },
+      {
+        path: 'devolucoes/detalhes/:id',
+        component: DetalhesDevolucaoComponent,
       },
     ],
   },

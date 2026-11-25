@@ -1,0 +1,214 @@
+<div class="cabecalho-pagina">
+    <div>
+        <h2>Devoluções</h2>
+        <p>Gerencie as devolucoes cadastradas no sistema.</p>
+    </div>
+</div>
+
+
+<div class="painel-padrao">
+
+    <h3> Aguardando devolução </h3>
+
+    @if (mensagemErroAlugada) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErroAlugada }}</span>
+        <button type="button" class="botao botao-secundario" (click)="listarAlugadas(paginaSolicitadaAlugada)"
+            [disabled]="carregandoAlugada">
+            {{ carregandoAlugada ? 'Carregando...' : 'Tentar novamente' }}
+        </button>
+    </div>
+    }
+
+    @if (carregandoAlugada) {
+    <p>Carregando reservas...</p>
+    }
+
+    @if (mensagemSucessoAlugada) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucessoAlugada }}</span>
+    </div>
+    }
+
+    <div class="tabela-responsiva">
+        <table class="tabela-padrao">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOME DO CLIENTE</th>
+                    <th>PERIODO</th>
+                    <th>STATUS</th>
+                    <th>VALOR TOTAL</th>
+                    <th>AÇÕES</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @for (reserva of reservasAlugadas; track reserva.id) {
+                <tr>
+                    <td>{{ reserva.id }}</td>
+                    <td>{{ reserva.clienteNome}}</td>
+                    <td>
+                        {{ reserva.dataInicial | date:'dd/MM/yyyy':'UTC' }}
+                        a
+                        {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}
+                    </td>
+                    <td>
+                        <span class="status-reserva" [class.status-Alugada]="reserva.status === 'Alugada'"
+                            [class.status-rejeitada]="reserva.status === 'REJEITADA'"
+                            [class.status-cancelada]="reserva.status === 'CANCELADA'"
+                            [class.status-em-andamento]="reserva.status === 'EM_ANDAMENTO'"
+                            [class.status-finalizada]="reserva.status === 'FINALIZADA'">
+                            {{ reserva.status }}
+                        </span>
+                    </td>
+                    <td>{{ reserva.valorTotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+                    <td>
+                        <div class="acoes-tabela">
+                            <a class="botao botao-secundario" [routerLink]="['/reservas/detalhes', reserva.id]">
+                                Detalhes
+                            </a>
+
+                            <a class="botao botao-primario" [routerLink]="['/devolucoes/nova', reserva.id]">
+                                Registrar devolução
+                            </a>
+                        </div>
+                    </td>
+
+                </tr>
+
+                }@empty {
+                @if (!carregandoAlugada && !mensagemErroAlugada) {
+                <tr>
+                    <td colspan="6 ">Nenhuma reserva encontrada.</td>
+                </tr>
+                }
+
+                }
+
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="paginacao">
+        <button type="button" class="botao botao-secundario" (click)="voltarPaginaAlugada()"
+            [disabled]="primeiraPaginaAlugada || carregandoAlugada">
+            ← Voltar
+        </button>
+
+        @if (totalPaginasAlugada > 0) {
+        <span class="informacao-pagina">
+            Página {{ paginaAtualAlugada }} de {{ totalPaginasAlugada }}
+        </span>
+        } @else {
+        <span class="informacao-pagina">
+            Nenhuma página disponível
+        </span>
+        }
+        <button type="button" class="botao botao-secundario" (click)="proximaPaginaAlugada()"
+            [disabled]="ultimaPaginaAlugada || carregandoAlugada">
+            Próxima →
+        </button>
+    </div>
+</div>
+
+
+
+<div class="painel-padrao">
+
+    <h3> Devolucoes realizadas </h3>
+
+    @if (mensagemErro) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+        <button type="button" class="botao botao-secundario" (click)="listar(paginaSolicitada)" [disabled]="carregando">
+            {{ carregando ? 'Carregando...' : 'Tentar novamente' }}
+        </button>
+    </div>
+    }
+
+    @if (carregando) {
+    <p>Carregando devolucoes...</p>
+    }
+
+    @if (mensagemSucesso) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucesso }}</span>
+    </div>
+    }
+
+    <div class="tabela-responsiva">
+        <table class="tabela-padrao">
+
+            <thead>
+                <tr>
+
+                    <th>RESERVA ID</th>
+                    <th>DATA DA RETIRADA</th>
+                    <th>USUARIO</th>
+                    <th>AÇÕES</th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @for (devolucao of devolucoes; track devolucao.id) {
+                <tr>
+
+                    <td>{{ devolucao.reservaId}}</td>
+                    <td>{{ devolucao.dataHoraDevolucao| date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ devolucao.usuarioResponsavelNome }}</td>
+
+                    <td>
+                        <div class="acoes-tabela">
+                            <a class="botao botao-secundario" [routerLink]="['/devolucoes/detalhes', devolucao.id]">
+                                Detalhes
+                            </a>
+                        </div>
+                    </td>
+
+                </tr>
+
+                }@empty {
+                @if (!carregando && !mensagemErro) {
+                <tr>
+                    <td colspan="4 ">Nenhuma retirada encontrada.</td>
+                </tr>
+                }
+
+                }
+
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="paginacao">
+        <button type="button" class="botao botao-secundario" (click)="voltarPagina()"
+            [disabled]="primeiraPagina || carregando">
+            ← Voltar
+        </button>
+
+        @if (totalPaginas > 0) {
+        <span class="informacao-pagina">
+            Página {{ paginaAtual }} de {{ totalPaginas }}
+        </span>
+        } @else {
+        <span class="informacao-pagina">
+            Nenhuma página disponível
+        </span>
+        }
+        <button type="button" class="botao botao-secundario" (click)="proximaPagina()"
+            [disabled]="ultimaPagina || carregando">
+            Próxima →
+        </button>
+    </div>
+</div>

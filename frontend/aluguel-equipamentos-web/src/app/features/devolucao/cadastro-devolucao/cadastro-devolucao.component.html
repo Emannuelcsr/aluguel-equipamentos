@@ -1,0 +1,109 @@
+<div class="cabecalho-pagina cabecalho-formulario">
+    <h2>Registrar Devolução</h2>
+    <p>Preencha os dados abaixo para registrar a devolução dos equipamentos.</p>
+</div>
+
+
+@if (reserva) {
+<div class="resumo-reserva">
+    <h3>Resumo da reserva</h3>
+    <p><strong>Reserva:</strong> {{ reserva.id }}</p>
+    <p><strong>Cliente:</strong> {{ reserva.clienteNome }}</p>
+    <p>
+        <strong>Período:</strong>
+        {{ reserva.dataInicial | date:'dd/MM/yyyy':'UTC' }}
+        até
+        {{ reserva.dataFinal | date:'dd/MM/yyyy':'UTC' }}
+    </p>
+</div>
+
+}
+
+<div class="painel-cadastro">
+    <h3>Dados da retirada</h3>
+
+    @if (mensagemErro) {
+    <div class="alerta alerta-erro" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ mensagemErro }}</span>
+    </div>
+    }
+    @if (mensagemSucesso) {
+    <div class="alerta alerta-sucesso" role="status">
+        <span aria-hidden="true">✅</span>
+        <span>{{ mensagemSucesso }}</span>
+    </div>
+    }
+
+    <form [formGroup]="formularioCadastro" (ngSubmit)="registrarDevolucao()">
+
+
+        <div class="campo-confirmacao">
+            <label>
+                <input type="checkbox" formControlName="confirmacaoRecebimento" />
+                Confirmo que a usuario recebeu os equipamentos.
+            </label>
+            @if (
+            formularioCadastro.controls.confirmacaoRecebimento.touched &&
+            formularioCadastro.controls.confirmacaoRecebimento.hasError('required')
+            ) {
+            <small>Confirme o recebimento dos equipamentos.</small>
+            }
+        </div>
+
+        <div formArrayName="itens" class="itens-retirada">
+
+            <h3>Condição dos equipamentos</h3>
+
+            @for (grupo of formularioCadastro.controls.itens.controls; track $index) {
+
+            <div [formGroupName]="$index">
+
+                <p>{{ reserva?.itens?.[$index]?.equipamentoNome }}</p>
+                <p>Código da unidade: {{ reserva?.itens?.[$index]?.codigoUnidade }}</p>
+
+                <div>
+                    <label>Condição física</label>
+                    <select formControlName="condicaoFisica">
+                        <option [ngValue]="null">Selecione</option>
+                        <option value="SEM_DANOS_APARENTES">Sem danos aparentes</option>
+                        <option value="COM_OBSERVACOES">Com observações</option>
+                    </select>
+                    @if (
+                    grupo.controls['condicaoFisica'].touched &&
+                    grupo.controls['condicaoFisica'].hasError('required')
+                    ) {
+                    <small>Selecione a condição física do equipamento.</small>
+                    }
+                </div>
+
+                @if (grupo.controls['condicaoFisica'].value === 'COM_OBSERVACOES') {
+                <div>
+                    <label>Observações</label>
+                    <textarea formControlName="observacoes" maxlength="500"></textarea>
+                    @if (
+                    grupo.controls['observacoes'].touched &&
+                    grupo.controls['observacoes'].hasError('required')
+                    ) {
+                    <small>Descreva as condições observadas no equipamento.</small>
+                    }
+                </div>
+                }
+
+            </div>
+
+            }
+
+        </div>
+        <div class="acoes-formulario">
+            <button type="button" class="botao botao-secundario" (click)="voltar()">
+                Voltar
+            </button>
+
+            <button type="submit" class="botao botao-primario" [disabled]="cadastrando || !!mensagemSucesso">
+                {{ cadastrando ? 'Registrando...' : 'Registrar retirada' }}
+            </button>
+        </div>
+
+    </form>
+</div>

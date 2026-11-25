@@ -258,6 +258,17 @@ public class ReservaService {
 	}
 	
 	
+	@Transactional(readOnly = true)
+	public PaginaResponse<ReservaResponse> listarAlugadas(Pageable paginacao) {
+
+		Page<Reserva> reservasDisponiveis = reservaRepository.findByStatusOrderByIdAsc(StatusReserva.EM_ANDAMENTO,paginacao);
+
+		Page<ReservaResponse> paginaDeRespostas = reservasDisponiveis.map(reserva -> ReservaResponse.de(reserva));			    
+
+		return converterPagina(paginaDeRespostas);
+
+	}
+	
 	
 	
 	

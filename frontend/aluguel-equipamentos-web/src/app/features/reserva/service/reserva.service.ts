@@ -34,6 +34,11 @@ constructor(private http: HttpClient) {}
     );
   }
 
+    listarAlugadas(pagina: number, tamanho: number) {
+    return this.http.get<PaginaResponse<ReservaResponse>>(
+      `${API_URL}/reservas/alugadas?page=${pagina}&size=${tamanho}`,
+    );
+  }
 
 
   aprovar(id: number) {

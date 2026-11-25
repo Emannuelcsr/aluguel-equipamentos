@@ -63,6 +63,15 @@ public class ReservaController {
 
 		return ResponseEntity.ok(resposta);
 	}
+	
+	@GetMapping("/alugadas")
+	public ResponseEntity<PaginaResponse<ReservaResponse>> reservasAlugadas(Pageable paginacao) {
+
+		PaginaResponse<ReservaResponse> resposta = reservaService.listarAlugadas(paginacao);
+
+		return ResponseEntity.ok(resposta);
+	}
+	
 
 	@PatchMapping("/{id}/aprovar")
 	public ResponseEntity<ReservaResponse> aprovar(@PathVariable Long id) {
