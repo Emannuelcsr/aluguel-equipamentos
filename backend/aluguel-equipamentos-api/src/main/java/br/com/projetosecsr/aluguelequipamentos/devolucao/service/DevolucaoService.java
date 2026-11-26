@@ -3,6 +3,7 @@ package br.com.projetosecsr.aluguelequipamentos.devolucao.service;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.StatusUnidadeIn
 import br.com.projetosecsr.aluguelequipamentos.devolucao.repository.DevolucaoRepository;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.request.CadastrarDevolucaoRequest;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.request.ItemDevolucaoRequest;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.response.DevolucaoListagemResponse;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.response.DevolucaoResponse;
 import br.com.projetosecsr.aluguelequipamentos.reserva.entidade.ItemReserva;
 import br.com.projetosecsr.aluguelequipamentos.reserva.entidade.Reserva;
@@ -43,11 +45,9 @@ import br.com.projetosecsr.aluguelequipamentos.retirada.excecao.RetiradaNaoEncon
 import br.com.projetosecsr.aluguelequipamentos.retirada.repository.RetiradaRepository;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.StatusUnidadeEquipamento;
 import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.entidade.UnidadeEquipamento;
-import br.com.projetosecsr.aluguelequipamentos.unidadeequipamento.excecao.OperacaoInvalidaException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.entidade.Usuario;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.repository.UsuarioRepository;
-import br.com.projetosecsr.aluguelequipamentos.usuario.response.UsuarioResponse;
 
 @Service
 public class DevolucaoService {
@@ -68,7 +68,7 @@ public class DevolucaoService {
 		this.retiradaRepository = retiradaRepository;
 	}
 
-	private PaginaResponse<DevolucaoResponse> converterPagina(Page<DevolucaoResponse> pagina) {
+	private <T> PaginaResponse<T> converterPagina(Page<T> pagina) {
 
 		if (pagina.getTotalPages() > 0 && pagina.getNumber() >= pagina.getTotalPages()) {
 
@@ -323,15 +323,14 @@ public class DevolucaoService {
 	}
 
 	@Transactional(readOnly = true)
-	public PaginaResponse<DevolucaoResponse> listarPaginado(Pageable paginacao) {
+	public PaginaResponse<DevolucaoListagemResponse> listarPaginado(Pageable paginacao) {
 
-		Page<Devolucao> paginaDeDevolucoes = devolucaoRepository.findAll(paginacao);
+	    Page<Devolucao> paginaDeDevolucoes = devolucaoRepository.findAll(paginacao);
 
-		Page<DevolucaoResponse> paginaDeRespostas = paginaDeDevolucoes
-				.map(devolucao -> DevolucaoResponse.de(devolucao));
+	    Page<DevolucaoListagemResponse> paginaDeRespostas =
+	            paginaDeDevolucoes.map(DevolucaoListagemResponse::de);
 
-		return converterPagina(paginaDeRespostas);
-
+	    return converterPagina(paginaDeRespostas);
 	}
 
 }

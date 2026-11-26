@@ -5,6 +5,7 @@ import { ReservaService } from '../../reserva/service/reserva.service';
 import { ReservaResponse } from '../../../core/models/reserva-response';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { DevolucaoListagemResponse } from '../../../core/models/devolucao-listagem-response';
 
 @Component({
   selector: 'app-listagem-devolucao',
@@ -13,7 +14,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './listagem-devolucao.component.scss',
 })
 export class ListagemDevolucaoComponent implements OnInit {
-  devolucoes: DevolucaoResponse[] = [];
+  devolucoes: DevolucaoListagemResponse[] = [];
   mensagemSucesso = '';
   mensagemErro = '';
   paginaAtual = 1;

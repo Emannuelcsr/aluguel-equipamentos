@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.PaginaResponse;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.request.CadastrarDevolucaoRequest;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.response.DevolucaoListagemResponse;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.response.DevolucaoResponse;
 import br.com.projetosecsr.aluguelequipamentos.devolucao.service.DevolucaoService;
 import jakarta.validation.Valid;
@@ -44,11 +45,12 @@ public class DevolucaoController {
 	}
 
 	@GetMapping
-	ResponseEntity<PaginaResponse<DevolucaoResponse>> listarPaginado(Pageable paginacao) {
+	ResponseEntity<PaginaResponse<DevolucaoListagemResponse>> listarPaginado(Pageable paginacao) {
 
-		PaginaResponse<DevolucaoResponse> resposta = devolucaoService.listarPaginado(paginacao);
+	    PaginaResponse<DevolucaoListagemResponse> resposta =
+	            devolucaoService.listarPaginado(paginacao);
 
-		return ResponseEntity.ok(resposta);
+	    return ResponseEntity.ok(resposta);
 	}
 
 }

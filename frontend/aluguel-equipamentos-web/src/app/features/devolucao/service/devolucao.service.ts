@@ -4,6 +4,7 @@ import { CadastrarDevolucaoRequest } from '../../../core/models/cadastrar-devolu
 import { API_URL } from '../../../core/config/api.config';
 import { DevolucaoResponse } from '../../../core/models/devolucao-response';
 import { PaginaResponse } from '../../../shared/pagina-response';
+import { DevolucaoListagemResponse } from '../../../core/models/devolucao-listagem-response';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class DevolucaoService {
   }
 
   listar(pagina: number, tamanho: number) {
-    return this.http.get<PaginaResponse<DevolucaoResponse>>(
+    return this.http.get<PaginaResponse<DevolucaoListagemResponse>>(
       `${API_URL}/devolucoes?page=${pagina}&size=${tamanho}`,
     );
   }

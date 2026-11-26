@@ -219,7 +219,7 @@ public class DevolucaoServiceTest {
 				() -> devolucaoService.cadastrar(request));
 
 		// VERIFICAR
-		assertEquals("Devolução dessa reserva ja foi realizada.", excecao.getMessage());
+		assertEquals("A devolução desta reserva já foi realizada", excecao.getMessage());
 
 		verify(reservaRepository).buscarPorIdComBloqueio(reservaId);
 
