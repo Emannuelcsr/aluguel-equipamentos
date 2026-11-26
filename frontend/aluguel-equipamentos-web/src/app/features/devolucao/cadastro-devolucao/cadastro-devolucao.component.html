@@ -20,7 +20,7 @@
 }
 
 <div class="painel-cadastro">
-    <h3>Dados da retirada</h3>
+    <h3>Dados da devolução</h3>
 
     @if (mensagemErro) {
     <div class="alerta alerta-erro" role="alert">
@@ -41,7 +41,7 @@
         <div class="campo-confirmacao">
             <label>
                 <input type="checkbox" formControlName="confirmacaoRecebimento" />
-                Confirmo que a usuario recebeu os equipamentos.
+                Confirmo o recebimento de todos os equipamentos devolvidos.
             </label>
             @if (
             formularioCadastro.controls.confirmacaoRecebimento.touched &&
@@ -101,7 +101,7 @@
             </button>
 
             <button type="submit" class="botao botao-primario" [disabled]="cadastrando || !!mensagemSucesso">
-                {{ cadastrando ? 'Registrando...' : 'Registrar retirada' }}
+                {{ cadastrando ? 'Registrando...' : 'Registrar devolução' }}
             </button>
         </div>
 

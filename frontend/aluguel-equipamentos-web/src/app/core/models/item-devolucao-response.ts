@@ -1,3 +1,4 @@
+import { CondicaoFisicaDevolucao } from "./condicao-fisica-devolucao.enum";
 import { CondicaoFisicaRetirada } from "./condicao-fisica-enum";
 
 export interface ItemDevolucaoResponse {
@@ -7,7 +8,7 @@ export interface ItemDevolucaoResponse {
   unidadeEquipamentoId: number;  
   codigoUnidade: string;
   equipamentoNome:string;
-  condicaoFisica: CondicaoFisicaRetirada;
+  condicaoFisica: CondicaoFisicaDevolucao;
   observacoes: string | null;
 
 }

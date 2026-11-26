@@ -27,6 +27,8 @@ import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EmailClienteJaCad
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.EstadoInvalidoException;
 import br.com.projetosecsr.aluguelequipamentos.cliente.excecao.NomeFantasiaNaoPermitidoException;
 import br.com.projetosecsr.aluguelequipamentos.compartilhado.paginacao.excecao.PaginaInvalidaException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.ConfirmacaoDevolucaoObrigatoriaException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.DevolucaoNaoEncontradaException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.equipamento.excecao.EquipamentoNaoEncontradoException;
@@ -63,6 +65,12 @@ import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.SenhaAtualIncorre
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaAtivoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioJaInativoException;
 import br.com.projetosecsr.aluguelequipamentos.usuario.excecao.UsuarioNaoEncontradoException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.DevolucaoAnteriorRetiradaException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.DevolucaoAntesDataInicialException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.DevolucaoJaRealizadaException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.ItemDevolucaoDuplicadoException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.ItensDevolucaoDivergentesException;
+import br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.StatusUnidadeInvalidoParaDevolucaoException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
@@ -189,6 +197,16 @@ public class TratadorGlobalDeErros {
 
 		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "Cliente não encontrado",
 				List.of(excecao.getMessage()), requisicao.getRequestURI(), "CLIENTE_NAO_ENCONTRADO");
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
+	}
+	
+	@ExceptionHandler({ DevolucaoNaoEncontradaException.class })
+	public ResponseEntity<ErroResponse> tratarDevolucaoNaoEncontrado(DevolucaoNaoEncontradaException excecao,
+			HttpServletRequest requisicao) {
+
+		ErroResponse resposta = new ErroResponse(Instant.now(), HttpStatus.NOT_FOUND.value(), "Devolução não encontrada",
+				List.of(excecao.getMessage()), requisicao.getRequestURI(), "DEVOLUCAO_NAO_ENCONTRADA");
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
 	}
@@ -550,5 +568,69 @@ public class TratadorGlobalDeErros {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resposta);
 	}
+	
+	
+	
+	@ExceptionHandler(ConfirmacaoDevolucaoObrigatoriaException.class)
+	public ResponseEntity<ErroResponse> tratarConfirmacaoDevolucaoObrigatoria(
+	        ConfirmacaoDevolucaoObrigatoriaException excecao,
+	        HttpServletRequest requisicao) {
+
+	    ErroResponse resposta = new ErroResponse(
+	            Instant.now(),
+	            HttpStatus.BAD_REQUEST.value(),
+	            "Confirmação da devolução obrigatória",
+	            List.of(excecao.getMessage()),
+	            requisicao.getRequestURI(),
+	            "CONFIRMACAO_DEVOLUCAO_OBRIGATORIA"
+	    );
+
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+	
+	
+	@ExceptionHandler({
+	    ItemDevolucaoDuplicadoException.class,
+	    ItensDevolucaoDivergentesException.class,
+	    br.com.projetosecsr.aluguelequipamentos.devolucao.excecao.ObservacaoObrigatoriaException.class
+	})
+	public ResponseEntity<ErroResponse> tratarDadosDevolucaoInvalidos(
+	        RuntimeException excecao,
+	        HttpServletRequest requisicao) {
+
+	    ErroResponse resposta = new ErroResponse(
+	            Instant.now(),
+	            HttpStatus.BAD_REQUEST.value(),
+	            "Dados da devolução inválidos",
+	            List.of(excecao.getMessage()),
+	            requisicao.getRequestURI(),
+	            "DADOS_DEVOLUCAO_INVALIDOS"
+	    );
+
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
+	}
+	
+	@ExceptionHandler({
+	    DevolucaoAnteriorRetiradaException.class,
+	    DevolucaoAntesDataInicialException.class,
+	    DevolucaoJaRealizadaException.class,
+	    StatusUnidadeInvalidoParaDevolucaoException.class
+	})
+	public ResponseEntity<ErroResponse> tratarOperacaoDevolucaoInvalida(
+	        RuntimeException excecao,
+	        HttpServletRequest requisicao) {
+
+	    ErroResponse resposta = new ErroResponse(
+	            Instant.now(),
+	            HttpStatus.CONFLICT.value(),
+	            "Operação de devolução inválida",
+	            List.of(excecao.getMessage()),
+	            requisicao.getRequestURI(),
+	            "OPERACAO_DEVOLUCAO_INVALIDA"
+	    );
+
+	    return ResponseEntity.status(HttpStatus.CONFLICT).body(resposta);
+	}
+	
 
 }

@@ -6,6 +6,6 @@ public class DevolucaoJaRealizadaException extends RuntimeException {
 
 	public DevolucaoJaRealizadaException() {
 
-		super("Devolução dessa reserva ja foi realizada.");
+		super("A devolução desta reserva já foi realizada");
 	}
 }

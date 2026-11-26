@@ -1,1 +1,84 @@
-<p>detalhes-devolucao works!</p>
+@if (mensagemErro) {
+<div class="alerta alerta-erro" role="alert">
+    <span aria-hidden="true">⚠️</span>
+    <span>{{ mensagemErro }}</span>
+</div>
+}
+
+@if (carregando) {
+<p>Carregando devolução...</p>
+}
+
+@if (devolucao && !carregando) {
+
+<div class="painel-detalhes dados-devolucao">
+
+    <h3>Dados da devolução</h3>
+
+    <p>
+        <strong>Reserva ID:</strong>
+        <span>{{devolucao.reservaId}}</span>
+    </p>
+
+
+    <p>
+        <strong>Data da devolução:</strong>
+        <span>
+            {{ devolucao.dataHoraDevolucao | date:'dd/MM/yyyy HH:mm':'UTC' }}
+        </span>
+    </p>
+
+    <p>
+        <strong>Devolução registrada por:</strong>
+        <span>{{devolucao.usuarioResponsavelNome}}</span>
+    </p>
+
+
+    <div class="itens-devolucao">
+
+        <p><strong>Itens:</strong></p>
+
+        <ul>
+            @for (item of devolucao.itens; track item.id) {
+            <li>
+
+                <p>
+                    {{ item.equipamentoNome }}
+                    ({{ item.codigoUnidade }})
+                </p>
+
+                <p>
+                    <strong>Condição física:</strong>
+                    <span>
+                        {{
+                        item.condicaoFisica === 'SEM_DANOS_APARENTES'
+                        ? 'Sem danos aparentes'
+                        : 'Com observações'
+                        }}
+                    </span>
+                </p>
+                <p>
+                    {{item.observacoes}}
+                </p>
+
+
+            </li>
+            } @empty {
+            <li>Nenhum equipamento encontrado nesta devolução.</li>
+            }
+        </ul>
+
+    </div>
+
+
+</div>
+
+}
+
+<div class="acoes-detalhes">
+
+    <a routerLink="/devolucoes" class="botao botao-secundario">
+        ← Voltar à listagem
+    </a>
+
+</div>
